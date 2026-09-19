@@ -140,7 +140,7 @@
             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 15px;">💎</div>
             <div>
                 <span class="text-sm font-bold" style="color: #0f172a; display: block; line-height: 1.2;">شیشه ولت</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.7 (Wallet V5)</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.8 (Wallet V5)</span>
             </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
@@ -210,6 +210,42 @@
             <button onclick="resetWallet()" class="btn-danger">حذف ولت از این دستگاه</button>
         </div>
 
+        <!-- برداشت -->
+        <div id="withdraw-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="color: #0f172a; font-size: 15px;">برداشت TON</h3>
+            <div class="warn-box">تراکنش‌های بلاک‌چین برگشت‌پذیر نیستند. آدرس مقصد را با دقت چک کنید. اگر به صرافی می‌فرستید، حتماً Memo/Comment را هم وارد کنید.</div>
+
+            <div class="text-xs" id="withdraw-available">موجودی قابل برداشت: ...</div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: #334155; font-weight: 500;">آدرس مقصد:</label>
+                <textarea id="wd-address" rows="2" placeholder="UQ... یا EQ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; direction: ltr; text-align: left;"></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: #334155; font-weight: 500;">مقدار (TON):</label>
+                <input type="text" inputmode="decimal" id="wd-amount" placeholder="مثلاً 1.5" class="glass-input" style="direction: ltr; text-align: left;">
+            </div>
+
+            <label class="text-xs" style="display: flex; gap: 8px; align-items: center; color: #334155;">
+                <input type="checkbox" id="wd-max" onchange="onMaxToggle()">
+                <span>برداشت کل موجودی (کارمزد از همین مبلغ کم می‌شود)</span>
+            </label>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: #334155; font-weight: 500;">Memo / Comment (اختیاری، عمومی است):</label>
+                <input type="text" id="wd-comment" placeholder="اختیاری" class="glass-input" style="direction: ltr; text-align: left;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: #334155; font-weight: 500;">رمز عبور ولت (برای امضای تراکنش):</label>
+                <input type="password" id="wd-pass" placeholder="رمز عبور" class="glass-input">
+            </div>
+
+            <button id="btn-withdraw" onclick="sendWithdraw()" class="btn-primary">ارسال</button>
+            <button onclick="cancelWithdraw()" class="btn-secondary">بازگشت</button>
+        </div>
+
         <!-- داشبورد -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card text-center flex flex-col items-center">
@@ -221,7 +257,7 @@
                 <h2 id="wallet-balance" style="font-size: 26px; font-weight: bold; margin-bottom: 14px; color: #0f172a;">در حال استعلام...</h2>
 
                 <div style="display: flex; gap: 10px; width: 100%;">
-                    <button onclick="alert('بخش برداشت به‌زودی فعال می‌شود')" class="btn-primary" style="padding: 12px; font-size: 13px;">برداشت</button>
+                    <button onclick="showWithdraw()" class="btn-primary" style="padding: 12px; font-size: 13px;">برداشت</button>
                     <button onclick="alert('بخش سواپ به‌زودی فعال می‌شود')" class="btn-secondary" style="padding: 12px; font-size: 13px;">سواپ (Swap)</button>
                 </div>
             </div>
@@ -244,7 +280,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: #94a3b8; padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v1.7 &bull; V5R1
+        TON Non-Custodial Wallet &bull; v1.8 &bull; V5R1
     </footer>
 
     <script>
@@ -252,13 +288,18 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'unlock-screen', 'dashboard-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'unlock-screen', 'dashboard-screen', 'withdraw-screen'];
+        const TONCENTER_API_KEY = '';      // اختیاری: کلید API از @tonapibot برای جلوگیری از محدودیت نرخ
+        const FEE_RESERVE = 10000000n;     // 0.01 TON ذخیره برای کارمزد
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
 
         let libs = null;               // کتابخانه‌های @ton (لود تنبل)
         let tonClient = null;
         let pendingWords = null;       // کلمات ساخته‌شده، فقط در حافظه تا لحظه تایید
         let currentAddress = '';
+        let currentAddressObj = null;
+        let currentBalanceNano = 0n;
+        let sending = false;
 
         // ---------- لود کتابخانه‌های V5 ----------
         async function loadLibs() {
@@ -272,10 +313,14 @@
                 mnemonicValidate: cryptoMod.mnemonicValidate,
                 mnemonicToPrivateKey: cryptoMod.mnemonicToPrivateKey,
                 WalletContractV5R1: tonMod.WalletContractV5R1,
-                TonClient: tonMod.TonClient
+                TonClient: tonMod.TonClient,
+                Address: tonMod.Address,
+                internal: tonMod.internal,
+                toNano: tonMod.toNano
             };
             if (!libs.WalletContractV5R1) throw new Error('V5R1 not available in this @ton/ton build');
-            tonClient = new libs.TonClient({ endpoint: TON_ENDPOINT });
+            if (!libs.Address || !libs.internal || !libs.toNano) throw new Error('@ton/core exports missing');
+            tonClient = new libs.TonClient(TONCENTER_API_KEY ? { endpoint: TON_ENDPOINT, apiKey: TONCENTER_API_KEY } : { endpoint: TON_ENDPOINT });
             return libs;
         }
 
@@ -494,6 +539,8 @@
 
         function lockWallet() {
             currentAddress = '';
+            currentAddressObj = null;
+            currentBalanceNano = 0n;
             document.getElementById('wallet-address-display').innerText = 'در حال بارگذاری...';
             document.getElementById('wallet-balance').innerText = 'در حال استعلام...';
             showScreen('unlock-screen');
@@ -537,12 +584,12 @@
                 });
 
                 // non-bounceable برای نمایش ولت
+                currentAddressObj = wallet.address;
                 currentAddress = wallet.address.toString({ urlSafe: true, bounceable: false, testOnly: false });
                 document.getElementById('wallet-address-display').innerText = currentAddress;
 
                 try {
-                    const balanceNano = await tonClient.getBalance(wallet.address);
-                    document.getElementById('wallet-balance').innerText = formatTon(balanceNano) + ' TON';
+                    await refreshBalance();
                 } catch (e) {
                     console.error(e);
                     document.getElementById('wallet-balance').innerText = 'خطا در استعلام';
@@ -552,6 +599,181 @@
                 console.error('خطا در پردازش ولت:', error);
                 alert('خطا در پردازش ولت. لطفاً دوباره تلاش کنید.');
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+            }
+        }
+
+
+        // ---------- موجودی ----------
+        async function refreshBalance() {
+            if (!currentAddressObj) return;
+            try {
+                const balanceNano = await withRetry(() => tonClient.getBalance(currentAddressObj));
+                currentBalanceNano = BigInt(balanceNano);
+                document.getElementById('wallet-balance').innerText = formatTon(currentBalanceNano) + ' TON';
+                setStatus('متصل به بلاک‌چین', true);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('wallet-balance').innerText = 'خطا در استعلام';
+                setStatus('خطای شبکه', false);
+            }
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // تلاش مجدد برای خطای محدودیت نرخ toncenter (برای عملیات‌های idempotent)
+        async function withRetry(fn, tries) {
+            tries = tries || 4;
+            let lastErr;
+            for (let i = 0; i < tries; i++) {
+                try { return await fn(); }
+                catch (e) { lastErr = e; await sleep(1300 * (i + 1)); }
+            }
+            throw lastErr;
+        }
+
+        // ---------- برداشت ----------
+        function normalizeNumber(str) {
+            const fa = '۰۱۲۳۴۵۶۷۸۹';
+            const ar = '٠١٢٣٤٥٦٧٨٩';
+            return str.trim()
+                .replace(/[۰-۹]/g, d => String(fa.indexOf(d)))
+                .replace(/[٠-٩]/g, d => String(ar.indexOf(d)))
+                .replace(/[٫,،]/g, '.');
+        }
+
+        function parseRecipient(str) {
+            str = str.trim();
+            try {
+                if (libs.Address.isFriendly(str)) {
+                    const p = libs.Address.parseFriendly(str);
+                    if (p.isTestOnly) return null;
+                    return { address: p.address, bounce: p.isBounceable };
+                }
+                return { address: libs.Address.parse(str), bounce: false };
+            } catch (e) {
+                return null;
+            }
+        }
+
+        async function showWithdraw() {
+            if (!currentAddressObj) return;
+            document.getElementById('wd-address').value = '';
+            document.getElementById('wd-amount').value = '';
+            document.getElementById('wd-amount').disabled = false;
+            document.getElementById('wd-max').checked = false;
+            document.getElementById('wd-comment').value = '';
+            document.getElementById('wd-pass').value = '';
+            document.getElementById('withdraw-available').innerText = 'موجودی قابل برداشت: ' + formatTon(currentBalanceNano) + ' TON';
+            showScreen('withdraw-screen');
+        }
+
+        function cancelWithdraw() {
+            document.getElementById('wd-pass').value = '';
+            showScreen('dashboard-screen');
+        }
+
+        function onMaxToggle() {
+            const on = document.getElementById('wd-max').checked;
+            const amountEl = document.getElementById('wd-amount');
+            amountEl.disabled = on;
+            if (on) amountEl.value = formatTon(currentBalanceNano);
+        }
+
+        async function sendWithdraw() {
+            if (sending) return;
+
+            const addrStr = document.getElementById('wd-address').value;
+            const amountStr = normalizeNumber(document.getElementById('wd-amount').value);
+            const comment = document.getElementById('wd-comment').value.trim();
+            const pass = document.getElementById('wd-pass').value;
+            const isMax = document.getElementById('wd-max').checked;
+
+            if (!(await libsReady())) return;
+
+            const recipient = parseRecipient(addrStr);
+            if (!recipient) { alert('آدرس مقصد معتبر نیست.'); return; }
+
+            let valueNano = 0n;
+            let sendMode = 3; // PAY_GAS_SEPARATELY + IGNORE_ERRORS
+            if (isMax) {
+                if (currentBalanceNano <= FEE_RESERVE) { alert('موجودی برای پرداخت کارمزد کافی نیست.'); return; }
+                sendMode = 128; // CARRY_ALL_REMAINING_BALANCE
+            } else {
+                if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alert('مقدار واردشده معتبر نیست.'); return; }
+                try { valueNano = libs.toNano(amountStr); } catch (e) { alert('مقدار واردشده معتبر نیست.'); return; }
+                if (valueNano <= 0n) { alert('مقدار باید بیشتر از صفر باشد.'); return; }
+                if (valueNano + FEE_RESERVE > currentBalanceNano) {
+                    alert('موجودی کافی نیست. حداقل 0.01 TON برای کارمزد باید باقی بماند.');
+                    return;
+                }
+            }
+            if (!pass) { alert('رمز عبور را وارد کنید.'); return; }
+
+            if (recipient.address.equals(currentAddressObj)) {
+                if (!confirm('آدرس مقصد همان آدرس ولت خودتان است. ادامه می‌دهید؟')) return;
+            }
+
+            const shownAmount = isMax ? 'کل موجودی (' + formatTon(currentBalanceNano) + ' TON)' : amountStr + ' TON';
+            const shownAddr = recipient.address.toString({ urlSafe: true, bounceable: recipient.bounce, testOnly: false });
+            const okConfirm = confirm('تایید نهایی برداشت:\n\nمقدار: ' + shownAmount + '\nمقصد:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nارسال شود؟');
+            if (!okConfirm) return;
+
+            sending = true;
+            const btn = document.getElementById('btn-withdraw');
+            btn.disabled = true;
+            btn.innerText = 'در حال ارسال...';
+
+            let words = null;
+            let keyPair = null;
+            try {
+                try {
+                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
+                } catch (e) {
+                    alert('رمز عبور اشتباه است.');
+                    return;
+                }
+
+                keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+
+                // بررسی ایمنی: کلید باید به همین ولت تعلق داشته باشد
+                if (!wallet.address.equals(currentAddressObj)) {
+                    alert('کلید ولت با آدرس فعلی مطابقت ندارد. عملیات لغو شد.');
+                    return;
+                }
+
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(() => contract.getSeqno());
+
+                const msg = libs.internal({
+                    to: recipient.address,
+                    value: valueNano,
+                    bounce: recipient.bounce,
+                    body: comment ? comment : undefined
+                });
+
+                // seqno ثابت است، پس تلاش مجدد در صورت خطای شبکه ایمن است (تراکنش تکراری نمی‌شود)
+                await withRetry(() => contract.sendTransfer({
+                    seqno: seqno,
+                    secretKey: keyPair.secretKey,
+                    sendMode: sendMode,
+                    messages: [msg]
+                }));
+
+                document.getElementById('wd-pass').value = '';
+                alert('تراکنش به شبکه ارسال شد. تایید آن چند ثانیه طول می‌کشد.');
+                showScreen('dashboard-screen');
+                setTimeout(refreshBalance, 8000);
+                setTimeout(refreshBalance, 20000);
+            } catch (e) {
+                console.error(e);
+                alert('ارسال ناموفق بود. اتصال اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
+            } finally {
+                words = null;
+                keyPair = null;
+                sending = false;
+                btn.disabled = false;
+                btn.innerText = 'ارسال';
             }
         }
 
