@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.60/dist/tonweb.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tonweb-mnemonic@0.0.2/dist/tonweb-mnemonic.js"></script>
     <style>
         * {
             box-sizing: border-box;
@@ -142,7 +140,7 @@
             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 15px;">💎</div>
             <div>
                 <span class="text-sm font-bold" style="color: #0f172a; display: block; line-height: 1.2;">شیشه ولت</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.6</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.7 (Wallet V5)</span>
             </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
@@ -246,7 +244,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: #94a3b8; padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v1.6
+        TON Non-Custodial Wallet &bull; v1.7 &bull; V5R1
     </footer>
 
     <script>
@@ -255,10 +253,49 @@
 
         const STORAGE_KEY = 'enc_wallet_v1';
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'unlock-screen', 'dashboard-screen'];
+        const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
 
-        let tonweb = null;
+        let libs = null;               // کتابخانه‌های @ton (لود تنبل)
+        let tonClient = null;
         let pendingWords = null;       // کلمات ساخته‌شده، فقط در حافظه تا لحظه تایید
         let currentAddress = '';
+
+        // ---------- لود کتابخانه‌های V5 ----------
+        async function loadLibs() {
+            if (libs) return libs;
+            const [cryptoMod, tonMod] = await Promise.all([
+                import('https://esm.sh/@ton/crypto@3'),
+                import('https://esm.sh/@ton/ton@15')
+            ]);
+            libs = {
+                mnemonicNew: cryptoMod.mnemonicNew,
+                mnemonicValidate: cryptoMod.mnemonicValidate,
+                mnemonicToPrivateKey: cryptoMod.mnemonicToPrivateKey,
+                WalletContractV5R1: tonMod.WalletContractV5R1,
+                TonClient: tonMod.TonClient
+            };
+            if (!libs.WalletContractV5R1) throw new Error('V5R1 not available in this @ton/ton build');
+            tonClient = new libs.TonClient({ endpoint: TON_ENDPOINT });
+            return libs;
+        }
+
+        async function libsReady() {
+            if (!window.crypto || !window.crypto.subtle) {
+                alert('این محیط از رمزنگاری امن پشتیبانی نمی‌کند.');
+                return false;
+            }
+            try {
+                setStatus('در حال لود کتابخانه...', true);
+                await loadLibs();
+                setStatus('آماده', true);
+                return true;
+            } catch (e) {
+                console.error(e);
+                setStatus('خطای لود', false);
+                alert('کتابخانه‌های TON لود نشدند. اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
+                return false;
+            }
+        }
 
         // ---------- ابزارهای عمومی ----------
         function showScreen(id) {
@@ -280,30 +317,6 @@
             }
         }
 
-        function getMnemonicLib() {
-            return window.TonWebMnemonic || window.tonMnemonic || window.TonMnemonic ||
-                   (window.TonWeb && window.TonWeb.mnemonic) || null;
-        }
-
-        function libsReady() {
-            if (typeof TonWeb === 'undefined') {
-                alert('کتابخانه TonWeb لود نشد. اینترنت را چک کنید و صفحه را دوباره باز کنید.');
-                return false;
-            }
-            if (!getMnemonicLib()) {
-                alert('کتابخانه tonweb-mnemonic لود نشد. اینترنت را چک کنید و صفحه را دوباره باز کنید.');
-                return false;
-            }
-            if (!window.crypto || !window.crypto.subtle) {
-                alert('این محیط از رمزنگاری امن پشتیبانی نمی‌کند.');
-                return false;
-            }
-            if (!tonweb) {
-                tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
-            }
-            return true;
-        }
-
         function bytesToB64(bytes) {
             let s = '';
             bytes.forEach(b => s += String.fromCharCode(b));
@@ -315,6 +328,13 @@
             const out = new Uint8Array(s.length);
             for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i);
             return out;
+        }
+
+        function formatTon(nano) {
+            const big = BigInt(nano);
+            const whole = big / 1000000000n;
+            const frac = (big % 1000000000n).toString().padStart(9, '0').slice(0, 4);
+            return whole.toString() + '.' + frac;
         }
 
         // ---------- رمزنگاری (PBKDF2 + AES-GCM) ----------
@@ -363,13 +383,12 @@
         }
 
         async function generateNewWallet() {
-            if (!libsReady()) return;
             const btn = document.getElementById('btn-generate');
             btn.disabled = true;
             try {
-                const lib = getMnemonicLib();
+                if (!(await libsReady())) return;
                 // ۲۴ کلمه تصادفی و استاندارد TON با تولید امن رمزنگاری
-                pendingWords = await lib.generateMnemonic();
+                pendingWords = await libs.mnemonicNew(24);
 
                 const box = document.getElementById('mnemonic-box-gen');
                 box.innerHTML = '';
@@ -417,7 +436,6 @@
         }
 
         async function processImportWallet() {
-            if (!libsReady()) return;
             const pass = document.getElementById('import-wallet-pass').value;
             const text = document.getElementById('import-mnemonic-area').value.trim();
 
@@ -434,8 +452,8 @@
             const btn = document.getElementById('btn-import');
             btn.disabled = true;
             try {
-                const lib = getMnemonicLib();
-                const valid = await lib.validateMnemonic(words);
+                if (!(await libsReady())) return;
+                const valid = await libs.mnemonicValidate(words);
                 if (!valid) {
                     alert('کلمات بازیابی معتبر نیستند (املای کلمات یا ترتیب آن‌ها را چک کنید).');
                     return;
@@ -454,19 +472,21 @@
         }
 
         async function unlockWallet() {
-            if (!libsReady()) return;
             const pass = document.getElementById('unlock-pass').value;
             if (!pass) { alert('رمز عبور را وارد کنید.'); return; }
 
             const btn = document.getElementById('btn-unlock');
             btn.disabled = true;
             try {
-                const stored = localStorage.getItem(STORAGE_KEY);
-                const words = await decryptWords(stored, pass);
+                let words;
+                try {
+                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
+                } catch (e) {
+                    alert('رمز عبور اشتباه است.');
+                    return;
+                }
                 document.getElementById('unlock-pass').value = '';
                 await loadWallet(words);
-            } catch (e) {
-                alert('رمز عبور اشتباه است.');
             } finally {
                 btn.disabled = false;
             }
@@ -497,31 +517,32 @@
             }
         }
 
-        // ---------- ساخت کلید و نمایش ولت ----------
+        // ---------- ساخت کلید و نمایش ولت (Wallet V5R1) ----------
         async function loadWallet(words) {
+            if (!(await libsReady())) {
+                showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+                return;
+            }
             showScreen('dashboard-screen');
             setStatus('متصل به بلاک‌چین', true);
 
             try {
-                const lib = getMnemonicLib();
                 // مشتق‌سازی استاندارد TON (سازگار با Tonkeeper و سایر ولت‌ها)
-                const keyPair = await lib.mnemonicToKeyPair(words);
+                const keyPair = await libs.mnemonicToPrivateKey(words);
 
-                const WalletClass = tonweb.wallet.all.v4R2;
-                const wallet = new WalletClass(tonweb.provider, {
-                    publicKey: keyPair.publicKey,
-                    wc: 0
+                // V5R1 با تنظیمات پیش‌فرض mainnet (همان چیزی که Tonkeeper می‌سازد)
+                const wallet = libs.WalletContractV5R1.create({
+                    workchain: 0,
+                    publicKey: keyPair.publicKey
                 });
 
-                const walletAddressObj = await wallet.getAddress();
                 // non-bounceable برای نمایش ولت
-                currentAddress = walletAddressObj.toString(true, true, false);
+                currentAddress = wallet.address.toString({ urlSafe: true, bounceable: false, testOnly: false });
                 document.getElementById('wallet-address-display').innerText = currentAddress;
 
                 try {
-                    const balanceNano = await tonweb.provider.getBalance(currentAddress);
-                    const balanceTon = TonWeb.utils.fromNano(balanceNano);
-                    document.getElementById('wallet-balance').innerText = parseFloat(balanceTon).toFixed(4) + ' TON';
+                    const balanceNano = await tonClient.getBalance(wallet.address);
+                    document.getElementById('wallet-balance').innerText = formatTon(balanceNano) + ' TON';
                 } catch (e) {
                     console.error(e);
                     document.getElementById('wallet-balance').innerText = 'خطا در استعلام';
@@ -536,11 +557,8 @@
 
         // ---------- شروع ----------
         window.addEventListener('load', function () {
-            if (localStorage.getItem(STORAGE_KEY)) {
-                showScreen('unlock-screen');
-            } else {
-                showScreen('welcome-screen');
-            }
+            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+            loadLibs().catch(function (e) { console.error('preload failed', e); });
         });
     </script>
 </body>
