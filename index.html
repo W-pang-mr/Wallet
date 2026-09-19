@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Glass Crypto Wallet</title>
-    <!-- اسکریپت اصلی تلگرام وب‌اپ -->
+    <title>True Glass Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -14,8 +13,9 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
-            color: #f8fafc;
+            /* پس‌زمینه زنده و رنگی برای اینکه افکت شیشه قشنگ خودشو نشون بده */
+            background: linear-gradient(135deg, #4f46e5 0%, #06b6d4 50%, #ec4899 100%);
+            color: #ffffff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -24,20 +24,22 @@
             max-width: 480px;
             margin: 0 auto;
         }
-        /* افکت شیشه‌ای (Glassmorphism) خالص */
+        /* افکت شیشه‌ای واقعی و شفاف */
         .glass-card {
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.25);
             border-radius: 24px;
             padding: 20px;
         }
         .glass-input {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 14px;
             padding: 12px;
             color: #fff;
@@ -45,30 +47,37 @@
             outline: none;
             transition: border-color 0.2s;
         }
+        .glass-input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
         .glass-input:focus {
-            border-color: rgba(59, 130, 246, 0.6);
+            border-color: rgba(255, 255, 255, 0.6);
         }
         .btn-primary {
             width: 100%;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             color: white;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.4);
             padding: 14px;
             border-radius: 14px;
             font-weight: 600;
             font-size: 14px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
-            transition: opacity 0.2s;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: background 0.2s;
         }
         .btn-primary:active {
-            opacity: 0.8;
+            background: rgba(255, 255, 255, 0.4);
         }
         .btn-secondary {
             width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            color: #cbd5e1;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             padding: 14px;
             border-radius: 14px;
             font-weight: 500;
@@ -82,7 +91,7 @@
         .justify-between { justify-content: space-between; }
         .gap-3 { gap: 12px; }
         .text-center { text-align: center; }
-        .text-xs { font-size: 12px; color: #94a3b8; }
+        .text-xs { font-size: 12px; color: rgba(255, 255, 255, 0.7); }
         .text-sm { font-size: 14px; }
         .font-bold { font-weight: 700; }
         .grid-24 {
@@ -91,17 +100,19 @@
             gap: 8px;
             max-height: 160px;
             overflow-y: auto;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.15);
             padding: 10px;
-            border-radius: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .word-item {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.1);
             padding: 6px;
             border-radius: 8px;
             font-size: 11px;
             text-align: center;
             font-family: monospace;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
     </style>
 </head>
@@ -110,10 +121,10 @@
     <!-- هدر برنامه -->
     <header class="glass-card" style="padding: 12px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 8px;">
-            <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(59,130,246,0.2); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 14px;">💎</div>
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px;">💎</div>
             <span class="text-sm font-bold">شیشه ولت</span>
         </div>
-        <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.2);">آماده</div>
+        <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.3); color: #fff; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.3);">آماده</div>
     </header>
 
     <!-- بخش اصلی محتوا -->
@@ -133,7 +144,7 @@
 
         <!-- صفحه ساخت ولت -->
         <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="color: #fbbf24;">عبارت بازیابی (۲۴ کلمه امن)</h3>
+            <h3 class="text-sm font-bold" style="color: #fde047;">عبارت بازیابی (۲۴ کلمه امن)</h3>
             <p class="text-xs">این کلمات را یادداشت کنید. راه دیگری برای بازگردانی ولت وجود ندارد.</p>
             
             <div id="mnemonic-box" class="grid-24">
@@ -145,7 +156,7 @@
                 <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input">
             </div>
 
-            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); margin-top: 4px;">یادداشت کردم و تایید</button>
+            <button onclick="confirmNewWallet()" class="btn-primary" style="margin-top: 4px;">یادداشت کردم و تایید</button>
         </div>
 
         <!-- صفحه ایمپورت ولت -->
@@ -182,14 +193,14 @@
                         <span class="text-xs">پروتکل TON Connect</span>
                     </div>
                 </div>
-                <span style="color: #64748b;">←</span>
+                <span style="color: rgba(255,255,255,0.7);">←</span>
             </div>
         </div>
 
     </main>
 
     <!-- فوتر کوچک -->
-    <footer style="text-align: center; font-size: 10px; color: #64748b; padding-top: 8px;">
+    <footer style="text-align: center; font-size: 10px; color: rgba(255,255,255,0.6); padding-top: 8px;">
         Non-Custodial Secure Wallet &bull; Telegram Mini App
     </footer>
 
@@ -210,7 +221,7 @@
             const box = document.getElementById('mnemonic-box');
             box.innerHTML = '';
             sampleWords.forEach((word, index) => {
-                box.innerHTML += `<div class="word-item"><span style="color:#64748b; font-size:9px;">${index+1}.</span> ${word}</div>`;
+                box.innerHTML += `<div class="word-item"><span style="color:rgba(255,255,255,0.5); font-size:9px;">${index+1}.</span> ${word}</div>`;
             });
         }
 
