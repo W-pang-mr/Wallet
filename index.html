@@ -114,10 +114,14 @@
 </head>
 <body>
 
+    <!-- هدر برنامه با نمایش نسخه -->
     <header class="glass-card" style="padding: 12px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 10px;">
             <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 16px;">💎</div>
-            <span class="text-sm font-bold" style="color: #0f172a;">شیشه ولت</span>
+            <div>
+                <span class="text-sm font-bold" style="color: #0f172a; display: block;">شیشه ولت</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.0</span>
+            </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 5px 12px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
     </header>
@@ -151,7 +155,7 @@
 
         <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="color: #0f172a; font-size: 16px;">وارد کردن ولت</h3>
-            <p class="text-xs">عبارت بازیابی (۲۴ کلمه با فاصله) را وارد کنید:</p>
+            <p class="text-xs">عبارت بازیابی (با فاصله) را وارد کنید:</p>
             
             <textarea id="import-mnemonic" rows="3" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace;"></textarea>
             
@@ -219,7 +223,6 @@
         }
 
         function showImportWallet() {
-            document.يجلس = true; // dummy
             document.getElementById('welcome-screen').classList.add('hidden');
             document.getElementById('import-wallet-screen').classList.remove('hidden');
         }
@@ -230,7 +233,6 @@
             localStorage.setItem('wallet_pass', pass);
             localStorage.setItem('wallet_active', 'true');
             
-            // تولید آدرس واقعی بر اساس کلید مشتق شده از کلمات
             deriveAndLoadWallet(currentWords);
         }
 
@@ -250,7 +252,6 @@
             deriveAndLoadWallet(words);
         }
 
-        // تابع تولید واقعی آدرس ولت از روی کلمات و گرفتن موجودی
         async function deriveAndLoadWallet(words) {
             document.getElementById('create-wallet-screen').classList.add('hidden');
             document.getElementById('import-wallet-screen').classList.add('hidden');
@@ -258,7 +259,6 @@
             document.getElementById('connection-status').innerText = 'متصل به بلاک‌چین';
 
             try {
-                // تبدیل کلمات به بایت و کلید خصوصی برای ساخت ولت استاندارد TON (نسخه V4R2)
                 const seed = await TonWeb.utils.mnemonicToSeed(words);
                 const keyPair = TonWeb.utils.nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
                 
@@ -273,7 +273,6 @@
 
                 document.getElementById('wallet-address-display').innerText = addressString;
 
-                // گرفتن موجودی واقعی از بلاک‌چین برای این آدرس اختصاصی
                 const balanceNano = await tonweb.provider.getBalance(addressString);
                 const balanceTon = TonWeb.utils.fromNano(balanceNano);
                 
