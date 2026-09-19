@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Glass Crypto Wallet</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+        /* افکت شیشه‌ای (Glassmorphism) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-input:focus {
+            border-color: rgba(59, 130, 246, 0.5);
+            outline: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen p-4 max-w-md mx-auto justify-between">
+
+    <!-- هدر برنامه -->
+    <header class="flex justify-between items-center mb-4 p-3 rounded-2xl glass-card">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">💎</div>
+            <h1 class="text-sm font-bold">شیشه ولت</h1>
+        </div>
+        <div id="connection-status" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">آماده</div>
+    </header>
+
+    <!-- بخش اصلی -->
+    <main id="app" class="flex-1 flex flex-col justify-center gap-4">
+        
+        <!-- صفحه خوش‌آمدگویی -->
+        <div id="welcome-screen" class="glass-card p-6 rounded-3xl flex flex-col items-center text-center gap-4">
+            <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 text-2xl border border-blue-500/20 mb-1">🔐</div>
+            <h2 class="text-xl font-bold">کیف پول غیرحضانتی</h2>
+            <p class="text-xs text-slate-300 leading-relaxed">کنترل کامل دارایی‌ها با کلیدهای خصوصی اختصاصی و عبارت بازیابی ۲۴ کلمه‌ای.</p>
+            
+            <div class="w-full flex flex-col gap-2.5 mt-2">
+                <button onclick="showCreateWallet()" class="w-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-blue-500/20 border border-blue-400/30">ساخت کیف پول جدید</button>
+                <button onclick="showImportWallet()" class="w-full glass-input text-slate-200 font-medium py-3 rounded-xl transition text-sm hover:bg-white/10">وارد کردن ولت (Import)</button>
+            </div>
+        </div>
+
+        <!-- صفحه ساخت ولت -->
+        <div id="create-wallet-screen" class="hidden glass-card p-5 rounded-3xl flex flex-col gap-3">
+            <h3 class="text-sm font-bold text-amber-400">عبارت بازیابی (۲۴ کلمه امن)</h3>
+            <p class="text-[11px] text-slate-300">این کلمات را یادداشت کنید. راه دیگری برای بازگردانی ولت وجود ندارد.</p>
+            
+            <div id="mnemonic-box" class="glass-input p-2.5 rounded-2xl grid grid-cols-3 gap-1.5 text-[10px] font-mono text-center select-all max-h-40 overflow-y-auto">
+                <!-- کلمات -->
+            </div>
+
+            <div class="flex flex-col gap-1.5 mt-1">
+                <label class="text-[11px] text-slate-300">رمز عبور امنیتی مینی‌اپ:</label>
+                <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input p-2.5 rounded-xl text-xs text-white">
+            </div>
+
+            <button onclick="confirmNewWallet()" class="w-full bg-emerald-600/80 hover:bg-emerald-600 text-white font-medium py-2.5 rounded-xl transition text-xs shadow-lg shadow-emerald-500/20 mt-2">یادداشت کردم و تایید</button>
+        </div>
+
+        <!-- صفحه ایمپورت ولت -->
+        <div id="import-wallet-screen" class="hidden glass-card p-5 rounded-3xl flex flex-col gap-3">
+            <h3 class="text-sm font-bold">وارد کردن ولت</h3>
+            <p class="text-[11px] text-slate-300">کلمات بازیابی را با فاصله وارد کنید:</p>
+            
+            <textarea id="import-mnemonic" rows="3" placeholder="word1 word2 word3 ..." class="glass-input p-2.5 rounded-xl text-xs font-mono text-white resize-none"></textarea>
+            
+            <div class="flex flex-col gap-1.5">
+                <label class="text-[11px] text-slate-300">رمز عبور امنیتی:</label>
+                <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input p-2.5 rounded-xl text-xs text-white">
+            </div>
+
+            <button onclick="processImportWallet()" class="w-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition text-xs mt-2">بارگذاری ولت</button>
+        </div>
+
+        <!-- داشبورد اصلی -->
+        <div id="dashboard-screen" class="hidden flex-col gap-3">
+            <div class="glass-card p-5 rounded-3xl flex flex-col items-center text-center">
+                <span class="text-[11px] text-slate-400 mb-1">موجودی کل</span>
+                <h2 class="text-2xl font-bold tracking-tight mb-3">$0.00</h2>
+                <div class="flex gap-2 w-full">
+                    <button onclick="alert('بخش برداشت فعال شد')" class="flex-1 bg-blue-600/80 py-2 rounded-xl text-xs font-medium transition shadow-md">برداشت</button>
+                    <button onclick="alert('بخش سواپ فعال شد')" class="flex-1 glass-input py-2 rounded-xl text-xs font-medium transition hover:bg-white/10">سواپ (Swap)</button>
+                </div>
+            </div>
+
+            <div class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/5 transition" onclick="alert('اتصال به مینی‌اپ برقرار شد!')">
+                <div class="flex items-center gap-3">
+                    <span class="text-base">🌐</span>
+                    <div class="flex flex-col text-right">
+                        <span class="text-xs font-medium">اتصال به مینی‌اپ‌ها (Connect)</span>
+                        <span class="text-[10px] text-slate-400">پروتکل TON Connect</span>
+                    </div>
+                </div>
+                <span class="text-slate-500 text-xs">←</span>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- فوتر کوچک -->
+    <footer class="text-center text-[10px] text-slate-500 py-2">
+        Non-Custodial Secure Wallet &bull; Telegram Mini App
+    </footer>
+
+    <script>
+        let tg = window.Telegram.WebApp;
+        tg.expand();
+
+        const sampleWords = [
+            "apple", "banana", "cat", "dog", "elephant", "fish", "grape", "horse", 
+            "ice", "juice", "kite", "lemon", "moon", "nest", "orange", "pen", 
+            "queen", "river", "sun", "tree", "umbrella", "vase", "water", "xylophone"
+        ];
+
+        function showCreateWallet() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('create-wallet-screen').classList.remove('hidden');
+            
+            const box = document.getElementById('mnemonic-box');
+            box.innerHTML = '';
+            sampleWords.forEach((word, index) => {
+                box.innerHTML += `<div class="bg-white/5 p-1 rounded border border-white/5"><span class="text-slate-500 text-[9px]">${index+1}.</span> ${word}</div>`;
+            });
+        }
+
+        function showImportWallet() {
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('import-wallet-screen').classList.remove('hidden');
+        }
+
+        function confirmNewWallet() {
+            const pass = document.getElementById('new-wallet-pass').value;
+            if(!pass) { alert('رمز عبور را وارد کنید'); return; }
+            localStorage.setItem('wallet_active', 'true');
+            goToDashboard();
+        }
+
+        function processImportWallet() {
+            const mnemonic = document.getElementById('import-mnemonic').value.trim();
+            if(!mnemonic) { alert('عبارت بازیابی را وارد کنید'); return; }
+            localStorage.setItem('wallet_active', 'true');
+            goToDashboard();
+        }
+
+        function goToDashboard() {
+            document.getElementById('create-wallet-screen').classList.add('hidden');
+            document.getElementById('import-wallet-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            document.getElementById('connection-status').innerText = 'متصل';
+        }
+    </script>
+</body>
+</html>
