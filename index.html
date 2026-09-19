@@ -109,7 +109,7 @@
             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 15px;">💎</div>
             <div>
                 <span class="text-sm font-bold" style="color: #0f172a; display: block; line-height: 1.2;">شیشه ولت</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.3</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.4</span>
             </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
@@ -142,7 +142,6 @@
             <button onclick="confirmNewWallet()" class="btn-primary" style="background: #059669; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);">یادداشت کردم و تایید</button>
         </div>
 
-        <!-- صفحه وارد کردن ولت با کادر هوشمند و پیست آسان -->
         <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="color: #0f172a; font-size: 15px;">وارد کردن ولت</h3>
             <p class="text-xs">کلمات بازیابی (۱۲ یا ۲۴ کلمه) را یکجا در کادر زیر <b>Paste</b> کنید:</p>
@@ -186,7 +185,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: #94a3b8; padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v1.3
+        TON Non-Custodial Wallet &bull; v1.4
     </footer>
 
     <script>
@@ -231,9 +230,11 @@
             if(!text) { alert('لطفاً کلمات بازیابی را وارد کنید'); return; }
             if(!pass) { alert('لطفاً رمز عبور را وارد کنید'); return; }
 
-            const words = text.split(/\s+/);
-            if(words.length < 12) {
-                alert('کلمات بازیابی باید حداقل ۱۲ کلمه باشند');
+            // اصلاح و پاکسازی دقیق کلمات (جدا کردن با هر نوع فاصله یا اسلش)
+            const words = text.replace(/[\n\r\t,]+/g, ' ').split(/\s+/).map(w => w.toLowerCase().trim()).filter(w => w.length > 0);
+            
+            if(words.length !== 12 && words.length !== 24) {
+                alert(`تعداد کلمات وارد شده ${words.length} است. کلمات بازیابی باید دقیقاً ۱۲ یا ۲۴ کلمه باشند.`);
                 return;
             }
 
@@ -247,9 +248,7 @@
             document.getElementById('connection-status').innerText = 'متصل به بلاک‌چین';
 
             try {
-                const cleanWords = words.map(w => w.toLowerCase().trim());
-                
-                const seed = await TonWeb.utils.mnemonicToSeed(cleanWords);
+                const seed = await TonWeb.utils.mnemonicToSeed(words);
                 const keyPair = TonWeb.utils.nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
                 
                 const WalletClass = tonweb.wallet.all.v4R2;
@@ -270,8 +269,9 @@
 
             } catch (error) {
                 console.error("خطا در پردازش ولت:", error);
-                document.getElementById('wallet-address-display').innerText = "خطا: کلمات بازیابی نامعتبر هستند";
-                document.getElementById('wallet-balance').innerText = "0.00 TON";
+                document.getElementById('dashboard-screen').classList.add('hidden');
+                document.getElementById('import-wallet-screen').classList.remove('hidden');
+                alert('خطا: کلمات بازیابی نامعتبر هستند یا به درستی وارد نشده‌اند.');
             }
         }
     </script>
