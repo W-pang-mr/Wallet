@@ -570,7 +570,7 @@
             <button onclick="resetWallet()" class="btn-danger">حذف ولت از این دستگاه</button>
 
             <div class="bottom-nav">
-                <div class="nav-item active" id="nav-wallet" onclick="showScreen('dashboard-screen')">
+                <div class="nav-item active" id="nav-wallet" onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')">
                     <span class="nav-icon">💎</span>
                     <span>ولت</span>
                 </div>
@@ -596,7 +596,7 @@
                 <button onclick="loadHistory()" class="btn-secondary" style="width:auto; padding:7px 12px; font-size:12px;">تازه‌سازی</button>
             </div>
             <div id="history-list" class="flex flex-col" style="max-height: 420px; overflow-y: auto;"></div>
-            <button onclick="showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
+            <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
         </div>
 
         <!-- TonConnect: لیست اتصال‌ها + پیست لینک -->
@@ -740,6 +740,13 @@
                 alert('کتابخانه‌های TON لود نشدند. اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
                 return false;
             }
+        }
+
+        function setActiveNav(id) {
+            const wallet = document.getElementById('nav-wallet');
+            const history = document.getElementById('nav-history');
+            if (wallet) wallet.classList.toggle('active', id === 'nav-wallet');
+            if (history) history.classList.toggle('active', id === 'nav-history');
         }
 
         function showScreen(id) {
@@ -1159,6 +1166,15 @@
                 }
 
                 startTcListener();
+
+                // اگر همون لحظه (مثلاً حین وارد کردن رمز) یه درخواست TonConnect در
+                // انتظار مونده، بجای داشبورد همون صفحه‌ی تایید رو نشون بده تا گم نشه.
+                if (tcPendingTx) {
+                    renderTcTxScreen();
+                    showScreen('tc-tx-screen');
+                } else if (tcPendingConnect) {
+                    showScreen('tc-confirm-screen');
+                }
             } catch (error) {
                 console.error('خطا در پردازش ولت:', error);
                 alert('خطا در پردازش ولت. لطفاً دوباره تلاش کنید.');
@@ -1361,7 +1377,7 @@
         }
 
         async function showHistoryScreen() {
-            document.getElementById('nav-wallet') && document.getElementById('nav-wallet').classList.remove('active');
+            setActiveNav('nav-history');
             showScreen('history-screen');
             await loadHistory();
         }
