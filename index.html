@@ -14,9 +14,9 @@
         }
         :root {
             --bg: #eef2f9;
-            --glass: rgba(255,255,255,0.55);
-            --glass-strong: rgba(255,255,255,0.8);
-            --border: rgba(255,255,255,0.9);
+            --glass: rgba(255,255,255,0.38);
+            --glass-strong: rgba(255,255,255,0.6);
+            --border: rgba(255,255,255,0.95);
             --accent: #2563eb;
             --accent-2: #7c5cff;
             --text: #0f172a;
@@ -41,36 +41,48 @@
         body::before, body::after {
             content: '';
             position: fixed;
-            width: 360px;
-            height: 360px;
+            width: 380px;
+            height: 380px;
             border-radius: 50%;
-            filter: blur(90px);
+            filter: blur(95px);
             z-index: -1;
-            opacity: 0.35;
+            opacity: 0.45;
         }
         body::before {
-            background: rgba(37,99,235,0.35);
+            background: rgba(37,99,235,0.4);
             top: -120px;
             right: -110px;
         }
         body::after {
-            background: rgba(124,92,255,0.3);
+            background: rgba(124,92,255,0.35);
             bottom: -90px;
             left: -120px;
         }
 
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(38px) saturate(160%);
+            -webkit-backdrop-filter: blur(38px) saturate(160%);
             border: 1px solid var(--border);
-            box-shadow: 0 20px 40px rgba(15,23,42,0.08), 0 1px 3px rgba(15,23,42,0.04);
+            box-shadow: 0 22px 45px rgba(15,23,42,0.1), 0 1px 3px rgba(15,23,42,0.05), inset 0 1px 0 rgba(255,255,255,0.6);
             border-radius: 26px;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 55%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.45), rgba(255,255,255,0));
+            pointer-events: none;
         }
         .glass-input {
             width: 100%;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
             border: 1px solid rgba(203,213,225,0.8);
             border-radius: 14px;
             padding: 13px;
@@ -82,7 +94,7 @@
         .glass-input::placeholder { color: rgba(15,23,42,0.35); }
         .glass-input:focus {
             border-color: var(--accent);
-            background: #fff;
+            background: rgba(255,255,255,0.85);
             box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
         }
         .btn-primary {
@@ -102,7 +114,7 @@
         .btn-primary:disabled { opacity: 0.5; }
         .btn-secondary {
             width: 100%;
-            background: rgba(255,255,255,0.75);
+            background: rgba(255,255,255,0.5);
             color: #334155;
             border: 1px solid rgba(203,213,225,0.9);
             padding: 15px;
@@ -110,11 +122,12 @@
             font-weight: 500;
             font-size: 14px;
             cursor: pointer;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
         .btn-danger {
             width: 100%;
-            background: rgba(254,226,226,0.8);
+            background: rgba(254,226,226,0.6);
             color: #b91c1c;
             border: 1px solid rgba(252,165,165,0.9);
             padding: 13px;
@@ -122,6 +135,8 @@
             font-weight: 500;
             font-size: 13px;
             cursor: pointer;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
         }
         .hidden { display: none !important; }
         .flex { display: flex; }
@@ -141,13 +156,13 @@
             max-height: 200px;
             overflow-y: auto;
             direction: ltr;
-            background: rgba(255,255,255,0.6);
+            background: rgba(255,255,255,0.45);
             padding: 8px;
             border-radius: 16px;
             border: 1px solid rgba(203,213,225,0.8);
         }
         .word-chip {
-            background: #fff;
+            background: rgba(255,255,255,0.85);
             padding: 5px;
             border-radius: 6px;
             font-size: 11px;
@@ -158,13 +173,15 @@
         }
         .word-chip span { color: #94a3b8; font-size: 9px; }
         .warn-box {
-            background: rgba(254,243,199,0.8);
+            background: rgba(254,243,199,0.7);
             border: 1px solid rgba(252,211,77,0.8);
             color: #92400e;
             border-radius: 14px;
             padding: 11px;
             font-size: 11px;
             line-height: 1.6;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         /* هدر */
@@ -185,6 +202,8 @@
         .status-badge {
             font-size: 10px;
             background: rgba(5,150,105,0.12);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: var(--success);
             padding: 5px 12px;
             border-radius: 20px;
@@ -200,7 +219,7 @@
             gap: 8px;
             font-size: 11px;
             font-family: monospace;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.55);
             padding: 6px 12px;
             border-radius: 20px;
             color: var(--text-dim);
@@ -218,14 +237,16 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .action-row { display: flex; gap: 10px; }
+        .action-row { display: flex; gap: 10px; direction: ltr; }
         .action-btn {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            background: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(203,213,225,0.8);
             border-radius: 18px;
             padding: 14px 6px;
@@ -234,7 +255,7 @@
         }
         .action-btn .icon-circle {
             width: 38px; height: 38px; border-radius: 50%;
-            background: rgba(37,99,235,0.1);
+            background: rgba(37,99,235,0.12);
             color: var(--accent);
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
@@ -259,15 +280,16 @@
             transform: translateX(-50%);
             width: calc(100% - 32px);
             max-width: 448px;
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.5);
+            backdrop-filter: blur(34px) saturate(160%);
+            -webkit-backdrop-filter: blur(34px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.95);
             border-radius: 22px;
             display: flex;
             justify-content: space-around;
             padding: 10px 6px;
-            box-shadow: 0 14px 30px rgba(15,23,42,0.12);
+            box-shadow: 0 14px 30px rgba(15,23,42,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+            direction: ltr;
         }
         .nav-item {
             display: flex;
@@ -281,7 +303,7 @@
             border-radius: 12px;
             font-weight: 600;
         }
-        .nav-item.active { color: var(--accent); background: rgba(37,99,235,0.1); }
+        .nav-item.active { color: var(--accent); background: rgba(37,99,235,0.12); }
         .nav-item .nav-icon { font-size: 17px; }
 
         /* ---------- صفحه‌ی رمز ۴ رقمی (Passcode) ---------- */
@@ -289,7 +311,9 @@
             position: fixed;
             top: 0; right: 0; bottom: 0; left: 0;
             z-index: 1000;
-            background: #ffffff;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             display: flex;
             justify-content: center;
             direction: ltr;
@@ -336,7 +360,9 @@
             height: min(20vw, 84px);
             border-radius: 50%;
             border: none;
-            background: #f4f4f4;
+            background: rgba(244,244,244,0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             color: #17181a;
             display: flex;
             flex-direction: column;
@@ -367,6 +393,46 @@
             30%, 50%, 70% { transform: translateX(-8px); }
             40%, 60% { transform: translateX(8px); }
         }
+
+        /* ---------- پنجره‌ی شیشه‌ای وضعیت ارسال/اتصال ---------- */
+        .sending-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            background: rgba(15,23,42,0.22);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .sending-card {
+            background: rgba(255,255,255,0.55);
+            backdrop-filter: blur(34px) saturate(160%);
+            -webkit-backdrop-filter: blur(34px) saturate(160%);
+            border: 1px solid rgba(255,255,255,0.95);
+            border-radius: 28px;
+            padding: 34px 26px;
+            width: 100%;
+            max-width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 25px 55px rgba(15,23,42,0.28), inset 0 1px 0 rgba(255,255,255,0.6);
+            text-align: center;
+        }
+        .sending-spinner {
+            width: 46px; height: 46px;
+            border-radius: 50%;
+            border: 3px solid rgba(37,99,235,0.15);
+            border-top-color: var(--accent);
+            animation: sending-spin 0.8s linear infinite;
+        }
+        @keyframes sending-spin { to { transform: rotate(360deg); } }
+        .sending-icon { font-size: 44px; }
+        .sending-text { font-size: 14px; font-weight: 600; color: var(--text); white-space: pre-line; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -376,7 +442,7 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.2;">شیشه ولت</span>
-                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.0 (Wallet V5 + TonConnect)</span>
+                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.1 (Wallet V5 + TonConnect)</span>
             </div>
         </div>
         <div id="connection-status" class="status-badge">آماده</div>
@@ -540,7 +606,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-dim); padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v2.0 &bull; V5R1
+        TON Non-Custodial Wallet &bull; v2.1 &bull; V5R1
     </footer>
 
     <!-- صفحه‌ی رمز ۴ رقمی -->
@@ -571,6 +637,16 @@
             </div>
 
             <button id="pin-link" class="pin-link" onclick="pinLinkClick()"></button>
+        </div>
+    </div>
+
+    <!-- پنجره‌ی شیشه‌ای وضعیت ارسال/اتصال -->
+    <div id="sending-overlay" class="sending-overlay hidden">
+        <div class="sending-card">
+            <div id="sending-spinner" class="sending-spinner"></div>
+            <div id="sending-icon" class="sending-icon hidden"></div>
+            <div id="sending-text" class="sending-text">در حال ارسال...</div>
+            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()">باشه</button>
         </div>
     </div>
 
@@ -642,7 +718,6 @@
         function showScreen(id) {
             SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
             if (id === 'unlock-screen') {
-                // ورود به ولت با صفحه‌ی رمز ۴ رقمی
                 startUnlockFlow();
                 return;
             }
@@ -714,8 +789,6 @@
         // ================= صفحه‌ی رمز ۴ رقمی (Passcode) =================
         let pinState = null;
 
-        // opts: { title, linkText, onLink: () => boolean|Promise<boolean>, verify: async (pin) => نتیجه|null, errorText }
-        // خروجی: { pin, result } یا null (لغو)
         function requestPasscode(opts) {
             return new Promise(function (resolve) {
                 pinState = { entered: '', busy: false, opts: opts, resolve: resolve };
@@ -799,6 +872,60 @@
             else if (e.key === 'Backspace') { pinBackspace(); }
         });
 
+        // ================= صدا و ویبره برای دکمه‌ها =================
+        let tapAudioCtx = null;
+        function hapticTap() {
+            try {
+                if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
+                    tg.HapticFeedback.impactOccurred('light');
+                } else if (navigator.vibrate) {
+                    navigator.vibrate(12);
+                }
+            } catch (e) {}
+        }
+        function playTapSound() {
+            try {
+                if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (tapAudioCtx.state === 'suspended') tapAudioCtx.resume();
+                const osc = tapAudioCtx.createOscillator();
+                const gain = tapAudioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(760, tapAudioCtx.currentTime);
+                gain.gain.setValueAtTime(0.06, tapAudioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, tapAudioCtx.currentTime + 0.08);
+                osc.connect(gain);
+                gain.connect(tapAudioCtx.destination);
+                osc.start();
+                osc.stop(tapAudioCtx.currentTime + 0.08);
+            } catch (e) {}
+        }
+        document.addEventListener('click', function (e) {
+            const el = e.target.closest('button, .action-btn, .nav-item, .list-card, .addr-pill');
+            if (!el) return;
+            hapticTap();
+            playTapSound();
+        }, true);
+
+        // ================= پنجره‌ی شیشه‌ای وضعیت ارسال/اتصال =================
+        function showSendingOverlay(text) {
+            document.getElementById('sending-spinner').classList.remove('hidden');
+            document.getElementById('sending-icon').classList.add('hidden');
+            document.getElementById('sending-close').classList.add('hidden');
+            document.getElementById('sending-text').innerText = text;
+            document.getElementById('sending-overlay').classList.remove('hidden');
+        }
+        function setSendingResult(success, text) {
+            document.getElementById('sending-spinner').classList.add('hidden');
+            const icon = document.getElementById('sending-icon');
+            icon.classList.remove('hidden');
+            icon.innerText = success ? '✅' : '⚠️';
+            document.getElementById('sending-text').innerText = text;
+            document.getElementById('sending-close').classList.remove('hidden');
+        }
+        function hideSendingOverlay() {
+            document.getElementById('sending-overlay').classList.add('hidden');
+        }
+
         async function decryptWithPin(pin) {
             try {
                 return await decryptWords(localStorage.getItem(STORAGE_KEY), pin);
@@ -807,7 +934,6 @@
             }
         }
 
-        // تعیین رمز جدید (دو بار وارد می‌شود)؛ خروجی: رمز یا null
         async function setNewPasscode() {
             const first = await requestPasscode({
                 title: 'یک رمز ' + PIN_LENGTH + ' رقمی برای ولت تعیین کنید',
@@ -826,7 +952,6 @@
             return first.pin;
         }
 
-        // درخواست رمز برای تایید عملیات؛ خروجی: { pin, result: کلمات } یا null
         function requestUnlockPasscode(title) {
             return requestPasscode({
                 title: title,
@@ -1129,6 +1254,7 @@
             const btn = document.getElementById('btn-withdraw');
             btn.disabled = true;
             btn.innerText = 'در حال ارسال...';
+            showSendingOverlay('در حال ارسال تراکنش...');
 
             let words = null;
             let keyPair = null;
@@ -1139,7 +1265,7 @@
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
 
                 if (!wallet.address.equals(currentAddressObj)) {
-                    alert('کلید ولت با آدرس فعلی مطابقت ندارد. عملیات لغو شد.');
+                    setSendingResult(false, 'کلید ولت با آدرس فعلی مطابقت ندارد. عملیات لغو شد.');
                     return;
                 }
 
@@ -1160,13 +1286,13 @@
                     messages: [msg]
                 }));
 
-                alert('تراکنش به شبکه ارسال شد. تایید آن چند ثانیه طول می‌کشد.');
+                setSendingResult(true, 'تراکنش به شبکه ارسال شد ✅\nتایید آن چند ثانیه طول می‌کشد.');
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
             } catch (e) {
                 console.error(e);
-                alert('ارسال ناموفق بود. اتصال اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
+                setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
             } finally {
                 words = null;
                 keyPair = null;
@@ -1188,10 +1314,6 @@
         let tcPendingConnect = null;
         let tcPendingTx = null;
 
-        // جلوگیری از پردازش دوباره‌ی یک درخواست تراکنش که قبلاً تایید/رد شده.
-        // بریج پیام‌ها را تا پایان ttl نگه می‌دارد و هر بار که یک اتصال SSE جدید
-        // باز شود (مثلاً بعد از بستن و باز کردن ولت)، همان پیام‌های قدیمی را
-        // دوباره ارسال می‌کند؛ این لیست از نمایش دوباره‌ی صفحه‌ی تایید جلوگیری می‌کند.
         function loadResolvedReqs() {
             try {
                 const arr = JSON.parse(localStorage.getItem(TC_RESOLVED_KEY) || '[]');
@@ -1340,6 +1462,7 @@
             if (!auth) return;
             const btn = document.getElementById('btn-tc-confirm');
             btn.disabled = true;
+            showSendingOverlay('در حال اتصال...');
             let words = null;
             try {
                 if (!(await libsReady())) return;
@@ -1349,7 +1472,7 @@
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    alert('خطای داخلی: عدم تطابق ولت.');
+                    setSendingResult(false, 'خطای داخلی: عدم تطابق ولت.');
                     return;
                 }
 
@@ -1373,7 +1496,7 @@
                         device: {
                             platform: 'browser',
                             appName: 'glass_wallet',
-                            appVersion: '2.0.0',
+                            appVersion: '2.1.0',
                             maxProtocolVersion: 2,
                             features: [{ name: 'SendTransaction', maxMessages: 4 }]
                         }
@@ -1407,11 +1530,11 @@
 
                 await loadWallet(words);
                 words = null;
-                alert('وصل شد! برگرد به همون اپ و چک کن.');
+                setSendingResult(true, 'وصل شد! برگرد به همون اپ و چک کن.');
                 showTonConnectScreen();
             } catch (e) {
                 console.error(e);
-                alert('اتصال ناموفق بود.\n' + (e && e.message ? e.message : ''));
+                setSendingResult(false, 'اتصال ناموفق بود.\n' + (e && e.message ? e.message : ''));
             } finally {
                 words = null;
                 btn.disabled = false;
@@ -1485,8 +1608,6 @@
                 if (payload.method === 'sendTransaction') {
                     const reqKey = fromHex + ':' + payload.id;
                     if (isReqResolved(reqKey)) {
-                        // این درخواست قبلاً تایید یا رد شده؛ بریج فقط دارد پیام قدیمی را
-                        // دوباره تحویل می‌دهد (رفتار عادی TTL بریج). نادیده می‌گیریم.
                         console.log('duplicate tx request ignored (already resolved):', reqKey);
                         return;
                     }
@@ -1534,6 +1655,7 @@
             if (!auth) return;
             const btn = document.getElementById('btn-tc-tx-approve');
             btn.disabled = true;
+            showSendingOverlay('در حال ارسال تراکنش...');
             let words = null;
             try {
                 if (!(await libsReady())) return;
@@ -1541,7 +1663,7 @@
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    alert('خطای داخلی: عدم تطابق ولت.');
+                    setSendingResult(false, 'خطای داخلی: عدم تطابق ولت.');
                     return;
                 }
 
@@ -1583,12 +1705,12 @@
 
                 await loadWallet(words);
                 words = null;
-                alert('تراکنش ارسال شد.');
+                setSendingResult(true, 'تراکنش ارسال شد ✅');
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
             } catch (e) {
                 console.error(e);
-                alert('ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
+                setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
             } finally {
                 words = null;
                 btn.disabled = false;
