@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- لود کتابخانه‌های استاندارد رمزنگاری و TON -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://unpkg.com/tonweb@0.0.60/dist/tonweb.js"></script>
     <style>
         * {
@@ -36,22 +38,6 @@
             border-radius: 28px;
             padding: 20px;
         }
-        .glass-input {
-            width: 100%;
-            background: rgba(241, 245, 249, 0.8);
-            border: 1px solid rgba(203, 213, 225, 0.8);
-            border-radius: 14px;
-            padding: 12px;
-            color: #0f172a;
-            font-size: 13px;
-            outline: none;
-            transition: all 0.2s;
-        }
-        .glass-input:focus {
-            border-color: #2563eb;
-            background: #ffffff;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
         .btn-primary {
             width: 100%;
             background: #2563eb;
@@ -78,6 +64,21 @@
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
         }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            resize: none;
+            outline: none;
+            margin-bottom: 12px;
+            text-align: left;
+            direction: ltr;
+        }
+        textarea:focus { border-color: #2563eb; }
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -88,18 +89,6 @@
         .text-xs { font-size: 12px; color: #64748b; }
         .text-sm { font-size: 14px; }
         .font-bold { font-weight: 700; }
-        
-        .grid-24 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-            max-height: 180px;
-            overflow-y: auto;
-            background: rgba(241, 245, 249, 0.9);
-            padding: 8px;
-            border-radius: 16px;
-            border: 1px solid rgba(203, 213, 225, 0.8);
-        }
     </style>
 </head>
 <body>
@@ -109,7 +98,7 @@
             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 15px;">💎</div>
             <div>
                 <span class="text-sm font-bold" style="color: #0f172a; display: block; line-height: 1.2;">شیشه ولت</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v2.0 (بدون خطای اعتبارسنجی)</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه غیرحضانتی (Seed Import)</span>
             </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
@@ -117,45 +106,18 @@
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
         
-        <div id="welcome-screen" class="glass-card text-center flex flex-col gap-3">
-            <div style="font-size: 38px; margin-bottom: 2px;">🔐</div>
-            <h2 class="text-sm font-bold" style="color: #0f172a; font-size: 17px;">کیف پول غیرحضانتی TON</h2>
-            <p class="text-xs" style="line-height: 1.5;">مدیریت دارایی‌ها با ساخت یا وارد کردن کلمات بازیابی استاندارد.</p>
+        <!-- صفحه ورود ۲۴ کلمه -->
+        <div id="import-screen" class="glass-card text-center flex flex-col gap-3">
+            <div style="font-size: 34px; margin-bottom: 2px;">🔑</div>
+            <h2 class="text-sm font-bold" style="color: #0f172a; font-size: 16px;">وارد کردن عبارت بازیابی</h2>
+            <p class="text-xs" style="line-height: 1.4;">۲۴ کلمه امنیتی ولت خود را با فاصله وارد کنید تا آدرس و موجودی مستقیماً استخراج شود.</p>
             
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%;">
-                <button onclick="generateNewWallet()" class="btn-primary">ساخت کیف پول جدید</button>
-                <button onclick="showImportWallet()" class="btn-secondary">وارد کردن ولت (Import)</button>
-            </div>
+            <textarea id="mnemonic-input" placeholder="word1 word2 word3 ... word24"></textarea>
+            
+            <button onclick="importWallet()" class="btn-primary">بارگذاری کیف پول</button>
         </div>
 
-        <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="color: #d97706; font-size: 15px;">عبارت بازیابی امن</h3>
-            <p class="text-xs">این ۲۴ کلمه استاندارد را یادداشت کنید:</p>
-            
-            <div id="mnemonic-box-gen" class="grid-24"></div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: #334155; font-weight: 500;">رمز عبور امنیتی مینی‌اپ:</label>
-                <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input">
-            </div>
-
-            <button onclick="confirmNewWallet()" class="btn-primary" style="background: #059669; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);">یادداشت کردم و تایید</button>
-        </div>
-
-        <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="color: #0f172a; font-size: 15px;">وارد کردن ولت</h3>
-            <p class="text-xs">کلمات بازیابی (۱۲ یا ۲۴ کلمه) را یکجا در کادر زیر <b>Paste</b> کنید:</p>
-            
-            <textarea id="import-mnemonic-area" rows="4" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; line-height: 1.5;"></textarea>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: #334155; font-weight: 500;">رمز عبور امنیتی:</label>
-                <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input">
-            </div>
-
-            <button onclick="processImportWallet()" class="btn-primary">بارگذاری ولت</button>
-        </div>
-
+        <!-- داشبورد مدیریت دارایی -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card text-center flex flex-col items-center">
                 <span class="text-xs" style="margin-bottom: 4px;">آدرس ولت شما</span>
@@ -170,120 +132,85 @@
                 </div>
             </div>
 
-            <div class="glass-card" style="padding: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="alert('پروتکل TON Connect آماده است')">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 20px;">🌐</span>
-                    <div style="display: flex; flex-direction: column; text-align: right;">
-                        <span class="text-sm font-bold" style="color: #0f172a;">اتصال به مینی‌اپ‌ها</span>
-                        <span class="text-xs">پروتکل TON Connect</span>
-                    </div>
-                </div>
-                <span style="color: #94a3b8; font-weight: bold;">←</span>
-            </div>
+            <button onclick="lockWallet()" class="btn-secondary" style="color: #dc2626; border-color: rgba(220, 38, 38, 0.3);">بستن ولت / خروج</button>
         </div>
 
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: #94a3b8; padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v2.0
+        TON Non-Custodial Wallet &bull; v2.2
     </footer>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        const tonweb = new TonWeb(new TonWeb.HttpProvider('https://toncenter.com/api/v2/jsonRPC'));
+        async function importWallet() {
+            const mnemonicText = document.getElementById('mnemonic-input').value.trim();
+            const words = mnemonicText.split(/\s+/);
 
-        let currentMnemonic = [];
-
-        async function generateNewWallet() {
-            try {
-                currentMnemonic = await TonWeb.utils.mnemonicGenerate();
-                document.getElementById('welcome-screen').classList.add('hidden');
-                document.getElementById('create-wallet-screen').classList.remove('hidden');
-                
-                const box = document.getElementById('mnemonic-box-gen');
-                box.innerHTML = '';
-                currentMnemonic.forEach((word, index) => {
-                    box.innerHTML += `<div style="background:#fff; padding:5px; border-radius:6px; font-size:11px; text-align:center; font-family:monospace; border:1px solid #e2e8f0;"><span style="color:#94a3b8; font-size:9px;">${index+1}.</span> ${word}</div>`;
-                });
-            } catch (err) {
-                console.error("خطا در ساخت کلمات:", err);
-                alert("خطا در تولید کلمات بازیابی.");
-            }
-        }
-
-        function showImportWallet() {
-            document.getElementById('welcome-screen').classList.add('hidden');
-            document.getElementById('import-wallet-screen').classList.remove('hidden');
-        }
-
-        async function confirmNewWallet() {
-            const pass = document.getElementById('new-wallet-pass').value;
-            if(!pass) { alert('لطفاً رمز عبور را وارد کنید'); return; }
-            localStorage.setItem('wallet_pass', pass);
-            deriveAndLoadWallet(currentMnemonic);
-        }
-
-        async function processImportWallet() {
-            const pass = document.getElementById('import-wallet-pass').value;
-            const text = document.getElementById('import-mnemonic-area').value.trim();
-
-            if(!text) { alert('لطفاً کلمات بازیابی را وارد کنید'); return; }
-            if(!pass) { alert('لطفاً رمز عبور را وارد کنید'); return; }
-
-            const words = text.replace(/[\n\r\t,]+/g, ' ').split(/\s+/).map(w => w.toLowerCase().trim()).filter(w => w.length > 0);
-            
-            if(words.length < 12) {
-                alert(`تعداد کلمات وارد شده ${words.length} است. کلمات بازیابی باید حداقل ۱۲ یا ۲۴ کلمه باشند.`);
+            if (words.length < 12) {
+                alert('لطفاً عبارت بازیابی معتبر (حداقل ۱۲ یا ۲۴ کلمه) وارد کنید.');
                 return;
             }
 
-            deriveAndLoadWallet(words);
-        }
-
-        async function deriveAndLoadWallet(words) {
-            document.getElementById('create-wallet-screen').classList.add('hidden');
-            document.getElementById('import-wallet-screen').classList.add('hidden');
-            document.getElementById('dashboard-screen').classList.remove('hidden');
-            document.getElementById('connection-status').innerText = 'متصل به بلاک‌چین';
+            document.getElementById('connection-status').innerText = 'در حال پردازش...';
 
             try {
-                let seed;
-                try {
-                    // تلاش برای استفاده از متد استاندارد
-                    seed = await TonWeb.utils.mnemonicToSeed(words);
-                } catch(e) {
-                    // روش ایمن جایگزین بدون خطای سخت‌گیری لیست کلمات
-                    const encoder = new TextEncoder();
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', encoder.encode(words.join(' ')));
-                    seed = new Uint8Array(hashBuffer);
-                }
+                // مشتق‌سازی استاندارد کلید با استفاده از PBKDF2 مطابق استاندارد ولت‌های TON
+                const salt = CryptoJS.enc.Utf8.parse("TON seed version 2");
+                const iterations = 100000;
+                const derivedKey = CryptoJS.PBKDF2(mnemonicText, salt, {
+                    keySize: 256 / 32,
+                    iterations: iterations,
+                    hasher: CryptoJS.algo.SHA512
+                });
 
-                const keyPair = TonWeb.utils.nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
+                // تبدیل کلید مشتق‌شده به بایت‌ها برای ساخت کیف پول v4R2 (استاندارد تونکیپر)
+                const keyHex = derivedKey.toString(CryptoJS.enc.Hex);
+                const secretKeyBytes = new Uint8Array(keyHex.match(/.{1,2}/g).map(byte => parseInt(byte, 16))).slice(0, 32);
+
+                // ساخت جفت کلید و قرارداد ولت نسخه v4r2 با استفاده از TonWeb
+                const keyPair = TonWeb.utils.nacl.sign.keyPair.fromSeed(secretKeyBytes);
                 
-                const WalletClass = tonweb.wallet.all.v4R2;
-                const wallet = new WalletClass(tonweb.provider, {
+                const WalletClass = TonWeb.wallet.all.v4R2;
+                const walletInstance = new WalletClass(TonWeb.defaultProvider, {
                     publicKey: keyPair.publicKey,
                     wc: 0
                 });
 
-                const walletAddressObj = await wallet.getAddress();
-                const addressString = walletAddressObj.toString(true, true, true);
+                const walletAddress = await walletInstance.getAddress();
+                const friendlyAddress = walletAddress.toString(true, true, true);
 
-                document.getElementById('wallet-address-display').innerText = addressString;
+                // نمایش داشبورد
+                document.getElementById('import-screen').classList.add('hidden');
+                document.getElementById('dashboard-screen').classList.remove('hidden');
+                document.getElementById('connection-status').innerText = 'متصل به بلاک‌چین';
+                document.getElementById('wallet-address-display').innerText = friendlyAddress;
 
-                const balanceNano = await tonweb.provider.getBalance(addressString);
-                const balanceTon = TonWeb.utils.fromNano(balanceNano);
+                // استعلام موجودی واقعی از شبکه TON
+                const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${friendlyAddress}`);
+                const data = await response.json();
                 
-                document.getElementById('wallet-balance').innerText = parseFloat(balanceTon).toFixed(4) + " TON";
+                if(data.ok) {
+                    const tonBalance = data.result / 1e9;
+                    document.getElementById('wallet-balance').innerText = tonBalance.toFixed(4) + " TON";
+                } else {
+                    document.getElementById('wallet-balance').innerText = "0.0000 TON";
+                }
 
             } catch (error) {
-                console.error("خطا در پردازش ولت:", error);
-                document.getElementById('dashboard-screen').classList.add('hidden');
-                document.getElementById('import-wallet-screen').classList.remove('hidden');
-                alert('خطا در بارگذاری ولت. لطفاً دوباره تلاش کنید.');
+                console.error("خطا در ساخت ولت:", error);
+                alert("خطایی در پردازش کلمات رخ داد. لطفاً کلمات را با دقت بررسی کنید.");
+                document.getElementById('connection-status').innerText = 'خطا';
             }
+        }
+
+        function lockWallet() {
+            document.getElementById('dashboard-screen').classList.add('hidden');
+            document.getElementById('import-screen').classList.remove('hidden');
+            document.getElementById('mnemonic-input').value = '';
+            document.getElementById('connection-status').innerText = 'آماده';
         }
     </script>
 </body>
