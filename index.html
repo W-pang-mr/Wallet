@@ -89,43 +89,16 @@
         .text-sm { font-size: 14px; }
         .font-bold { font-weight: 700; }
         
-        /* گرید ۲۴ کلمه‌ای مرتب مشابه Tonkeeper */
         .grid-24 {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            max-height: 220px;
+            max-height: 180px;
             overflow-y: auto;
             background: rgba(241, 245, 249, 0.9);
             padding: 8px;
             border-radius: 16px;
             border: 1px solid rgba(203, 213, 225, 0.8);
-        }
-        .word-input-group {
-            display: flex;
-            align-items: center;
-            background: #ffffff;
-            border-radius: 8px;
-            border: 1px solid rgba(226, 232, 240, 1);
-            padding: 2px 4px;
-        }
-        .word-index {
-            font-size: 9px;
-            color: #94a3b8;
-            margin-left: 3px;
-            min-width: 12px;
-            direction: ltr;
-        }
-        .word-field {
-            width: 100%;
-            border: none;
-            outline: none;
-            font-size: 11px;
-            font-family: monospace;
-            background: transparent;
-            color: #0f172a;
-            padding: 4px 0;
-            text-align: center;
         }
     </style>
 </head>
@@ -136,7 +109,7 @@
             <div style="width: 34px; height: 34px; border-radius: 50%; background: rgba(37,99,235,0.1); display: flex; align-items: center; justify-content: center; color: #2563eb; font-size: 15px;">💎</div>
             <div>
                 <span class="text-sm font-bold" style="color: #0f172a; display: block; line-height: 1.2;">شیشه ولت</span>
-                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.2</span>
+                <span style="font-size: 9px; color: #64748b; font-weight: 600;">نسخه v1.3</span>
             </div>
         </div>
         <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #059669; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.3); font-weight: 600;">آماده</div>
@@ -155,7 +128,6 @@
             </div>
         </div>
 
-        <!-- صفحه ساخت ولت جدید -->
         <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="color: #d97706; font-size: 15px;">عبارت بازیابی امن</h3>
             <p class="text-xs">این ۲۴ کلمه را یادداشت کنید:</p>
@@ -170,14 +142,14 @@
             <button onclick="confirmNewWallet()" class="btn-primary" style="background: #059669; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);">یادداشت کردم و تایید</button>
         </div>
 
-        <!-- صفحه ورود ولت مشابه تون‌کیپر (چسباندن در باکس اول) -->
+        <!-- صفحه وارد کردن ولت با کادر هوشمند و پیست آسان -->
         <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="color: #0f172a; font-size: 15px;">وارد کردن ولت</h3>
-            <p class="text-xs">کافیست کلمات را در <b>باکس اول (شماره ۱) Paste کنید</b> یا دستی وارد کنید:</p>
+            <p class="text-xs">کلمات بازیابی (۱۲ یا ۲۴ کلمه) را یکجا در کادر زیر <b>Paste</b> کنید:</p>
             
-            <div id="import-grid-box" class="grid-24"></div>
+            <textarea id="import-mnemonic-area" rows="4" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; line-height: 1.5;"></textarea>
 
-            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 2px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label class="text-xs" style="color: #334155; font-weight: 500;">رمز عبور امنیتی:</label>
                 <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input">
             </div>
@@ -185,7 +157,6 @@
             <button onclick="processImportWallet()" class="btn-primary">بارگذاری ولت</button>
         </div>
 
-        <!-- داشبورد اصلی -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card text-center flex flex-col items-center">
                 <span class="text-xs" style="margin-bottom: 4px;">آدرس ولت شما</span>
@@ -215,7 +186,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: #94a3b8; padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v1.2
+        TON Non-Custodial Wallet &bull; v1.3
     </footer>
 
     <script>
@@ -229,38 +200,6 @@
             "key", "private", "public", "telegram", "mini", "app", "glass", "design", 
             "speed", "network", "global", "user", "interface", "code", "github", "success"
         ];
-
-        // ساخت ۲۴ باکس ایمپورت و تنظیم قابلیت هوشمند Paste روی باکس اول
-        function buildImportGrid() {
-            const grid = document.getElementById('import-grid-box');
-            grid.innerHTML = '';
-            for(let i = 1; i <= 24; i++) {
-                grid.innerHTML += `
-                    <div class="word-input-group">
-                        <span class="word-index">${i}.</span>
-                        <input type="text" id="w-${i}" class="word-field" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-                    </div>
-                `;
-            }
-
-            // هوشمندی تون‌کیپر: اگر کاربر روی باکس اول کلمات رو چسبوند، بین همه باکس‌ها پخش بشه
-            const firstInput = document.getElementById('w-1');
-            firstInput.addEventListener('paste', function(e) {
-                e.preventDefault();
-                const pasteData = (e.clipboardData || window.clipboardData).getData('text');
-                const words = pasteData.trim().split(/\s+/);
-                
-                if(words.length > 0) {
-                    for(let i = 0; i < 24; i++) {
-                        const field = document.getElementById(`w-${i+1}`);
-                        if(field && words[i]) {
-                            field.value = words[i].toLowerCase().trim();
-                        }
-                    }
-                }
-            });
-        }
-        buildImportGrid();
 
         function generateNewWallet() {
             document.getElementById('welcome-screen').classList.add('hidden');
@@ -287,16 +226,14 @@
 
         async function processImportWallet() {
             const pass = document.getElementById('import-wallet-pass').value;
+            const text = document.getElementById('import-mnemonic-area').value.trim();
+
+            if(!text) { alert('لطفاً کلمات بازیابی را وارد کنید'); return; }
             if(!pass) { alert('لطفاً رمز عبور را وارد کنید'); return; }
 
-            let words = [];
-            for(let i = 1; i <= 24; i++) {
-                const val = document.getElementById(`w-${i}`).value.trim();
-                if(val) words.push(val);
-            }
-
+            const words = text.split(/\s+/);
             if(words.length < 12) {
-                alert('لطفاً حداقل ۱۲ الی ۲۴ کلمه را به صورت کامل وارد کنید');
+                alert('کلمات بازیابی باید حداقل ۱۲ کلمه باشند');
                 return;
             }
 
