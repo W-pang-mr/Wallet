@@ -984,10 +984,40 @@
         // ================= TonConnect =================
         const TC_BRIDGE = 'https://connect.ton.org/bridge';
         const TC_STORAGE_KEY = 'tc_connections_v1';
+        const TC_LAST_EVENT_ID_KEY = 'tc_last_event_id_v1';
+        const TC_RESOLVED_KEY = 'tc_resolved_reqs_v1';
+        const TC_RESOLVED_MAX = 200;
+        const TC_RESOLVED_TTL_MS = 24 * 60 * 60 * 1000; // 24 ساعت
         let tcNacl = null;
         let tcEventSource = null;
         let tcPendingConnect = null;
         let tcPendingTx = null;
+
+        // جلوگیری از پردازش دوباره‌ی یک درخواست تراکنش که قبلاً تایید/رد شده.
+        // بریج پیام‌ها را تا پایان ttl نگه می‌دارد و هر بار که یک اتصال SSE جدید
+        // باز شود (مثلاً بعد از بستن و باز کردن ولت)، همان پیام‌های قدیمی را
+        // دوباره ارسال می‌کند؛ این لیست از نمایش دوباره‌ی صفحه‌ی تایید جلوگیری می‌کند.
+        function loadResolvedReqs() {
+            try {
+                const arr = JSON.parse(localStorage.getItem(TC_RESOLVED_KEY) || '[]');
+                const now = Date.now();
+                return arr.filter(function (it) { return (now - it.ts) < TC_RESOLVED_TTL_MS; });
+            } catch (e) { return []; }
+        }
+        function saveResolvedReqs(list) {
+            if (list.length > TC_RESOLVED_MAX) list = list.slice(list.length - TC_RESOLVED_MAX);
+            localStorage.setItem(TC_RESOLVED_KEY, JSON.stringify(list));
+        }
+        function isReqResolved(reqKey) {
+            return loadResolvedReqs().some(function (it) { return it.key === reqKey; });
+        }
+        function markReqResolved(reqKey) {
+            const list = loadResolvedReqs();
+            if (!list.some(function (it) { return it.key === reqKey; })) {
+                list.push({ key: reqKey, ts: Date.now() });
+                saveResolvedReqs(list);
+            }
+        }
 
         async function loadTcNacl() {
             if (tcNacl) return tcNacl;
@@ -1223,8 +1253,16 @@
                 return;
             }
             const ids = list.map(c => c.ourPubHex).join(',');
-            tcEventSource = new EventSource(TC_BRIDGE + '/events?client_id=' + ids);
-            tcEventSource.onmessage = function (e) { handleTcBridgeMessage(e.data); };
+            let url = TC_BRIDGE + '/events?client_id=' + ids;
+            const lastId = localStorage.getItem(TC_LAST_EVENT_ID_KEY);
+            if (lastId) url += '&last_event_id=' + encodeURIComponent(lastId);
+            tcEventSource = new EventSource(url);
+            tcEventSource.onmessage = function (e) {
+                if (e.lastEventId) {
+                    localStorage.setItem(TC_LAST_EVENT_ID_KEY, e.lastEventId);
+                }
+                handleTcBridgeMessage(e.data);
+            };
             tcEventSource.onerror = function (e) { console.error('tc SSE error', e); };
         }
 
@@ -1257,8 +1295,15 @@
                 }
 
                 if (payload.method === 'sendTransaction') {
+                    const reqKey = fromHex + ':' + payload.id;
+                    if (isReqResolved(reqKey)) {
+                        // این درخواست قبلاً تایید یا رد شده؛ بریج فقط دارد پیام قدیمی را
+                        // دوباره تحویل می‌دهد (رفتار عادی TTL بریج). نادیده می‌گیریم.
+                        console.log('duplicate tx request ignored (already resolved):', reqKey);
+                        return;
+                    }
                     const txRequest = JSON.parse(payload.params[0]);
-                    tcPendingTx = { connection: conn, requestId: payload.id, txRequest: txRequest };
+                    tcPendingTx = { connection: conn, requestId: payload.id, txRequest: txRequest, reqKey: reqKey };
                     if (!(await libsReady())) return;
                     renderTcTxScreen();
                     showScreen('tc-tx-screen');
@@ -1290,6 +1335,7 @@
 
         async function rejectTcTx() {
             if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
+            if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
             await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
             tcPendingTx = null;
             showScreen('dashboard-screen');
@@ -1349,6 +1395,7 @@
 
                 const resultB64 = transferCell.toBoc().toString('base64');
                 await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
+                if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
 
                 document.getElementById('tc-tx-pass').value = '';
                 tcPendingTx = null;
