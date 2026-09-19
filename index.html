@@ -4,120 +4,192 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Glass Crypto Wallet</title>
+    <!-- اسکریپت اصلی تلگرام وب‌اپ -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
         body {
-            font-family: 'Vazirmatn', sans-serif;
             background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #311042 100%);
             color: #f8fafc;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            max-width: 480px;
+            margin: 0 auto;
         }
-        /* افکت شیشه‌ای (Glassmorphism) */
+        /* افکت شیشه‌ای (Glassmorphism) خالص */
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 24px;
+            padding: 20px;
         }
         .glass-input {
+            width: 100%;
             background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(8px);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 12px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
         }
         .glass-input:focus {
-            border-color: rgba(59, 130, 246, 0.5);
-            outline: none;
+            border-color: rgba(59, 130, 246, 0.6);
+        }
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: opacity 0.2s;
+        }
+        .btn-primary:active {
+            opacity: 0.8;
+        }
+        .btn-secondary {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            color: #cbd5e1;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-3 { gap: 12px; }
+        .text-center { text-align: center; }
+        .text-xs { font-size: 12px; color: #94a3b8; }
+        .text-sm { font-size: 14px; }
+        .font-bold { font-weight: 700; }
+        .grid-24 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 160px;
+            overflow-y: auto;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 12px;
+        }
+        .word-item {
+            background: rgba(255,255,255,0.05);
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 11px;
+            text-align: center;
+            font-family: monospace;
         }
     </style>
 </head>
-<body class="flex flex-col min-h-screen p-4 max-w-md mx-auto justify-between">
+<body>
 
     <!-- هدر برنامه -->
-    <header class="flex justify-between items-center mb-4 p-3 rounded-2xl glass-card">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">💎</div>
-            <h1 class="text-sm font-bold">شیشه ولت</h1>
+    <header class="glass-card" style="padding: 12px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(59,130,246,0.2); display: flex; align-items: center; justify-content: center; color: #60a5fa; font-size: 14px;">💎</div>
+            <span class="text-sm font-bold">شیشه ولت</span>
         </div>
-        <div id="connection-status" class="text-[10px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/20">آماده</div>
+        <div id="connection-status" style="font-size: 10px; background: rgba(16,185,129,0.15); color: #34d399; padding: 4px 10px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.2);">آماده</div>
     </header>
 
-    <!-- بخش اصلی -->
-    <main id="app" class="flex-1 flex flex-col justify-center gap-4">
+    <!-- بخش اصلی محتوا -->
+    <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
         
         <!-- صفحه خوش‌آمدگویی -->
-        <div id="welcome-screen" class="glass-card p-6 rounded-3xl flex flex-col items-center text-center gap-4">
-            <div class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 text-2xl border border-blue-500/20 mb-1">🔐</div>
-            <h2 class="text-xl font-bold">کیف پول غیرحضانتی</h2>
-            <p class="text-xs text-slate-300 leading-relaxed">کنترل کامل دارایی‌ها با کلیدهای خصوصی اختصاصی و عبارت بازیابی ۲۴ کلمه‌ای.</p>
+        <div id="welcome-screen" class="glass-card text-center flex flex-col gap-3">
+            <div style="font-size: 32px; margin-bottom: 4px;">🔐</div>
+            <h2 class="text-sm font-bold">کیف پول غیرحضانتی</h2>
+            <p class="text-xs">کنترل کامل دارایی‌ها با کلیدهای خصوصی اختصاصی و عبارت بازیابی ۲۴ کلمه‌ای.</p>
             
-            <div class="w-full flex flex-col gap-2.5 mt-2">
-                <button onclick="showCreateWallet()" class="w-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium py-3 rounded-xl transition text-sm shadow-lg shadow-blue-500/20 border border-blue-400/30">ساخت کیف پول جدید</button>
-                <button onclick="showImportWallet()" class="w-full glass-input text-slate-200 font-medium py-3 rounded-xl transition text-sm hover:bg-white/10">وارد کردن ولت (Import)</button>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px; width: 100%;">
+                <button onclick="showCreateWallet()" class="btn-primary">ساخت کیف پول جدید</button>
+                <button onclick="showImportWallet()" class="btn-secondary">وارد کردن ولت (Import)</button>
             </div>
         </div>
 
         <!-- صفحه ساخت ولت -->
-        <div id="create-wallet-screen" class="hidden glass-card p-5 rounded-3xl flex flex-col gap-3">
-            <h3 class="text-sm font-bold text-amber-400">عبارت بازیابی (۲۴ کلمه امن)</h3>
-            <p class="text-[11px] text-slate-300">این کلمات را یادداشت کنید. راه دیگری برای بازگردانی ولت وجود ندارد.</p>
+        <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="color: #fbbf24;">عبارت بازیابی (۲۴ کلمه امن)</h3>
+            <p class="text-xs">این کلمات را یادداشت کنید. راه دیگری برای بازگردانی ولت وجود ندارد.</p>
             
-            <div id="mnemonic-box" class="glass-input p-2.5 rounded-2xl grid grid-cols-3 gap-1.5 text-[10px] font-mono text-center select-all max-h-40 overflow-y-auto">
-                <!-- کلمات -->
+            <div id="mnemonic-box" class="grid-24">
+                <!-- کلمات اینجا لود میشن -->
             </div>
 
-            <div class="flex flex-col gap-1.5 mt-1">
-                <label class="text-[11px] text-slate-300">رمز عبور امنیتی مینی‌اپ:</label>
-                <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input p-2.5 rounded-xl text-xs text-white">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs">رمز عبور امنیتی مینی‌اپ:</label>
+                <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input">
             </div>
 
-            <button onclick="confirmNewWallet()" class="w-full bg-emerald-600/80 hover:bg-emerald-600 text-white font-medium py-2.5 rounded-xl transition text-xs shadow-lg shadow-emerald-500/20 mt-2">یادداشت کردم و تایید</button>
+            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); margin-top: 4px;">یادداشت کردم و تایید</button>
         </div>
 
         <!-- صفحه ایمپورت ولت -->
-        <div id="import-wallet-screen" class="hidden glass-card p-5 rounded-3xl flex flex-col gap-3">
+        <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold">وارد کردن ولت</h3>
-            <p class="text-[11px] text-slate-300">کلمات بازیابی را با فاصله وارد کنید:</p>
+            <p class="text-xs">کلمات بازیابی را با فاصله وارد کنید:</p>
             
-            <textarea id="import-mnemonic" rows="3" placeholder="word1 word2 word3 ..." class="glass-input p-2.5 rounded-xl text-xs font-mono text-white resize-none"></textarea>
+            <textarea id="import-mnemonic" rows="3" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace;"></textarea>
             
-            <div class="flex flex-col gap-1.5">
-                <label class="text-[11px] text-slate-300">رمز عبور امنیتی:</label>
-                <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input p-2.5 rounded-xl text-xs text-white">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs">رمز عبور امنیتی:</label>
+                <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input">
             </div>
 
-            <button onclick="processImportWallet()" class="w-full bg-blue-600/80 hover:bg-blue-600 text-white font-medium py-2.5 rounded-xl transition text-xs mt-2">بارگذاری ولت</button>
+            <button onclick="processImportWallet()" class="btn-primary" style="margin-top: 4px;">بارگذاری ولت</button>
         </div>
 
         <!-- داشبورد اصلی -->
-        <div id="dashboard-screen" class="hidden flex-col gap-3">
-            <div class="glass-card p-5 rounded-3xl flex flex-col items-center text-center">
-                <span class="text-[11px] text-slate-400 mb-1">موجودی کل</span>
-                <h2 class="text-2xl font-bold tracking-tight mb-3">$0.00</h2>
-                <div class="flex gap-2 w-full">
-                    <button onclick="alert('بخش برداشت فعال شد')" class="flex-1 bg-blue-600/80 py-2 rounded-xl text-xs font-medium transition shadow-md">برداشت</button>
-                    <button onclick="alert('بخش سواپ فعال شد')" class="flex-1 glass-input py-2 rounded-xl text-xs font-medium transition hover:bg-white/10">سواپ (Swap)</button>
+        <div id="dashboard-screen" class="hidden flex flex-col gap-3">
+            <div class="glass-card text-center flex flex-col items-center">
+                <span class="text-xs" style="margin-bottom: 4px;">موجودی کل</span>
+                <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 12px;">$0.00</h2>
+                <div style="display: flex; gap: 8px; width: 100%;">
+                    <button onclick="alert('بخش برداشت فعال شد')" class="btn-primary" style="padding: 10px; font-size: 12px;">برداشت</button>
+                    <button onclick="alert('بخش سواپ فعال شد')" class="btn-secondary" style="padding: 10px; font-size: 12px;">سواپ (Swap)</button>
                 </div>
             </div>
 
-            <div class="glass-card p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:bg-white/5 transition" onclick="alert('اتصال به مینی‌اپ برقرار شد!')">
-                <div class="flex items-center gap-3">
-                    <span class="text-base">🌐</span>
-                    <div class="flex flex-col text-right">
-                        <span class="text-xs font-medium">اتصال به مینی‌اپ‌ها (Connect)</span>
-                        <span class="text-[10px] text-slate-400">پروتکل TON Connect</span>
+            <div class="glass-card" style="padding: 14px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;" onclick="alert('اتصال به مینی‌اپ برقرار شد!')">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 18px;">🌐</span>
+                    <div style="display: flex; flex-direction: column; text-align: right;">
+                        <span class="text-sm font-bold">اتصال به مینی‌اپ‌ها</span>
+                        <span class="text-xs">پروتکل TON Connect</span>
                     </div>
                 </div>
-                <span class="text-slate-500 text-xs">←</span>
+                <span style="color: #64748b;">←</span>
             </div>
         </div>
 
     </main>
 
     <!-- فوتر کوچک -->
-    <footer class="text-center text-[10px] text-slate-500 py-2">
+    <footer style="text-align: center; font-size: 10px; color: #64748b; padding-top: 8px;">
         Non-Custodial Secure Wallet &bull; Telegram Mini App
     </footer>
 
@@ -138,7 +210,7 @@
             const box = document.getElementById('mnemonic-box');
             box.innerHTML = '';
             sampleWords.forEach((word, index) => {
-                box.innerHTML += `<div class="bg-white/5 p-1 rounded border border-white/5"><span class="text-slate-500 text-[9px]">${index+1}.</span> ${word}</div>`;
+                box.innerHTML += `<div class="word-item"><span style="color:#64748b; font-size:9px;">${index+1}.</span> ${word}</div>`;
             });
         }
 
