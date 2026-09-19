@@ -283,6 +283,90 @@
         }
         .nav-item.active { color: var(--accent); background: rgba(37,99,235,0.1); }
         .nav-item .nav-icon { font-size: 17px; }
+
+        /* ---------- صفحه‌ی رمز ۴ رقمی (Passcode) ---------- */
+        .pin-overlay {
+            position: fixed;
+            top: 0; right: 0; bottom: 0; left: 0;
+            z-index: 1000;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            direction: ltr;
+            overflow-y: auto;
+        }
+        .pin-inner {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9vh 16px 3vh;
+        }
+        .pin-top { display: flex; flex-direction: column; align-items: center; }
+        .pin-icon { font-size: 44px; line-height: 1; margin-bottom: 26px; }
+        .pin-title {
+            font-size: 21px;
+            font-weight: 500;
+            color: #17181a;
+            text-align: center;
+            margin-bottom: 26px;
+            line-height: 1.5;
+        }
+        .pin-dots { display: flex; gap: 24px; height: 14px; align-items: center; }
+        .pin-dot {
+            width: 14px; height: 14px;
+            border-radius: 50%;
+            border: 1.5px solid #17181a;
+            background: transparent;
+            transition: background 0.12s;
+        }
+        .pin-dot.filled { background: #17181a; }
+        .pin-error { color: #dc2626; font-size: 12px; min-height: 16px; margin-top: 12px; text-align: center; }
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            gap: 20px 22px;
+            margin-top: 8px;
+        }
+        .pin-key {
+            width: min(20vw, 84px);
+            height: min(20vw, 84px);
+            border-radius: 50%;
+            border: none;
+            background: #f4f4f4;
+            color: #17181a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .pin-key:active { background: #e4e4e4; }
+        .pin-key b { font-size: 30px; font-weight: 400; line-height: 1; }
+        .pin-key small { font-size: 11px; letter-spacing: 3px; color: #6b6f76; margin-top: 4px; height: 12px; line-height: 12px; }
+        .pin-key svg { width: 36px; height: 36px; }
+        .pin-key-empty { width: min(20vw, 84px); height: min(20vw, 84px); visibility: hidden; }
+        .pin-link {
+            background: none;
+            border: none;
+            color: #4c6ef5;
+            font-size: 19px;
+            cursor: pointer;
+            padding: 12px;
+            margin-top: 18px;
+        }
+        .pin-shake { animation: pin-shake 0.4s; }
+        @keyframes pin-shake {
+            10%, 90% { transform: translateX(-2px); }
+            20%, 80% { transform: translateX(4px); }
+            30%, 50%, 70% { transform: translateX(-8px); }
+            40%, 60% { transform: translateX(8px); }
+        }
     </style>
 </head>
 <body>
@@ -319,21 +403,12 @@
 
             <div id="mnemonic-box-gen" class="grid-24"></div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">رمز عبور مینی‌اپ (حداقل ۸ کاراکتر):</label>
-                <input type="password" id="new-wallet-pass" placeholder="رمز عبور قوی" class="glass-input">
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">تکرار رمز عبور:</label>
-                <input type="password" id="new-wallet-pass2" placeholder="تکرار رمز عبور" class="glass-input">
-            </div>
-
             <label class="text-xs" style="display: flex; gap: 8px; align-items: flex-start; color: var(--text);">
                 <input type="checkbox" id="saved-check" style="margin-top: 2px;">
                 <span>کلمات را روی کاغذ یادداشت کردم و می‌دانم بدون آن‌ها ولت قابل بازیابی نیست.</span>
             </label>
 
-            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 10px 24px rgba(5,150,105,0.3);">تایید و ساخت ولت</button>
+            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); box-shadow: 0 10px 24px rgba(5,150,105,0.3);">تایید و تعیین رمز ولت</button>
             <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
         </div>
 
@@ -344,22 +419,8 @@
 
             <textarea id="import-mnemonic-area" rows="4" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; line-height: 1.5; direction: ltr; text-align: left;"></textarea>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">رمز عبور امنیتی (حداقل ۸ کاراکتر):</label>
-                <input type="password" id="import-wallet-pass" placeholder="رمز عبور" class="glass-input">
-            </div>
-
             <button id="btn-import" onclick="processImportWallet()" class="btn-primary">بارگذاری ولت</button>
             <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
-        </div>
-
-        <!-- باز کردن قفل -->
-        <div id="unlock-screen" class="glass-card hidden flex flex-col gap-3 text-center">
-            <div style="font-size: 36px;">🔒</div>
-            <h3 class="text-sm font-bold" style="font-size: 15px;">ولت قفل است</h3>
-            <input type="password" id="unlock-pass" placeholder="رمز عبور" class="glass-input">
-            <button id="btn-unlock" onclick="unlockWallet()" class="btn-primary">باز کردن قفل</button>
-            <button onclick="resetWallet()" class="btn-danger">حذف ولت از این دستگاه</button>
         </div>
 
         <!-- برداشت -->
@@ -387,11 +448,6 @@
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label class="text-xs" style="color: var(--text); font-weight: 500;">Memo / Comment (اختیاری، عمومی است):</label>
                 <input type="text" id="wd-comment" placeholder="اختیاری" class="glass-input" style="direction: ltr; text-align: left;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">رمز عبور ولت (برای امضای تراکنش):</label>
-                <input type="password" id="wd-pass" placeholder="رمز عبور" class="glass-input">
             </div>
 
             <button id="btn-withdraw" onclick="sendWithdraw()" class="btn-primary">ارسال</button>
@@ -468,10 +524,6 @@
             <h3 class="text-sm font-bold" style="font-size: 15px;">درخواست اتصال</h3>
             <div class="warn-box" id="tc-confirm-app-info">در حال بارگذاری اطلاعات اپ...</div>
             <div class="text-xs">این اپ فقط آدرس ولت تو رو می‌بینه، نه کلمات بازیابی یا رمزت.</div>
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">رمز عبور ولت:</label>
-                <input type="password" id="tc-confirm-pass" placeholder="رمز عبور" class="glass-input">
-            </div>
             <button id="btn-tc-confirm" onclick="confirmTcConnect()" class="btn-primary">تایید و اتصال</button>
             <button onclick="cancelTcConnect()" class="btn-secondary">لغو</button>
         </div>
@@ -481,10 +533,6 @@
             <h3 class="text-sm font-bold" style="font-size: 15px;">درخواست تراکنش</h3>
             <div class="warn-box" id="tc-tx-from-app">درخواست از یه اپ متصل</div>
             <div id="tc-tx-details" class="text-xs flex flex-col gap-3" style="max-height: 220px; overflow-y: auto;"></div>
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">رمز عبور ولت:</label>
-                <input type="password" id="tc-tx-pass" placeholder="رمز عبور" class="glass-input">
-            </div>
             <button id="btn-tc-tx-approve" onclick="approveTcTx()" class="btn-primary">تایید و ارسال</button>
             <button onclick="rejectTcTx()" class="btn-secondary">رد کردن</button>
         </div>
@@ -495,15 +543,47 @@
         TON Non-Custodial Wallet &bull; v2.0 &bull; V5R1
     </footer>
 
+    <!-- صفحه‌ی رمز ۴ رقمی -->
+    <div id="pin-overlay" class="pin-overlay hidden">
+        <div class="pin-inner">
+            <div class="pin-top">
+                <div class="pin-icon">💎</div>
+                <h2 id="pin-title" class="pin-title"></h2>
+                <div id="pin-dots" class="pin-dots"></div>
+                <div id="pin-error" class="pin-error"></div>
+            </div>
+
+            <div class="pin-pad">
+                <button class="pin-key" onclick="pinPress('1')"><b>1</b><small></small></button>
+                <button class="pin-key" onclick="pinPress('2')"><b>2</b><small>ABC</small></button>
+                <button class="pin-key" onclick="pinPress('3')"><b>3</b><small>DEF</small></button>
+                <button class="pin-key" onclick="pinPress('4')"><b>4</b><small>GHI</small></button>
+                <button class="pin-key" onclick="pinPress('5')"><b>5</b><small>JKL</small></button>
+                <button class="pin-key" onclick="pinPress('6')"><b>6</b><small>MNO</small></button>
+                <button class="pin-key" onclick="pinPress('7')"><b>7</b><small>PQRS</small></button>
+                <button class="pin-key" onclick="pinPress('8')"><b>8</b><small>TUV</small></button>
+                <button class="pin-key" onclick="pinPress('9')"><b>9</b><small>WXYZ</small></button>
+                <span class="pin-key-empty"></span>
+                <button class="pin-key" onclick="pinPress('0')"><b>0</b><small>+</small></button>
+                <button class="pin-key" onclick="pinBackspace()" aria-label="Backspace">
+                    <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="#17181a"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                </button>
+            </div>
+
+            <button id="pin-link" class="pin-link" onclick="pinLinkClick()"></button>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'unlock-screen', 'dashboard-screen', 'withdraw-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '';      // اختیاری: کلید API از @tonapibot برای جلوگیری از محدودیت نرخ
         const FEE_RESERVE = 10000000n;     // 0.01 TON ذخیره برای کارمزد
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
+        const PIN_LENGTH = 4;              // طول رمز ولت (برای امنیت بیشتر می‌توانی ۶ بگذاری)
 
         let libs = null;
         let tonClient = null;
@@ -512,6 +592,7 @@
         let currentAddressObj = null;
         let currentBalanceNano = 0n;
         let sending = false;
+        let unlockActive = false;
 
         async function loadLibs() {
             if (libs) return libs;
@@ -560,6 +641,11 @@
 
         function showScreen(id) {
             SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
+            if (id === 'unlock-screen') {
+                // ورود به ولت با صفحه‌ی رمز ۴ رقمی
+                startUnlockFlow();
+                return;
+            }
             document.getElementById(id).classList.remove('hidden');
         }
 
@@ -625,14 +711,156 @@
             return new TextDecoder().decode(plain).split(' ');
         }
 
+        // ================= صفحه‌ی رمز ۴ رقمی (Passcode) =================
+        let pinState = null;
+
+        // opts: { title, linkText, onLink: () => boolean|Promise<boolean>, verify: async (pin) => نتیجه|null, errorText }
+        // خروجی: { pin, result } یا null (لغو)
+        function requestPasscode(opts) {
+            return new Promise(function (resolve) {
+                pinState = { entered: '', busy: false, opts: opts, resolve: resolve };
+                document.getElementById('pin-title').innerText = opts.title || '';
+                document.getElementById('pin-error').innerText = '';
+                const link = document.getElementById('pin-link');
+                link.innerText = opts.linkText || '';
+                link.style.visibility = opts.linkText ? 'visible' : 'hidden';
+                renderPinDots();
+                document.getElementById('pin-overlay').classList.remove('hidden');
+            });
+        }
+
+        function closePin(value) {
+            const st = pinState;
+            pinState = null;
+            document.getElementById('pin-overlay').classList.add('hidden');
+            if (st) st.resolve(value);
+        }
+
+        function renderPinDots() {
+            const box = document.getElementById('pin-dots');
+            box.innerHTML = '';
+            const n = pinState ? pinState.entered.length : 0;
+            for (let i = 0; i < PIN_LENGTH; i++) {
+                const d = document.createElement('span');
+                d.className = 'pin-dot' + (i < n ? ' filled' : '');
+                box.appendChild(d);
+            }
+        }
+
+        async function pinPress(d) {
+            const st = pinState;
+            if (!st || st.busy) return;
+            if (st.entered.length >= PIN_LENGTH) return;
+            document.getElementById('pin-error').innerText = '';
+            st.entered += d;
+            renderPinDots();
+            if (st.entered.length < PIN_LENGTH) return;
+
+            st.busy = true;
+            const pin = st.entered;
+            await sleep(150);
+            let result = true;
+            if (st.opts.verify) {
+                try { result = await st.opts.verify(pin); } catch (e) { result = null; }
+            }
+            if (pinState !== st) return;
+            if (result) {
+                closePin({ pin: pin, result: result });
+            } else {
+                const dots = document.getElementById('pin-dots');
+                dots.classList.add('pin-shake');
+                setTimeout(function () { dots.classList.remove('pin-shake'); }, 450);
+                document.getElementById('pin-error').innerText = st.opts.errorText || 'رمز اشتباه است';
+                st.entered = '';
+                st.busy = false;
+                renderPinDots();
+            }
+        }
+
+        function pinBackspace() {
+            const st = pinState;
+            if (!st || st.busy) return;
+            st.entered = st.entered.slice(0, -1);
+            renderPinDots();
+        }
+
+        async function pinLinkClick() {
+            const st = pinState;
+            if (!st || st.busy) return;
+            let close = true;
+            if (st.opts.onLink) close = await st.opts.onLink();
+            if (close && pinState === st) closePin(null);
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (!pinState) return;
+            const k = normalizeNumber(e.key);
+            if (/^[0-9]$/.test(k)) { pinPress(k); }
+            else if (e.key === 'Backspace') { pinBackspace(); }
+        });
+
+        async function decryptWithPin(pin) {
+            try {
+                return await decryptWords(localStorage.getItem(STORAGE_KEY), pin);
+            } catch (e) {
+                return null;
+            }
+        }
+
+        // تعیین رمز جدید (دو بار وارد می‌شود)؛ خروجی: رمز یا null
+        async function setNewPasscode() {
+            const first = await requestPasscode({
+                title: 'یک رمز ' + PIN_LENGTH + ' رقمی برای ولت تعیین کنید',
+                linkText: 'لغو',
+                onLink: function () { return true; }
+            });
+            if (!first) return null;
+            const second = await requestPasscode({
+                title: 'رمز را دوباره وارد کنید',
+                linkText: 'لغو',
+                onLink: function () { return true; },
+                verify: async function (p) { return p === first.pin ? true : null; },
+                errorText: 'رمزها یکسان نیستند'
+            });
+            if (!second) return null;
+            return first.pin;
+        }
+
+        // درخواست رمز برای تایید عملیات؛ خروجی: { pin, result: کلمات } یا null
+        function requestUnlockPasscode(title) {
+            return requestPasscode({
+                title: title,
+                linkText: 'لغو',
+                onLink: function () { return true; },
+                verify: decryptWithPin
+            });
+        }
+
+        async function startUnlockFlow() {
+            if (unlockActive) return;
+            unlockActive = true;
+            let res = null;
+            try {
+                res = await requestPasscode({
+                    title: 'رمز ولت خود را وارد کنید',
+                    linkText: 'رمز را فراموش کرده‌اید؟',
+                    onLink: function () {
+                        resetWallet();
+                        return !localStorage.getItem(STORAGE_KEY);
+                    },
+                    verify: decryptWithPin
+                });
+            } finally {
+                unlockActive = false;
+            }
+            if (res) await loadWallet(res.result);
+        }
+
         function backToWelcome() {
             pendingWords = null;
             document.getElementById('mnemonic-box-gen').innerHTML = '';
-            document.getElementById('new-wallet-pass').value = '';
-            document.getElementById('new-wallet-pass2').value = '';
             document.getElementById('saved-check').checked = false;
             document.getElementById('import-mnemonic-area').value = '';
-            document.getElementById('import-wallet-pass').value = '';
             showScreen('welcome-screen');
         }
 
@@ -668,23 +896,19 @@
         }
 
         async function confirmNewWallet() {
-            const pass = document.getElementById('new-wallet-pass').value;
-            const pass2 = document.getElementById('new-wallet-pass2').value;
             const checked = document.getElementById('saved-check').checked;
 
             if (!pendingWords) { alert('ابتدا کلمات ساخته شوند.'); backToWelcome(); return; }
-            if (pass.length < 8) { alert('رمز عبور باید حداقل ۸ کاراکتر باشد.'); return; }
-            if (pass !== pass2) { alert('رمز عبور و تکرار آن یکسان نیست.'); return; }
             if (!checked) { alert('ابتدا کلمات را یادداشت کنید و تیک تایید را بزنید.'); return; }
 
             try {
-                const encrypted = await encryptWords(pendingWords, pass);
+                const pin = await setNewPasscode();
+                if (!pin) return;
+                const encrypted = await encryptWords(pendingWords, pin);
                 localStorage.setItem(STORAGE_KEY, encrypted);
                 const words = pendingWords;
                 pendingWords = null;
                 document.getElementById('mnemonic-box-gen').innerHTML = '';
-                document.getElementById('new-wallet-pass').value = '';
-                document.getElementById('new-wallet-pass2').value = '';
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
@@ -693,11 +917,9 @@
         }
 
         async function processImportWallet() {
-            const pass = document.getElementById('import-wallet-pass').value;
             const text = document.getElementById('import-mnemonic-area').value.trim();
 
             if (!text) { alert('لطفاً کلمات بازیابی را وارد کنید.'); return; }
-            if (pass.length < 8) { alert('رمز عبور باید حداقل ۸ کاراکتر باشد.'); return; }
 
             const words = text.replace(/[\n\r\t,]+/g, ' ').split(/\s+/).map(w => w.toLowerCase().trim()).filter(w => w.length > 0);
 
@@ -715,35 +937,15 @@
                     alert('کلمات بازیابی معتبر نیستند (املای کلمات یا ترتیب آن‌ها را چک کنید).');
                     return;
                 }
-                const encrypted = await encryptWords(words, pass);
+                const pin = await setNewPasscode();
+                if (!pin) return;
+                const encrypted = await encryptWords(words, pin);
                 localStorage.setItem(STORAGE_KEY, encrypted);
                 document.getElementById('import-mnemonic-area').value = '';
-                document.getElementById('import-wallet-pass').value = '';
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
                 alert('خطا در وارد کردن ولت.');
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        async function unlockWallet() {
-            const pass = document.getElementById('unlock-pass').value;
-            if (!pass) { alert('رمز عبور را وارد کنید.'); return; }
-
-            const btn = document.getElementById('btn-unlock');
-            btn.disabled = true;
-            try {
-                let words;
-                try {
-                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
-                } catch (e) {
-                    alert('رمز عبور اشتباه است.');
-                    return;
-                }
-                document.getElementById('unlock-pass').value = '';
-                await loadWallet(words);
             } finally {
                 btn.disabled = false;
             }
@@ -868,13 +1070,11 @@
             document.getElementById('wd-amount').disabled = false;
             document.getElementById('wd-max').checked = false;
             document.getElementById('wd-comment').value = '';
-            document.getElementById('wd-pass').value = '';
             document.getElementById('withdraw-available').innerText = 'موجودی قابل برداشت: ' + formatTon(currentBalanceNano) + ' TON';
             showScreen('withdraw-screen');
         }
 
         function cancelWithdraw() {
-            document.getElementById('wd-pass').value = '';
             showScreen('dashboard-screen');
         }
 
@@ -891,7 +1091,6 @@
             const addrStr = document.getElementById('wd-address').value;
             const amountStr = normalizeNumber(document.getElementById('wd-amount').value);
             const comment = document.getElementById('wd-comment').value.trim();
-            const pass = document.getElementById('wd-pass').value;
             const isMax = document.getElementById('wd-max').checked;
 
             if (!(await libsReady())) return;
@@ -913,7 +1112,6 @@
                     return;
                 }
             }
-            if (!pass) { alert('رمز عبور را وارد کنید.'); return; }
 
             if (recipient.address.equals(currentAddressObj)) {
                 if (!confirm('آدرس مقصد همان آدرس ولت خودتان است. ادامه می‌دهید؟')) return;
@@ -924,6 +1122,9 @@
             const okConfirm = confirm('تایید نهایی برداشت:\n\nمقدار: ' + shownAmount + '\nمقصد:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nارسال شود؟');
             if (!okConfirm) return;
 
+            const auth = await requestUnlockPasscode('برای تایید تراکنش، رمز ولت را وارد کنید');
+            if (!auth) return;
+
             sending = true;
             const btn = document.getElementById('btn-withdraw');
             btn.disabled = true;
@@ -932,12 +1133,7 @@
             let words = null;
             let keyPair = null;
             try {
-                try {
-                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
-                } catch (e) {
-                    alert('رمز عبور اشتباه است.');
-                    return;
-                }
+                words = auth.result;
 
                 keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
@@ -964,7 +1160,6 @@
                     messages: [msg]
                 }));
 
-                document.getElementById('wd-pass').value = '';
                 alert('تراکنش به شبکه ارسال شد. تایید آن چند ثانیه طول می‌کشد.');
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 8000);
@@ -1131,7 +1326,6 @@
             else if (manifestUrl) { try { name = new URL(manifestUrl).hostname; } catch (e) {} }
             if (manifest && manifest.url) url = manifest.url;
             infoEl.innerText = 'اپ "' + name + '" (' + url + ') می‌خواد به ولت تو وصل بشه.';
-            document.getElementById('tc-confirm-pass').value = '';
             showScreen('tc-confirm-screen');
         }
 
@@ -1142,8 +1336,8 @@
 
         async function confirmTcConnect() {
             if (!tcPendingConnect) { showScreen('tonconnect-screen'); return; }
-            const pass = document.getElementById('tc-confirm-pass').value;
-            if (!pass) { alert('رمز عبور را وارد کن.'); return; }
+            const auth = await requestUnlockPasscode('برای اتصال، رمز ولت را وارد کنید');
+            if (!auth) return;
             const btn = document.getElementById('btn-tc-confirm');
             btn.disabled = true;
             let words = null;
@@ -1151,12 +1345,7 @@
                 if (!(await libsReady())) return;
                 await loadTcNacl();
 
-                try {
-                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
-                } catch (e) {
-                    alert('رمز عبور اشتباه است.');
-                    return;
-                }
+                words = auth.result;
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
@@ -1215,7 +1404,6 @@
                 });
                 saveTcConnections(list);
                 tcPendingConnect = null;
-                document.getElementById('tc-confirm-pass').value = '';
 
                 await loadWallet(words);
                 words = null;
@@ -1330,7 +1518,6 @@
                 div.innerText = '#' + (idx + 1) + '\nTo: ' + addr + '\nAmount: ' + formatTon(m.amount) + ' TON';
                 box.appendChild(div);
             });
-            document.getElementById('tc-tx-pass').value = '';
         }
 
         async function rejectTcTx() {
@@ -1343,19 +1530,14 @@
 
         async function approveTcTx() {
             if (!tcPendingTx) return;
-            const pass = document.getElementById('tc-tx-pass').value;
-            if (!pass) { alert('رمز عبور را وارد کن.'); return; }
+            const auth = await requestUnlockPasscode('برای تایید تراکنش، رمز ولت را وارد کنید');
+            if (!auth) return;
             const btn = document.getElementById('btn-tc-tx-approve');
             btn.disabled = true;
             let words = null;
             try {
                 if (!(await libsReady())) return;
-                try {
-                    words = await decryptWords(localStorage.getItem(STORAGE_KEY), pass);
-                } catch (e) {
-                    alert('رمز عبور اشتباه است.');
-                    return;
-                }
+                words = auth.result;
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
@@ -1397,7 +1579,6 @@
                 await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
                 if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
 
-                document.getElementById('tc-tx-pass').value = '';
                 tcPendingTx = null;
 
                 await loadWallet(words);
