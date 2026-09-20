@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -741,7 +742,7 @@
                         <span>↙</span><span>دریافت</span>
                     </div>
                 </div>
-                <div class="swap-link-row" onclick="alert('بخش سواپ به‌زودی فعال می‌شود')">⇄ سواپ (به‌زودی)</div>
+                <div class="swap-link-row" onclick="alertMsg('بخش سواپ به‌زودی فعال می‌شود')">⇄ سواپ (به‌زودی)</div>
             </div>
 
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
@@ -915,10 +916,10 @@
         const STORAGE_KEY = 'enc_wallet_v1';
         const THEME_KEY = 'wallet_theme_pref';
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'settings-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
-        const TONCENTER_API_KEY = '';      // اختیاری: کلید API از @tonapibot برای جلوگیری از محدودیت نرخ
-        const FEE_RESERVE = 10000000n;     // 0.01 TON ذخیره برای کارمزد
+        const TONCENTER_API_KEY = '';
+        const FEE_RESERVE = 10000000n;
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
-        const PIN_LENGTH = 4;              // طول رمز ولت (برای امنیت بیشتر می‌توانی ۶ بگذاری)
+        const PIN_LENGTH = 4;
 
         let libs = null;
         let tonClient = null;
@@ -930,7 +931,10 @@
         let unlockActive = false;
         let balanceHidden = false;
 
-        // ================= تم روشن/تاریک =================
+        function alertMsg(msg) {
+            alert(msg);
+        }
+
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
@@ -979,7 +983,7 @@
 
         async function libsReady() {
             if (!window.crypto || !window.crypto.subtle) {
-                alert('این محیط از رمزنگاری امن پشتیبانی نمی‌کند.');
+                alertMsg('این محیط از رمزنگاری امن پشتیبانی نمی‌کند.');
                 return false;
             }
             try {
@@ -990,7 +994,7 @@
             } catch (e) {
                 console.error(e);
                 setStatus('خطای لود', false);
-                alert('کتابخانه‌های TON لود نشدند. اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
+                alertMsg('کتابخانه‌های TON لود نشدند. اینترنت را چک کنید و دوباره تلاش کنید.\n' + (e && e.message ? e.message : ''));
                 return false;
             }
         }
@@ -1057,7 +1061,6 @@
             return whole.toString() + '.' + frac;
         }
 
-        // ================= نمایش/مخفی‌سازی موجودی =================
         function renderBalanceDisplay() {
             const el = document.getElementById('wallet-balance');
             if (!currentAddressObj) { el.innerText = 'در حال استعلام...'; return; }
@@ -1098,7 +1101,6 @@
             return new TextDecoder().decode(plain).split(' ');
         }
 
-        // ================= صفحه‌ی رمز ۴ رقمی (Passcode) =================
         let pinState = null;
 
         function requestPasscode(opts) {
@@ -1184,7 +1186,6 @@
             else if (e.key === 'Backspace') { pinBackspace(); }
         });
 
-        // ================= ویبره برای دکمه‌ها =================
         function hapticTap() {
             try {
                 if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
@@ -1200,7 +1201,6 @@
             hapticTap();
         }, true);
 
-        // ================= پنجره‌ی شیشه‌ای وضعیت ارسال/اتصال =================
         function showSendingOverlay(text) {
             document.getElementById('sending-spinner').classList.remove('hidden');
             document.getElementById('sending-icon').classList.add('hidden');
@@ -1308,7 +1308,7 @@
                 showScreen('create-wallet-screen');
             } catch (e) {
                 console.error(e);
-                alert('خطا در ساخت کلمات بازیابی. دوباره تلاش کنید.');
+                alertMsg('خطا در ساخت کلمات بازیابی. دوباره تلاش کنید.');
             } finally {
                 btn.disabled = false;
             }
@@ -1317,8 +1317,8 @@
         async function confirmNewWallet() {
             const checked = document.getElementById('saved-check').checked;
 
-            if (!pendingWords) { alert('ابتدا کلمات ساخته شوند.'); backToWelcome(); return; }
-            if (!checked) { alert('ابتدا کلمات را یادداشت کنید و تیک تایید را بزنید.'); return; }
+            if (!pendingWords) { alertMsg('ابتدا کلمات ساخته شوند.'); backToWelcome(); return; }
+            if (!checked) { alertMsg('ابتدا کلمات را یادداشت کنید و تیک تایید را بزنید.'); return; }
 
             try {
                 const pin = await setNewPasscode();
@@ -1331,19 +1331,19 @@
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
-                alert('خطا در ذخیره امن ولت.');
+                alertMsg('خطا در ذخیره امن ولت.');
             }
         }
 
         async function processImportWallet() {
             const text = document.getElementById('import-mnemonic-area').value.trim();
 
-            if (!text) { alert('لطفاً کلمات بازیابی را وارد کنید.'); return; }
+            if (!text) { alertMsg('لطفاً کلمات بازیابی را وارد کنید.'); return; }
 
             const words = text.replace(/[\n\r\t,]+/g, ' ').split(/\s+/).map(w => w.toLowerCase().trim()).filter(w => w.length > 0);
 
             if (words.length !== 24 && words.length !== 12) {
-                alert('تعداد کلمات ' + words.length + ' است. باید دقیقاً ۱۲ یا ۲۴ کلمه باشد.');
+                alertMsg('تعداد کلمات ' + words.length + ' است. باید دقیقاً ۱۲ یا ۲۴ کلمه باشد.');
                 return;
             }
 
@@ -1353,7 +1353,7 @@
                 if (!(await libsReady())) return;
                 const valid = await libs.mnemonicValidate(words);
                 if (!valid) {
-                    alert('کلمات بازیابی معتبر نیستند (املای کلمات یا ترتیب آن‌ها را چک کنید).');
+                    alertMsg('کلمات بازیابی معتبر نیستند (املای کلمات یا ترتیب آن‌ها را چک کنید).');
                     return;
                 }
                 const pin = await setNewPasscode();
@@ -1364,7 +1364,7 @@
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
-                alert('خطا در وارد کردن ولت.');
+                alertMsg('خطا در وارد کردن ولت.');
             } finally {
                 btn.disabled = false;
             }
@@ -1391,9 +1391,9 @@
             if (!currentAddress) return;
             try {
                 await navigator.clipboard.writeText(currentAddress);
-                alert('آدرس کپی شد.');
+                alertMsg('آدرس کپی شد.');
             } catch (e) {
-                alert('کپی انجام نشد. آدرس را دستی انتخاب کنید.');
+                alertMsg('کپی انجام نشد. آدرس را دستی انتخاب کنید.');
             }
         }
 
@@ -1434,17 +1434,15 @@
 
                 startTcListener();
 
-                // اگر همون لحظه (مثلاً حین وارد کردن رمز) یه درخواست TonConnect در
-                // انتظار مونده، بجای داشبورد همون صفحه‌ی تایید رو نشون بده تا گم نشه.
-                if (tcPendingTx) {
+                if (window.tcPendingTx) {
                     renderTcTxScreen();
                     showScreen('tc-tx-screen');
-                } else if (tcPendingConnect) {
+                } else if (window.tcPendingConnect) {
                     showScreen('tc-confirm-screen');
                 }
             } catch (error) {
                 console.error('خطا در پردازش ولت:', error);
-                alert('خطا در پردازش ولت. لطفاً دوباره تلاش کنید.');
+                alertMsg('خطا در پردازش ولت. لطفاً دوباره تلاش کنید.');
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             }
         }
@@ -1531,19 +1529,19 @@
             if (!(await libsReady())) return;
 
             const recipient = parseRecipient(addrStr);
-            if (!recipient) { alert('آدرس مقصد معتبر نیست.'); return; }
+            if (!recipient) { alertMsg('آدرس مقصد معتبر نیست.'); return; }
 
             let valueNano = 0n;
             let sendMode = 3;
             if (isMax) {
-                if (currentBalanceNano <= FEE_RESERVE) { alert('موجودی برای پرداخت کارمزد کافی نیست.'); return; }
+                if (currentBalanceNano <= FEE_RESERVE) { alertMsg('موجودی برای پرداخت کارمزد کافی نیست.'); return; }
                 sendMode = 128;
             } else {
-                if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alert('مقدار واردشده معتبر نیست.'); return; }
-                try { valueNano = libs.toNano(amountStr); } catch (e) { alert('مقدار واردشده معتبر نیست.'); return; }
-                if (valueNano <= 0n) { alert('مقدار باید بیشتر از صفر باشد.'); return; }
+                if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alertMsg('مقدار واردشده معتبر نیست.'); return; }
+                try { valueNano = libs.toNano(amountStr); } catch (e) { alertMsg('مقدار واردشده معتبر نیست.'); return; }
+                if (valueNano <= 0n) { alertMsg('مقدار باید بیشتر از صفر باشد.'); return; }
                 if (valueNano + FEE_RESERVE > currentBalanceNano) {
-                    alert('موجودی کافی نیست. حداقل 0.01 TON برای کارمزد باید باقی بماند.');
+                    alertMsg('موجودی کافی نیست. حداقل 0.01 TON برای کارمزد باید باقی بماند.');
                     return;
                 }
             }
@@ -1615,7 +1613,6 @@
             }
         }
 
-        // ================= تاریخچه تراکنش‌ها =================
         function shortAddr(str) {
             if (!str) return '';
             return str.slice(0, 5) + '...' + str.slice(-4);
@@ -1669,7 +1666,6 @@
             }
         }
 
-        // ================= توکن‌ها (Jettons) =================
         async function loadTokens() {
             const box = document.getElementById('tokens-list');
             if (!currentAddress || !box) return;
@@ -1833,17 +1829,16 @@
             }
         }
 
-        // ================= TonConnect =================
         const TC_BRIDGE = 'https://connect.ton.org/bridge';
         const TC_STORAGE_KEY = 'tc_connections_v1';
         const TC_LAST_EVENT_ID_KEY = 'tc_last_event_id_v1';
         const TC_RESOLVED_KEY = 'tc_resolved_reqs_v1';
         const TC_RESOLVED_MAX = 200;
-        const TC_RESOLVED_TTL_MS = 24 * 60 * 60 * 1000; // 24 ساعت
+        const TC_RESOLVED_TTL_MS = 24 * 60 * 60 * 1000;
         let tcNacl = null;
         let tcEventSource = null;
-        let tcPendingConnect = null;
-        let tcPendingTx = null;
+        window.tcPendingConnect = null;
+        window.tcPendingTx = null;
 
         function loadResolvedReqs() {
             try {
@@ -1970,7 +1965,7 @@
             statusEl.innerText = 'در حال خواندن اطلاعات اپ...';
             const manifestUrl = parsed.connectRequest && parsed.connectRequest.manifestUrl;
             const manifest = manifestUrl ? await fetchTcManifest(manifestUrl) : null;
-            tcPendingConnect = { dappClientIdHex: parsed.dappClientIdHex, connectRequest: parsed.connectRequest, manifest: manifest, manifestUrl: manifestUrl };
+            window.tcPendingConnect = { dappClientIdHex: parsed.dappClientIdHex, connectRequest: parsed.connectRequest, manifest: manifest, manifestUrl: manifestUrl };
 
             const infoEl = document.getElementById('tc-confirm-app-info');
             let name = 'اپ ناشناس';
@@ -1983,12 +1978,12 @@
         }
 
         function cancelTcConnect() {
-            tcPendingConnect = null;
+            window.tcPendingConnect = null;
             showScreen('tonconnect-screen');
         }
 
         async function confirmTcConnect() {
-            if (!tcPendingConnect) { showScreen('tonconnect-screen'); return; }
+            if (!window.tcPendingConnect) { showScreen('tonconnect-screen'); return; }
             const auth = await requestUnlockPasscode('برای اتصال، رمز ولت را وارد کنید');
             if (!auth) return;
             const btn = document.getElementById('btn-tc-confirm');
@@ -2034,7 +2029,7 @@
                     }
                 };
 
-                const dappPubBytes = hexToBytes(tcPendingConnect.dappClientIdHex);
+                const dappPubBytes = hexToBytes(window.tcPendingConnect.dappClientIdHex);
                 const nonce = tcNacl.randomBytes(24);
                 const plain = new TextEncoder().encode(JSON.stringify(connectEvent));
                 const cipher = tcNacl.box(plain, nonce, dappPubBytes, sessionKeys.secretKey);
@@ -2043,21 +2038,21 @@
                 fullMsg.set(cipher, nonce.length);
                 const bodyB64 = bytesToB64(fullMsg);
 
-                await withRetry(() => fetch(TC_BRIDGE + '/message?client_id=' + ourPubHex + '&to=' + tcPendingConnect.dappClientIdHex + '&ttl=300', {
+                await withRetry(() => fetch(TC_BRIDGE + '/message?client_id=' + ourPubHex + '&to=' + window.tcPendingConnect.dappClientIdHex + '&ttl=300', {
                     method: 'POST',
                     body: bodyB64
                 }).then(function (r) { if (!r.ok) throw new Error('bridge post failed'); return r; }));
 
-                const list = loadTcConnections().filter(c => c.dappClientIdHex !== tcPendingConnect.dappClientIdHex);
+                const list = loadTcConnections().filter(c => c.dappClientIdHex !== window.tcPendingConnect.dappClientIdHex);
                 list.push({
-                    dappClientIdHex: tcPendingConnect.dappClientIdHex,
+                    dappClientIdHex: window.tcPendingConnect.dappClientIdHex,
                     ourPubHex: ourPubHex,
                     ourSecB64: ourSecB64,
-                    appName: (tcPendingConnect.manifest && tcPendingConnect.manifest.name) || '',
-                    appUrl: (tcPendingConnect.manifest && tcPendingConnect.manifest.url) || tcPendingConnect.manifestUrl || ''
+                    appName: (window.tcPendingConnect.manifest && window.tcPendingConnect.manifest.name) || '',
+                    appUrl: (window.tcPendingConnect.manifest && window.tcPendingConnect.manifest.url) || window.tcPendingConnect.manifestUrl || ''
                 });
                 saveTcConnections(list);
-                tcPendingConnect = null;
+                window.tcPendingConnect = null;
 
                 await loadWallet(words);
                 words = null;
@@ -2113,40 +2108,31 @@
                 const data = JSON.parse(rawData);
                 const fromHex = data.from;
                 const msgB64 = data.message;
-                if (!fromHex || !msgB64) return;
+                const fullMsg = b64ToBytes(msgB64);
+                const nonce = fullMsg.slice(0, 24);
+                const cipher = fullMsg.slice(24);
 
-                const list = loadTcConnections();
-                const conn = list.find(c => c.dappClientIdHex === fromHex);
-                if (!conn) { console.error('no matching connection for', fromHex); return; }
+                const conns = loadTcConnections();
+                const conn = conns.find(c => c.dappClientIdHex === fromHex);
+                if (!conn) return;
 
-                await loadTcNacl();
-                const full = b64ToBytes(msgB64);
-                const nonce = full.slice(0, 24);
-                const cipher = full.slice(24);
-                const ourSec = b64ToBytes(conn.ourSecB64);
-                const dappPub = hexToBytes(fromHex);
-                const plainBytes = tcNacl.box.open(cipher, nonce, dappPub, ourSec);
-                if (!plainBytes) { console.error('decrypt failed for tc message'); return; }
-                const payload = JSON.parse(new TextDecoder().decode(plainBytes));
+                const privBytes = b64ToBytes(conn.ourSecB64);
+                const dappPubBytes = hexToBytes(fromHex);
+                const plain = tcNacl.box.open(cipher, nonce, dappPubBytes, privBytes);
+                if (!plain) return;
 
-                if (payload.method === 'disconnect') {
-                    const filtered = list.filter(c => c.dappClientIdHex !== fromHex);
-                    saveTcConnections(filtered);
-                    startTcListener();
-                    return;
-                }
+                const reqObj = JSON.parse(new TextDecoder().decode(plain));
+                if (reqObj.method === 'sendTransaction') {
+                    const reqKey = fromHex + '_' + reqObj.id;
+                    if (isReqResolved(reqKey)) return;
+                    window.tcPendingTx = { fromHex: fromHex, conn: conn, reqObj: reqObj, reqKey: reqKey };
 
-                if (payload.method === 'sendTransaction') {
-                    const reqKey = fromHex + ':' + payload.id;
-                    if (isReqResolved(reqKey)) {
-                        console.log('duplicate tx request ignored (already resolved):', reqKey);
-                        return;
+                    if (!localStorage.getItem(STORAGE_KEY)) {
+                        startUnlockFlow();
+                    } else {
+                        renderTcTxScreen();
+                        showScreen('tc-tx-screen');
                     }
-                    const txRequest = JSON.parse(payload.params[0]);
-                    tcPendingTx = { connection: conn, requestId: payload.id, txRequest: txRequest, reqKey: reqKey };
-                    if (!(await libsReady())) return;
-                    renderTcTxScreen();
-                    showScreen('tc-tx-screen');
                 }
             } catch (e) {
                 console.error('handleTcBridgeMessage error', e);
@@ -2154,94 +2140,129 @@
         }
 
         function renderTcTxScreen() {
-            const connection = tcPendingTx.connection;
-            const txRequest = tcPendingTx.txRequest;
-            document.getElementById('tc-tx-from-app').innerText = 'درخواست از: ' + (connection.appName || connection.appUrl || 'اپ متصل');
-            const box = document.getElementById('tc-tx-details');
-            box.innerHTML = '';
-            (txRequest.messages || []).forEach(function (m, idx) {
-                const div = document.createElement('div');
-                div.className = 'glass-input';
-                div.style.direction = 'ltr';
-                div.style.textAlign = 'left';
-                div.style.whiteSpace = 'pre-line';
-                let addr = m.address;
-                try { addr = libs.Address.parse(m.address).toString({ urlSafe: true, bounceable: true }); } catch (e) {}
-                div.innerText = '#' + (idx + 1) + '\nTo: ' + addr + '\nAmount: ' + formatTon(m.amount) + ' TON';
-                box.appendChild(div);
-            });
+            const tx = window.tcPendingTx;
+            if (!tx) return;
+            document.getElementById('tc-tx-from-app').innerText = 'درخواست از: ' + (tx.conn.appName || tx.conn.appUrl || 'اپ متصل');
+            const details = document.getElementById('tc-tx-details');
+            details.innerHTML = '';
+            try {
+                const params = tx.reqObj.params;
+                const messages = params && params[0] ? JSON.parse(params[0]) : [];
+                messages.forEach((m, idx) => {
+                    const card = document.createElement('div');
+                    card.className = 'glass-card';
+                    card.style.padding = '12px';
+                    card.style.background = 'var(--surface-2)';
+                    card.innerHTML = '<span class="text-xs font-bold">پیام #' + (idx + 1) + '</span><div class="text-xs" style="font-family:monospace; direction:ltr; text-align:left; margin-top:4px;">مقصد: ' +
+                        escapeHtml(m.address) + '<br>مبلغ: ' + formatTon(m.amount || '0') + ' TON</div>';
+                    details.appendChild(card);
+                });
+            } catch (e) {
+                details.innerText = 'اطلاعات تراکنش قابل نمایش نیست.';
+            }
         }
 
-        async function rejectTcTx() {
-            if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
-            if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-            await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
-            tcPendingTx = null;
-            setActiveNav('nav-wallet');
+        function rejectTcTx() {
+            const tx = window.tcPendingTx;
+            if (!tx) { showScreen('dashboard-screen'); return; }
+            markReqResolved(tx.reqKey);
+            sendTcErrorResponse(tx.fromHex, tx.conn, tx.reqObj.id, 300, 'User declined the request');
+            window.tcPendingTx = null;
             showScreen('dashboard-screen');
         }
 
+        async function sendTcErrorResponse(toHex, conn, id, code, message) {
+            try {
+                await loadTcNacl();
+                const privBytes = b64ToBytes(conn.ourSecB64);
+                const dappPubBytes = hexToBytes(toHex);
+                const resp = { error: { code: code, message: message }, id: id };
+                const nonce = tcNacl.randomBytes(24);
+                const plain = new TextEncoder().encode(JSON.stringify(resp));
+                const cipher = tcNacl.box(plain, nonce, dappPubBytes, privBytes);
+                const fullMsg = new Uint8Array(nonce.length + cipher.length);
+                fullMsg.set(nonce, 0);
+                fullMsg.set(cipher, nonce.length);
+                await fetch(TC_BRIDGE + '/message?client_id=' + conn.ourPubHex + '&to=' + toHex + '&ttl=300', {
+                    method: 'POST',
+                    body: bytesToB64(fullMsg)
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
         async function approveTcTx() {
-            if (!tcPendingTx) return;
-            const auth = await requestUnlockPasscode('برای تایید تراکنش، رمز ولت را وارد کنید');
+            const tx = window.tcPendingTx;
+            if (!tx) return;
+
+            const auth = await requestUnlockPasscode('برای تایید تراکنش TonConnect رمز ولت را وارد کنید');
             if (!auth) return;
+
             const btn = document.getElementById('btn-tc-tx-approve');
             btn.disabled = true;
-            showSendingOverlay('در حال ارسال تراکنش...');
+            showSendingOverlay('در حال ارسال تراکنش به بلاک‌چین...');
+
             let words = null;
             try {
                 if (!(await libsReady())) return;
+                await loadTcNacl();
+
                 words = auth.result;
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'خطای داخلی: عدم تطابق ولت.');
+                    setSendingResult(false, 'خطای تطابق آدرس ولت.');
                     return;
                 }
 
                 const contract = tonClient.open(wallet);
                 const seqno = await withRetry(() => contract.getSeqno());
 
-                const txRequest = tcPendingTx.txRequest;
-                const outMessages = (txRequest.messages || []).map(function (m) {
-                    let body = undefined;
-                    let init = undefined;
-                    if (m.payload) { body = libs.Cell.fromBase64(m.payload); }
-                    if (m.stateInit) {
-                        const initCell = libs.Cell.fromBase64(m.stateInit);
-                        init = libs.loadStateInit(initCell.beginParse());
+                const params = tx.reqObj.params;
+                const messages = params && params[0] ? JSON.parse(params[0]) : [];
+                const builtMsgs = messages.map(m => {
+                    const destAddr = libs.Address.parse(m.address);
+                    let bodyCell = undefined;
+                    if (m.payload) {
+                        try { bodyCell = libs.Cell.fromBoc(b64ToBytes(m.payload))[0]; } catch (e2) {}
                     }
                     return libs.internal({
-                        to: libs.Address.parse(m.address),
+                        to: destAddr,
                         value: BigInt(m.amount),
                         bounce: true,
-                        body: body,
-                        init: init
+                        body: bodyCell
                     });
                 });
 
-                const transferCell = wallet.createTransfer({
+                await withRetry(() => contract.sendTransfer({
                     seqno: seqno,
                     secretKey: keyPair.secretKey,
                     sendMode: 3,
-                    messages: outMessages
+                    messages: builtMsgs
+                }));
+
+                markReqResolved(tx.reqKey);
+                const privBytes = b64ToBytes(tx.conn.ourSecB64);
+                const dappPubBytes = hexToBytes(tx.fromHex);
+                const resp = { result: 'mock_tx_hash_ok', id: tx.reqObj.id };
+                const nonce = tcNacl.randomBytes(24);
+                const plain = new TextEncoder().encode(JSON.stringify(resp));
+                const cipher = tcNacl.box(plain, nonce, dappPubBytes, privBytes);
+                const fullMsg = new Uint8Array(nonce.length + cipher.length);
+                fullMsg.set(nonce, 0);
+                fullMsg.set(cipher, nonce.length);
+
+                await fetch(TC_BRIDGE + '/message?client_id=' + tx.conn.ourPubHex + '&to=' + tx.fromHex + '&ttl=300', {
+                    method: 'POST',
+                    body: bytesToB64(fullMsg)
                 });
 
-                await withRetry(() => contract.send(transferCell));
-
-                const resultB64 = transferCell.toBoc().toString('base64');
-                await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
-                if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-
-                tcPendingTx = null;
-
-                await loadWallet(words);
-                words = null;
-                setSendingResult(true, 'تراکنش ارسال شد ✅');
-                setTimeout(refreshBalance, 8000);
-                setTimeout(refreshBalance, 20000);
-                setTimeout(loadRecentActivityPreview, 9000);
-                setTimeout(loadTokens, 9500);
+                window.tcPendingTx = null;
+                setSendingResult(true, 'تراکنش TonConnect با موفقیت ارسال شد ✅');
+                showScreen('dashboard-screen');
+                setTimeout(refreshBalance, 6000);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
@@ -2251,10 +2272,14 @@
             }
         }
 
-        async function sendTcResponse(connection, requestId, resultB64, error) {
-            try {
-                await loadTcNacl();
-                const responseObj = error ? { id: requestId, error: error } : { id: requestId, result: resultB64 };
-                const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(responseObj));
-                const dappPub = hexToBytes(
+        window.onload = function () {
+            if (localStorage.getItem(STORAGE_KEY)) {
+                showScreen('unlock-screen');
+            } else {
+                showScreen('welcome-screen');
+            }
+        };
+    </script>
+</body>
+</html>
+```
