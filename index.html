@@ -15,9 +15,12 @@
         :root {
             --bg: #05070d;
             --bg-2: #0b0f1c;
-            --glass: rgba(255,255,255,0.055);
-            --glass-strong: rgba(255,255,255,0.09);
+            --surface-1: rgba(255,255,255,0.055);
+            --surface-2: rgba(255,255,255,0.09);
+            --surface-3: rgba(255,255,255,0.06);
+            --surface-input: rgba(255,255,255,0.05);
             --border: rgba(255,255,255,0.09);
+            --border-2: rgba(255,255,255,0.12);
             --accent: #0098ea;
             --accent-2: #34c9ff;
             --text: #eef3fb;
@@ -25,12 +28,49 @@
             --success: #22c55e;
             --danger: #f87171;
             --warn: #fbbf24;
+            --overlay-bg: rgba(5,7,13,0.88);
+            --overlay-card-bg: rgba(15,20,32,0.9);
+            --nav-bg: rgba(10,14,24,0.7);
+            --shadow-1: 0 20px 50px rgba(0,0,0,0.35);
+            --balance-grad-from: #ffffff;
+            --balance-grad-to: var(--accent-2);
+            --pin-key-bg: rgba(255,255,255,0.06);
+            --pin-key-active: rgba(255,255,255,0.14);
+            --receive-fg: #04141f;
+            color-scheme: dark;
+        }
+        :root[data-theme="light"] {
+            --bg: #eef2f7;
+            --bg-2: #e3e9f3;
+            --surface-1: rgba(15,23,42,0.045);
+            --surface-2: rgba(15,23,42,0.08);
+            --surface-3: rgba(15,23,42,0.045);
+            --surface-input: rgba(15,23,42,0.045);
+            --border: rgba(15,23,42,0.09);
+            --border-2: rgba(15,23,42,0.14);
+            --accent: #0098ea;
+            --accent-2: #0077c2;
+            --text: #0f172a;
+            --text-dim: #64748b;
+            --success: #15803d;
+            --danger: #dc2626;
+            --warn: #b45309;
+            --overlay-bg: rgba(238,242,247,0.92);
+            --overlay-card-bg: rgba(255,255,255,0.97);
+            --nav-bg: rgba(255,255,255,0.8);
+            --shadow-1: 0 18px 40px rgba(15,23,42,0.12);
+            --balance-grad-from: #0f172a;
+            --balance-grad-to: var(--accent);
+            --pin-key-bg: rgba(15,23,42,0.05);
+            --pin-key-active: rgba(15,23,42,0.11);
+            --receive-fg: #04141f;
+            color-scheme: light;
         }
         html, body { height: 100%; }
         body {
             background:
-                radial-gradient(720px 480px at 12% -8%, rgba(0,152,234,0.22), transparent 60%),
-                radial-gradient(620px 460px at 100% 10%, rgba(52,201,255,0.14), transparent 55%),
+                radial-gradient(720px 480px at 12% -8%, rgba(0,152,234,0.20), transparent 60%),
+                radial-gradient(620px 460px at 100% 10%, rgba(52,201,255,0.12), transparent 55%),
                 linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
             color: var(--text);
             min-height: 100vh;
@@ -41,15 +81,15 @@
             margin: 0 auto;
             position: relative;
             overflow-x: hidden;
+            transition: background 0.25s, color 0.25s;
         }
-        body::before, body::after { content: none; }
 
         .glass-card {
-            background: var(--glass);
+            background: var(--surface-1);
             backdrop-filter: blur(28px) saturate(140%);
             -webkit-backdrop-filter: blur(28px) saturate(140%);
             border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: var(--shadow-1), inset 0 1px 0 rgba(255,255,255,0.05);
             border-radius: 24px;
             padding: 20px;
             position: relative;
@@ -63,12 +103,13 @@
             background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
             pointer-events: none;
         }
+        :root[data-theme="light"] .glass-card::before { display: none; }
         .glass-input {
             width: 100%;
-            background: rgba(255,255,255,0.05);
+            background: var(--surface-input);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid var(--border-2);
             border-radius: 14px;
             padding: 13px;
             color: var(--text);
@@ -76,7 +117,7 @@
             outline: none;
             transition: all 0.2s;
         }
-        .glass-input::placeholder { color: rgba(238,243,251,0.3); }
+        .glass-input::placeholder { color: var(--text-dim); opacity: 0.7; }
         .glass-input:focus {
             border-color: var(--accent);
             background: rgba(0,152,234,0.08);
@@ -99,9 +140,9 @@
         .btn-primary:disabled { opacity: 0.5; }
         .btn-secondary {
             width: 100%;
-            background: rgba(255,255,255,0.06);
+            background: var(--surface-3);
             color: var(--text);
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid var(--border-2);
             padding: 15px;
             border-radius: 16px;
             font-weight: 500;
@@ -141,22 +182,22 @@
             max-height: 200px;
             overflow-y: auto;
             direction: ltr;
-            background: rgba(255,255,255,0.04);
+            background: var(--surface-3);
             padding: 8px;
             border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-2);
         }
         .word-chip {
-            background: rgba(255,255,255,0.06);
+            background: var(--surface-2);
             padding: 5px;
             border-radius: 6px;
             font-size: 11px;
             text-align: center;
             font-family: monospace;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-2);
             color: var(--text);
         }
-        .word-chip span { color: #64748b; font-size: 9px; }
+        .word-chip span { color: var(--text-dim); font-size: 9px; }
         .warn-box {
             background: rgba(251,191,36,0.1);
             border: 1px solid rgba(251,191,36,0.3);
@@ -184,6 +225,17 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 16px;
         }
+        .top-actions { display: flex; align-items: center; gap: 8px; }
+        .theme-toggle-btn {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border-2);
+            color: var(--text);
+            font-size: 14px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
         .status-badge {
             font-size: 10px;
             background: rgba(34,197,94,0.1);
@@ -194,59 +246,78 @@
             border-radius: 20px;
             border: 1px solid rgba(34,197,94,0.25);
             font-weight: 600;
+            white-space: nowrap;
         }
 
         /* داشبورد */
-        .balance-card { text-align: center; padding: 30px 20px; }
+        .balance-card { padding: 22px 20px 24px; }
+        .balance-top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .balance-label { font-size: 11px; color: var(--text-dim); font-weight: 700; letter-spacing: 0.4px; }
+        .eye-btn {
+            width: 30px; height: 30px; border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border-2);
+            color: var(--text-dim);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .balance-num {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1.2px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--balance-grad-from), var(--balance-grad-to));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            direction: ltr;
+            text-align: right;
+        }
+        .balance-sub-row { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; margin-bottom: 20px; }
         .addr-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 11px;
             font-family: monospace;
-            background: rgba(255,255,255,0.06);
+            background: var(--surface-2);
             padding: 6px 12px;
             border-radius: 20px;
             color: var(--text-dim);
             direction: ltr;
-            margin-bottom: 18px;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-2);
         }
-        .balance-num {
-            font-size: 42px;
-            font-weight: 800;
-            letter-spacing: -1.2px;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, #fff, var(--accent-2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .action-row { display: flex; gap: 10px; direction: ltr; }
-        .action-btn {
+        .action-row { display: flex; gap: 10px; }
+        .pill-action {
             flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 7px;
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 18px;
-            padding: 14px 6px;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 16px;
+            padding: 15px 8px;
             cursor: pointer;
-            color: var(--text);
-        }
-        .action-btn .icon-circle {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(0,152,234,0.15);
-            color: var(--accent-2);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 17px;
             font-weight: 700;
+            font-size: 14px;
         }
-        .action-btn span { font-size: 11px; font-weight: 600; }
+        .pill-action.receive {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent));
+            color: var(--receive-fg);
+            box-shadow: 0 10px 22px rgba(0,152,234,0.28);
+        }
+        .pill-action.send {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border-2);
+        }
+        .swap-link-row {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--text-dim);
+            cursor: pointer;
+        }
 
         .list-card {
             display: flex;
@@ -256,7 +327,17 @@
             cursor: pointer;
         }
         .list-card .left { display: flex; align-items: center; gap: 12px; }
-        .list-card .emoji-icon { font-size: 20px; }
+        .list-card .icon-box {
+            width: 40px; height: 40px; border-radius: 14px;
+            background: rgba(0,152,234,0.14);
+            color: var(--accent-2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+        .section-head .see-all { font-size: 12px; color: var(--accent-2); cursor: pointer; font-weight: 600; }
 
         /* تاریخچه تراکنش‌ها */
         .tx-row {
@@ -265,7 +346,7 @@
             justify-content: space-between;
             gap: 10px;
             padding: 13px 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            border-bottom: 1px solid var(--border);
             cursor: pointer;
         }
         .tx-row:last-child { border-bottom: none; }
@@ -285,6 +366,22 @@
         .tx-amount.in { color: var(--success); }
         .tx-amount.out { color: var(--text); }
 
+        /* سوییچ تم در تنظیمات */
+        .switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .switch-track {
+            position: absolute; inset: 0; border-radius: 999px;
+            background: var(--surface-2); border: 1px solid var(--border-2);
+            transition: background 0.2s; cursor: pointer;
+        }
+        .switch-track::before {
+            content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+            left: 3px; top: 3px; background: var(--text-dim);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .switch input:checked + .switch-track { background: rgba(0,152,234,0.25); border-color: var(--accent); }
+        .switch input:checked + .switch-track::before { transform: translateX(-18px); background: var(--accent-2); }
+
         /* ناوبری پایین */
         .bottom-nav {
             position: fixed;
@@ -293,16 +390,15 @@
             transform: translateX(-50%);
             width: calc(100% - 32px);
             max-width: 448px;
-            background: rgba(10,14,24,0.7);
+            background: var(--nav-bg);
             backdrop-filter: blur(34px) saturate(160%);
             -webkit-backdrop-filter: blur(34px) saturate(160%);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-2);
             border-radius: 22px;
             display: flex;
             justify-content: space-around;
             padding: 10px 6px;
-            box-shadow: 0 14px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-            direction: ltr;
+            box-shadow: 0 14px 30px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.06);
         }
         .nav-item {
             display: flex;
@@ -312,19 +408,19 @@
             font-size: 10px;
             color: var(--text-dim);
             cursor: pointer;
-            padding: 4px 10px;
+            padding: 4px 14px;
             border-radius: 12px;
             font-weight: 600;
         }
         .nav-item.active { color: var(--accent-2); background: rgba(0,152,234,0.14); }
-        .nav-item .nav-icon { font-size: 17px; }
+        .nav-item svg { width: 19px; height: 19px; stroke: currentColor; }
 
         /* ---------- صفحه‌ی رمز ۴ رقمی (Passcode) ---------- */
         .pin-overlay {
             position: fixed;
             top: 0; right: 0; bottom: 0; left: 0;
             z-index: 1000;
-            background: rgba(5,7,13,0.88);
+            background: var(--overlay-bg);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             display: flex;
@@ -373,7 +469,7 @@
             height: min(20vw, 84px);
             border-radius: 50%;
             border: none;
-            background: rgba(255,255,255,0.06);
+            background: var(--pin-key-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             color: var(--text);
@@ -385,7 +481,7 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        .pin-key:active { background: rgba(255,255,255,0.14); }
+        .pin-key:active { background: var(--pin-key-active); }
         .pin-key b { font-size: 30px; font-weight: 400; line-height: 1; }
         .pin-key small { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); margin-top: 4px; height: 12px; line-height: 12px; }
         .pin-key svg { width: 36px; height: 36px; }
@@ -412,7 +508,7 @@
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(5,7,13,0.6);
+            background: rgba(5,7,13,0.5);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             display: flex;
@@ -420,11 +516,12 @@
             justify-content: center;
             padding: 20px;
         }
+        :root[data-theme="light"] .sending-overlay { background: rgba(15,23,42,0.25); }
         .sending-card {
-            background: rgba(15,20,32,0.9);
+            background: var(--overlay-card-bg);
             backdrop-filter: blur(34px) saturate(160%);
             -webkit-backdrop-filter: blur(34px) saturate(160%);
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid var(--border-2);
             border-radius: 28px;
             padding: 34px 26px;
             width: 100%;
@@ -433,7 +530,7 @@
             flex-direction: column;
             align-items: center;
             gap: 16px;
-            box-shadow: 0 25px 55px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+            box-shadow: 0 25px 55px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
             text-align: center;
         }
         .sending-spinner {
@@ -455,10 +552,13 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.2;">شیشه ولت</span>
-                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.1 (Wallet V5 + TonConnect)</span>
+                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.2 (Wallet V5 + TonConnect)</span>
             </div>
         </div>
-        <div id="connection-status" class="status-badge">آماده</div>
+        <div class="top-actions">
+            <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغییر تم">☀️</button>
+            <div id="connection-status" class="status-badge">آماده</div>
+        </div>
     </div>
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
@@ -536,55 +636,57 @@
         <!-- داشبورد -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card balance-card">
-                <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()">در حال بارگذاری... 📋</div>
+                <div class="balance-top-row">
+                    <span class="balance-label">موجودی کل</span>
+                    <button class="eye-btn" onclick="toggleBalanceVisibility()" id="balance-eye-btn" title="نمایش/مخفی کردن موجودی">👁</button>
+                </div>
                 <div id="wallet-balance" class="balance-num">در حال استعلام...</div>
+                <div class="balance-sub-row">
+                    <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()">در حال بارگذاری... 📋</div>
+                </div>
 
                 <div class="action-row">
-                    <div class="action-btn" onclick="showWithdraw()">
-                        <div class="icon-circle">↑</div>
-                        <span>ارسال</span>
+                    <div class="pill-action send" onclick="showWithdraw()">
+                        <span>↗</span><span>ارسال</span>
                     </div>
-                    <div class="action-btn" onclick="copyAddress()">
-                        <div class="icon-circle">↓</div>
-                        <span>دریافت</span>
-                    </div>
-                    <div class="action-btn" onclick="alert('بخش سواپ به‌زودی فعال می‌شود')">
-                        <div class="icon-circle">⇄</div>
-                        <span>سواپ</span>
+                    <div class="pill-action receive" onclick="copyAddress()">
+                        <span>↙</span><span>دریافت</span>
                     </div>
                 </div>
+                <div class="swap-link-row" onclick="alert('بخش سواپ به‌زودی فعال می‌شود')">⇄ سواپ (به‌زودی)</div>
             </div>
 
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
                 <div class="left">
-                    <span class="emoji-icon">🌐</span>
+                    <div class="icon-box">🌐</div>
                     <div style="display: flex; flex-direction: column; text-align: right;">
-                        <span class="text-sm font-bold">اتصال به مینی‌اپ‌ها</span>
-                        <span class="text-xs">پروتکل TON Connect</span>
+                        <span class="text-sm font-bold">اتصال به یک اپ</span>
+                        <span class="text-xs">استفاده امن از TON در مینی‌اپ‌های تلگرام</span>
                     </div>
                 </div>
                 <span style="color: var(--text-dim); font-weight: bold;">←</span>
             </div>
 
-            <button onclick="lockWallet()" class="btn-secondary">قفل کردن ولت</button>
-            <button onclick="resetWallet()" class="btn-danger">حذف ولت از این دستگاه</button>
+            <div class="glass-card flex flex-col gap-3">
+                <div class="section-head">
+                    <h3 class="text-sm font-bold" style="font-size: 15px;">تراکنش‌های اخیر</h3>
+                    <span class="see-all" onclick="showHistoryScreen()">مشاهده همه</span>
+                </div>
+                <div id="recent-activity-list" class="flex flex-col"></div>
+            </div>
 
             <div class="bottom-nav">
                 <div class="nav-item active" id="nav-wallet" onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')">
-                    <span class="nav-icon">💎</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
                     <span>ولت</span>
                 </div>
                 <div class="nav-item" id="nav-history" onclick="showHistoryScreen()">
-                    <span class="nav-icon">🕘</span>
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
                     <span>تاریخچه</span>
                 </div>
-                <div class="nav-item" onclick="alert('بخش سواپ به‌زودی فعال می‌شود')">
-                    <span class="nav-icon">⇄</span>
-                    <span>سواپ</span>
-                </div>
-                <div class="nav-item" onclick="showTonConnectScreen()">
-                    <span class="nav-icon">🧩</span>
-                    <span>اپلیکیشن‌ها</span>
+                <div class="nav-item" id="nav-settings" onclick="setActiveNav('nav-settings'); showSettingsScreen()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 19a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg>
+                    <span>تنظیمات</span>
                 </div>
             </div>
         </div>
@@ -596,6 +698,40 @@
                 <button onclick="loadHistory()" class="btn-secondary" style="width:auto; padding:7px 12px; font-size:12px;">تازه‌سازی</button>
             </div>
             <div id="history-list" class="flex flex-col" style="max-height: 420px; overflow-y: auto;"></div>
+            <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
+        </div>
+
+        <!-- تنظیمات -->
+        <div id="settings-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size: 15px;">تنظیمات</h3>
+
+            <div class="list-card" style="padding:14px 4px; cursor:default;">
+                <div class="left">
+                    <div class="icon-box" style="background:var(--surface-2); color: var(--text);">🎨</div>
+                    <div style="display:flex; flex-direction:column; text-align:right;">
+                        <span class="text-sm font-bold">تم روشن</span>
+                        <span class="text-xs">جابه‌جایی بین تم تیره و روشن</span>
+                    </div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="settings-theme-switch" onchange="toggleTheme()">
+                    <span class="switch-track"></span>
+                </label>
+            </div>
+
+            <div class="list-card" onclick="showTonConnectScreen()" style="padding:14px 4px;">
+                <div class="left">
+                    <div class="icon-box">🧩</div>
+                    <div style="display:flex; flex-direction:column; text-align:right;">
+                        <span class="text-sm font-bold">اتصال‌های TonConnect</span>
+                        <span class="text-xs">مدیریت مینی‌اپ‌های متصل</span>
+                    </div>
+                </div>
+                <span style="color: var(--text-dim); font-weight: bold;">←</span>
+            </div>
+
+            <button onclick="lockWallet()" class="btn-secondary">قفل کردن ولت</button>
+            <button onclick="resetWallet()" class="btn-danger">حذف ولت از این دستگاه</button>
             <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
         </div>
 
@@ -633,7 +769,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-dim); padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v2.1 &bull; V5R1
+        TON Non-Custodial Wallet &bull; v2.2 &bull; V5R1
     </footer>
 
     <!-- صفحه‌ی رمز ۴ رقمی -->
@@ -659,7 +795,7 @@
                 <span class="pin-key-empty"></span>
                 <button class="pin-key" onclick="pinPress('0')"><b>0</b><small>+</small></button>
                 <button class="pin-key" onclick="pinBackspace()" aria-label="Backspace">
-                    <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="#eef3fb"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="#05070d" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="var(--text)"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
                 </button>
             </div>
 
@@ -682,7 +818,8 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'history-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const THEME_KEY = 'wallet_theme_pref';
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'history-screen', 'settings-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '';      // اختیاری: کلید API از @tonapibot برای جلوگیری از محدودیت نرخ
         const FEE_RESERVE = 10000000n;     // 0.01 TON ذخیره برای کارمزد
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
@@ -696,6 +833,27 @@
         let currentBalanceNano = 0n;
         let sending = false;
         let unlockActive = false;
+        let balanceHidden = false;
+
+        // ================= تم روشن/تاریک =================
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+            document.querySelectorAll('.theme-toggle-btn').forEach(function (b) {
+                b.innerText = theme === 'light' ? '🌙' : '☀️';
+            });
+            const sw = document.getElementById('settings-theme-switch');
+            if (sw) sw.checked = theme === 'light';
+        }
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            applyTheme(cur === 'light' ? 'dark' : 'light');
+        }
+        (function initTheme() {
+            let saved = 'dark';
+            try { saved = localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) {}
+            applyTheme(saved);
+        })();
 
         async function loadLibs() {
             if (libs) return libs;
@@ -743,10 +901,10 @@
         }
 
         function setActiveNav(id) {
-            const wallet = document.getElementById('nav-wallet');
-            const history = document.getElementById('nav-history');
-            if (wallet) wallet.classList.toggle('active', id === 'nav-wallet');
-            if (history) history.classList.toggle('active', id === 'nav-history');
+            ['nav-wallet', 'nav-history', 'nav-settings'].forEach(function (navId) {
+                const el = document.getElementById(navId);
+                if (el) el.classList.toggle('active', navId === id);
+            });
         }
 
         function showScreen(id) {
@@ -790,6 +948,19 @@
             const whole = big / 1000000000n;
             const frac = (big % 1000000000n).toString().padStart(9, '0').slice(0, 4);
             return whole.toString() + '.' + frac;
+        }
+
+        // ================= نمایش/مخفی‌سازی موجودی =================
+        function renderBalanceDisplay() {
+            const el = document.getElementById('wallet-balance');
+            if (!currentAddressObj) { el.innerText = 'در حال استعلام...'; return; }
+            el.innerText = balanceHidden ? '••••• TON' : formatTon(currentBalanceNano) + ' TON';
+        }
+        function toggleBalanceVisibility() {
+            balanceHidden = !balanceHidden;
+            const btn = document.getElementById('balance-eye-btn');
+            if (btn) btn.innerText = balanceHidden ? '🙈' : '👁';
+            renderBalanceDisplay();
         }
 
         async function deriveAesKey(password, salt) {
@@ -934,7 +1105,7 @@
             } catch (e) {}
         }
         document.addEventListener('click', function (e) {
-            const el = e.target.closest('button, .action-btn, .nav-item, .list-card, .addr-pill');
+            const el = e.target.closest('button, .action-btn, .pill-action, .nav-item, .list-card, .addr-pill, .eye-btn, .theme-toggle-btn');
             if (!el) return;
             hapticTap();
             playTapSound();
@@ -1115,7 +1286,7 @@
             currentAddressObj = null;
             currentBalanceNano = 0n;
             document.getElementById('wallet-address-display').innerText = 'در حال بارگذاری...';
-            document.getElementById('wallet-balance').innerText = 'در حال استعلام...';
+            renderBalanceDisplay();
             showScreen('unlock-screen');
         }
 
@@ -1137,11 +1308,16 @@
             }
         }
 
+        function showSettingsScreen() {
+            showScreen('settings-screen');
+        }
+
         async function loadWallet(words) {
             if (!(await libsReady())) {
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
                 return;
             }
+            setActiveNav('nav-wallet');
             showScreen('dashboard-screen');
             setStatus('متصل به بلاک‌چین', true);
 
@@ -1159,6 +1335,7 @@
 
                 try {
                     await refreshBalance();
+                    await loadRecentActivityPreview();
                 } catch (e) {
                     console.error(e);
                     document.getElementById('wallet-balance').innerText = 'خطا در استعلام';
@@ -1187,7 +1364,7 @@
             try {
                 const balanceNano = await withRetry(() => tonClient.getBalance(currentAddressObj));
                 currentBalanceNano = BigInt(balanceNano);
-                document.getElementById('wallet-balance').innerText = formatTon(currentBalanceNano) + ' TON';
+                renderBalanceDisplay();
                 setStatus('متصل به بلاک‌چین', true);
             } catch (e) {
                 console.error(e);
@@ -1330,9 +1507,11 @@
                 }));
 
                 setSendingResult(true, 'تراکنش به شبکه ارسال شد ✅\nتایید آن چند ثانیه طول می‌کشد.');
+                setActiveNav('nav-wallet');
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
+                setTimeout(loadRecentActivityPreview, 9000);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
@@ -1404,6 +1583,31 @@
             } catch (e) {
                 console.error(e);
                 box.innerHTML = '<div class="text-xs" style="text-align:center; padding:20px 0; color:var(--danger);">خطا در دریافت تاریخچه.</div>';
+            }
+        }
+
+        async function loadRecentActivityPreview() {
+            const box = document.getElementById('recent-activity-list');
+            if (!currentAddressObj || !box) return;
+            box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">در حال بارگذاری...</div>';
+            try {
+                if (!(await libsReady())) return;
+                const txs = await withRetry(() => tonClient.getTransactions(currentAddressObj, { limit: 3 }));
+                box.innerHTML = '';
+                if (!txs || txs.length === 0) {
+                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">هنوز تراکنشی ثبت نشده.</div>';
+                    return;
+                }
+                txs.forEach(function (tx) {
+                    const row = buildTxRow(tx);
+                    if (row) box.appendChild(row);
+                });
+                if (!box.hasChildNodes()) {
+                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">تراکنشی یافت نشد.</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0; color:var(--danger);">خطا در دریافت.</div>';
             }
         }
 
@@ -1592,7 +1796,7 @@
                 const row = document.createElement('div');
                 row.className = 'list-card';
                 row.style.padding = '12px 14px';
-                row.innerHTML = '<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:right;"><span class="text-sm font-bold">' +
+                row.innerHTML = '<div class="left"><span class="icon-box">🔗</span><div style="display:flex; flex-direction:column; text-align:right;"><span class="text-sm font-bold">' +
                     escapeHtml(conn.appName || conn.appUrl || 'اپ ناشناس') + '</span><span class="text-xs">' + escapeHtml(conn.appUrl || '') + '</span></div></div>';
                 const btn = document.createElement('button');
                 btn.className = 'btn-danger';
@@ -1670,7 +1874,7 @@
                         device: {
                             platform: 'browser',
                             appName: 'glass_wallet',
-                            appVersion: '2.1.0',
+                            appVersion: '2.2.0',
                             maxProtocolVersion: 2,
                             features: [{ name: 'SendTransaction', maxMessages: 4 }]
                         }
@@ -1820,6 +2024,7 @@
             if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
             await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
             tcPendingTx = null;
+            setActiveNav('nav-wallet');
             showScreen('dashboard-screen');
         }
 
@@ -1882,6 +2087,7 @@
                 setSendingResult(true, 'تراکنش ارسال شد ✅');
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
+                setTimeout(loadRecentActivityPreview, 9000);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
