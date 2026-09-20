@@ -903,7 +903,14 @@
 
     <script>
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg) { tg.expand(); }
+        try {
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+        } catch (e) {
+            console.error('Telegram WebApp init failed:', e);
+        }
 
         const STORAGE_KEY = 'enc_wallet_v1';
         const THEME_KEY = 'wallet_theme_pref';
@@ -2250,6 +2257,4 @@
                 const responseObj = error ? { id: requestId, error: error } : { id: requestId, result: resultB64 };
                 const nonce = tcNacl.randomBytes(24);
                 const plain = new TextEncoder().encode(JSON.stringify(responseObj));
-                const dappPub = hexToBytes(connection.dappClientIdHex);
-                const ourSec = b64ToBytes(connection.ourSecB64);
-                const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
+                const dappPub = hexToBytes(
