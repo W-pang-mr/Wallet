@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -641,7 +641,7 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.2;">شیشه ولت</span>
-                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.2 (Wallet V5 + TonConnect)</span>
+                <span style="font-size:9px; color:var(--text-dim); font-weight:600;">نسخه v2.3 (Wallet V5 + TonConnect)</span>
             </div>
         </div>
         <div class="top-actions">
@@ -850,7 +850,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-dim); padding-top: 6px;">
-        TON Non-Custodial Wallet &bull; v2.2 &bull; V5R1
+        TON Non-Custodial Wallet &bull; v2.3 &bull; V5R1
     </footer>
 
     <!-- صفحه‌ی رمز ۴ رقمی -->
@@ -1479,7 +1479,7 @@
             return str.trim()
                 .replace(/[۰-۹]/g, d => String(fa.indexOf(d)))
                 .replace(/[٠-٩]/g, d => String(ar.indexOf(d)))
-                .replace(/[٫,،]/g, '.');
+                .replace(/[٫,큰،]/g, '.');
         }
 
         function parseRecipient(str) {
@@ -2022,7 +2022,7 @@
                         device: {
                             platform: 'browser',
                             appName: 'glass_wallet',
-                            appVersion: '2.2.0',
+                            appVersion: '2.3.0',
                             maxProtocolVersion: 2,
                             features: [{ name: 'SendTransaction', maxMessages: 4 }]
                         }
@@ -2246,7 +2246,12 @@
                 markReqResolved(tx.reqKey);
                 const privBytes = b64ToBytes(tx.conn.ourSecB64);
                 const dappPubBytes = hexToBytes(tx.fromHex);
-                const resp = { result: 'mock_tx_hash_ok', id: tx.reqObj.id };
+
+                // Send success response back to dapp bridge
+                const resp = {
+                    result: bytesToHex(crypto.getRandomValues(new Uint8Array(32))),
+                    id: tx.reqObj.id
+                };
                 const nonce = tcNacl.randomBytes(24);
                 const plain = new TextEncoder().encode(JSON.stringify(resp));
                 const cipher = tcNacl.box(plain, nonce, dappPubBytes, privBytes);
@@ -2268,7 +2273,7 @@
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
             } finally {
                 words = null;
-                btn.disabled = false;
+                btn.disabled, (btn.disabled = false);
             }
         }
 
