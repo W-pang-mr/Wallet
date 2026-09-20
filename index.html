@@ -517,6 +517,7 @@
 
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label class="text-xs" style="color: var(--text); font-weight: 500;">Destination address:</label>
+                <div id="wd-address-book" class="grid-24 hidden" style="max-height: none;"></div>
                 <textarea id="wd-address" rows="2" placeholder="UQ... or EQ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; direction: ltr; text-align: left;"></textarea>
             </div>
 
@@ -537,6 +538,42 @@
 
             <button id="btn-withdraw" onclick="sendWithdraw()" class="btn-primary btn-blue">Send</button>
             <button onclick="cancelWithdraw()" class="btn-secondary">Back</button>
+        </div>
+
+        <!-- Send Jetton (TON token) -->
+        <div id="send-jetton-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size: 15px;">Send <span id="sj-symbol"></span></h3>
+            <div class="warn-box">Blockchain transactions cannot be reversed. Double-check the destination address.</div>
+
+            <div class="text-xs" id="sj-available">Available balance: ...</div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 500;">Destination address:</label>
+                <div id="sj-address-book" class="grid-24 hidden" style="max-height: none;"></div>
+                <textarea id="sj-address" rows="2" placeholder="UQ... or EQ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; direction: ltr; text-align: left;"></textarea>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 500;">Amount:</label>
+                <input type="text" inputmode="decimal" id="sj-amount" placeholder="e.g. 10" class="glass-input" style="direction: ltr; text-align: left;">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 500;">Comment (optional, public):</label>
+                <input type="text" id="sj-comment" placeholder="Optional" class="glass-input" style="direction: ltr; text-align: left;">
+            </div>
+
+            <button id="btn-send-jetton" onclick="sendJettonTransfer()" class="btn-primary btn-blue">Send</button>
+            <button onclick="cancelSendJetton()" class="btn-secondary">Back</button>
+        </div>
+
+        <!-- Security settings -->
+        <div id="security-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size: 15px;">Security</h3>
+            <div class="info-box" id="sec-status">PIN protection is ON.</div>
+            <div class="warn-box">Turning the PIN off means the wallet opens automatically and sends funds without asking for any confirmation. Only do this on a device only you can access.</div>
+            <button id="btn-toggle-pin" onclick="togglePinProtection()" class="btn-danger">Disable PIN</button>
+            <button onclick="showScreen('dashboard-screen')" class="btn-secondary">Back</button>
         </div>
 
         <!-- Dashboard -->
@@ -562,12 +599,28 @@
                 </div>
             </div>
 
+            <div id="jettons-card" class="glass-card hidden flex flex-col gap-3">
+                <div class="text-sm font-bold">Tokens</div>
+                <div id="jettons-list" class="flex flex-col gap-3"></div>
+            </div>
+
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
                 <div class="left">
                     <span class="emoji-icon">🌐</span>
                     <div style="display: flex; flex-direction: column; text-align: left;">
                         <span class="text-sm font-bold">Connect to Mini Apps</span>
                         <span class="text-xs">TON Connect protocol</span>
+                    </div>
+                </div>
+                <span style="color: var(--text-dim); font-weight: bold;">→</span>
+            </div>
+
+            <div class="glass-card list-card" onclick="showSecurityScreen()">
+                <div class="left">
+                    <span class="emoji-icon">🛡️</span>
+                    <div style="display: flex; flex-direction: column; text-align: left;">
+                        <span class="text-sm font-bold">Security</span>
+                        <span class="text-xs">PIN lock settings</span>
                     </div>
                 </div>
                 <span style="color: var(--text-dim); font-weight: bold;">→</span>
@@ -675,8 +728,8 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
-        const TONCENTER_API_KEY = '';      // optional: API key from @tonapibot to avoid rate limits
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17'; // toncenter API key
         const FEE_RESERVE = 10000000n;     // 0.01 TON reserved for network fees
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
         const PIN_LENGTH = 4;              // wallet PIN length (use 6 for extra security)
@@ -692,6 +745,14 @@
         let unlockActive = false;
         let balanceRefreshing = false;
         let balancePollTimer = null;
+        let jettons = [];
+        let jettonsRefreshing = false;
+        let pendingJetton = null;
+
+        const ADDRESS_BOOK_KEY = 'address_book_v1';
+        const ADDRESS_BOOK_MAX = 3;
+        const PIN_DISABLED_KEY = 'pin_disabled_v1';
+        const NO_PIN_SECRET = 'glass_wallet_no_pin_v1';
 
         async function loadLibs() {
             if (libs) return libs;
@@ -964,6 +1025,91 @@
             }
         }
 
+        // ================= Address book (last 3 used addresses) =================
+        function loadAddressBook() {
+            try { return JSON.parse(localStorage.getItem(ADDRESS_BOOK_KEY) || '[]'); }
+            catch (e) { return []; }
+        }
+        function saveAddressToBook(address) {
+            let list = loadAddressBook().filter(a => a !== address);
+            list.unshift(address);
+            if (list.length > ADDRESS_BOOK_MAX) list = list.slice(0, ADDRESS_BOOK_MAX);
+            localStorage.setItem(ADDRESS_BOOK_KEY, JSON.stringify(list));
+        }
+        function shortenAddress(addr) {
+            if (addr.length <= 14) return addr;
+            return addr.slice(0, 6) + '...' + addr.slice(-4);
+        }
+        function renderAddressBook(containerId, targetInputId) {
+            const box = document.getElementById(containerId);
+            const list = loadAddressBook();
+            box.innerHTML = '';
+            if (list.length === 0) { box.classList.add('hidden'); return; }
+            box.classList.remove('hidden');
+            list.forEach(function (addr) {
+                const chip = document.createElement('div');
+                chip.className = 'word-chip';
+                chip.style.cursor = 'pointer';
+                chip.style.padding = '8px 6px';
+                chip.innerText = shortenAddress(addr);
+                chip.onclick = function () { document.getElementById(targetInputId).value = addr; };
+                box.appendChild(chip);
+            });
+        }
+
+        // ================= PIN on/off toggle =================
+        function isPinDisabled() {
+            return localStorage.getItem(PIN_DISABLED_KEY) === '1';
+        }
+
+        // Use this instead of requestUnlockPasscode() for any action that needs the
+        // wallet's private key. When the user has turned PIN protection off, this skips
+        // the PIN screen entirely and decrypts with the fixed no-PIN key instead.
+        async function authorizeAction(title) {
+            if (isPinDisabled()) {
+                const words = await decryptWithPin(NO_PIN_SECRET);
+                if (!words) { alert('Could not read the wallet.'); return null; }
+                return { pin: null, result: words };
+            }
+            return requestUnlockPasscode(title);
+        }
+
+        function showSecurityScreen() {
+            document.getElementById('sec-status').innerText = isPinDisabled()
+                ? 'PIN protection is OFF — the wallet opens automatically and sends funds without asking for a PIN.'
+                : 'PIN protection is ON.';
+            document.getElementById('btn-toggle-pin').innerText = isPinDisabled() ? 'Enable PIN' : 'Disable PIN';
+            document.getElementById('btn-toggle-pin').className = isPinDisabled() ? 'btn-primary btn-blue' : 'btn-danger';
+            showScreen('security-screen');
+        }
+
+        async function togglePinProtection() {
+            if (isPinDisabled()) {
+                let words;
+                try { words = await decryptWords(localStorage.getItem(STORAGE_KEY), NO_PIN_SECRET); }
+                catch (e) { alert('Could not read the wallet.'); return; }
+                const pin = await setNewPasscode();
+                if (!pin) return;
+                const encrypted = await encryptWords(words, pin);
+                localStorage.setItem(STORAGE_KEY, encrypted);
+                localStorage.removeItem(PIN_DISABLED_KEY);
+                words = null;
+                alert('PIN protection is back on.');
+                showSecurityScreen();
+            } else {
+                const ok = confirm('Turning the PIN off means anyone with access to this device can open your wallet and send funds without entering anything. Only do this on a device only you can access. Continue?');
+                if (!ok) return;
+                const auth = await requestUnlockPasscode('Enter your current PIN to confirm');
+                if (!auth) return;
+                const words = auth.result;
+                const encrypted = await encryptWords(words, NO_PIN_SECRET);
+                localStorage.setItem(STORAGE_KEY, encrypted);
+                localStorage.setItem(PIN_DISABLED_KEY, '1');
+                alert('PIN protection is now off.');
+                showSecurityScreen();
+            }
+        }
+
         async function setNewPasscode() {
             const first = await requestPasscode({
                 title: 'Set a ' + PIN_LENGTH + '-digit PIN for your wallet',
@@ -994,21 +1140,31 @@
         async function startUnlockFlow() {
             if (unlockActive) return;
             unlockActive = true;
-            let res = null;
             try {
-                res = await requestPasscode({
-                    title: 'Enter your wallet PIN',
-                    linkText: 'Forgot your PIN?',
-                    onLink: function () {
-                        resetWallet();
-                        return !localStorage.getItem(STORAGE_KEY);
-                    },
-                    verify: decryptWithPin
-                });
+                if (isPinDisabled()) {
+                    const words = await decryptWithPin(NO_PIN_SECRET);
+                    if (words) { await loadWallet(words); return; }
+                    // Something is wrong with the stored no-PIN state — fall back to a normal PIN prompt.
+                    localStorage.removeItem(PIN_DISABLED_KEY);
+                }
+                let res = null;
+                try {
+                    res = await requestPasscode({
+                        title: 'Enter your wallet PIN',
+                        linkText: 'Forgot your PIN?',
+                        onLink: function () {
+                            resetWallet();
+                            return !localStorage.getItem(STORAGE_KEY);
+                        },
+                        verify: decryptWithPin
+                    });
+                } finally {
+                    unlockActive = false;
+                }
+                if (res) await loadWallet(res.result);
             } finally {
                 unlockActive = false;
             }
-            if (res) await loadWallet(res.result);
         }
 
         function backToWelcome() {
@@ -1111,6 +1267,7 @@
             currentAddress = '';
             currentAddressObj = null;
             currentBalanceNano = 0n;
+            jettons = [];
             document.getElementById('wallet-address-display').innerText = 'Loading...';
             document.getElementById('wallet-balance').innerText = 'Checking...';
             document.getElementById('balance-updated').innerText = '';
@@ -1163,6 +1320,7 @@
                     document.getElementById('wallet-balance').innerText = 'Error';
                     setStatus('Network error', false);
                 }
+                refreshJettons();
 
                 startBalancePolling();
                 startTcListener();
@@ -1171,6 +1329,100 @@
                 alert('Failed to load the wallet. Please try again.');
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             }
+        }
+
+        // ================= Jettons (TON tokens) =================
+        function formatJetton(raw, decimals) {
+            const big = BigInt(raw);
+            const div = 10n ** BigInt(decimals);
+            const whole = big / div;
+            const showDecimals = Math.min(4, decimals);
+            if (showDecimals === 0) return whole.toString();
+            const frac = (big % div).toString().padStart(decimals, '0').slice(0, showDecimals);
+            return whole.toString() + '.' + frac;
+        }
+
+        async function fetchJettonWallets(ownerRaw) {
+            const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
+            const url = 'https://toncenter.com/api/v3/jetton/wallets?owner_address=' + encodeURIComponent(ownerRaw) + '&limit=50';
+            const res = await fetch(url, { headers: headers });
+            if (!res.ok) throw new Error('jetton wallets fetch failed');
+            const data = await res.json();
+            return data.jetton_wallets || [];
+        }
+
+        async function fetchJettonMaster(masterAddress) {
+            try {
+                const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
+                const url = 'https://toncenter.com/api/v3/jetton/masters?address=' + encodeURIComponent(masterAddress) + '&limit=1';
+                const res = await fetch(url, { headers: headers });
+                if (!res.ok) return null;
+                const data = await res.json();
+                const item = (data.jetton_masters && data.jetton_masters[0]) || null;
+                if (!item) return null;
+                const c = item.jetton_content || {};
+                return {
+                    symbol: c.symbol || '???',
+                    name: c.name || 'Unknown Token',
+                    decimals: c.decimals !== undefined && c.decimals !== null ? parseInt(c.decimals) : 9
+                };
+            } catch (e) {
+                console.error('jetton master fetch failed', e);
+                return null;
+            }
+        }
+
+        async function refreshJettons() {
+            if (!currentAddressObj || jettonsRefreshing) return;
+            jettonsRefreshing = true;
+            try {
+                const ownerRaw = currentAddressObj.toRawString();
+                const wallets = await withRetry(() => fetchJettonWallets(ownerRaw), 2);
+                const nonZero = wallets.filter(w => { try { return BigInt(w.balance) > 0n; } catch (e) { return false; } });
+
+                const masterCache = {};
+                await Promise.all(nonZero.map(async function (w) {
+                    if (!masterCache[w.jetton]) {
+                        masterCache[w.jetton] = (await fetchJettonMaster(w.jetton)) || { symbol: '???', name: 'Unknown Token', decimals: 9 };
+                    }
+                }));
+
+                jettons = nonZero.map(function (w) {
+                    const meta = masterCache[w.jetton];
+                    return {
+                        walletAddress: w.address,
+                        masterAddress: w.jetton,
+                        balance: BigInt(w.balance),
+                        decimals: meta.decimals,
+                        symbol: meta.symbol,
+                        name: meta.name
+                    };
+                });
+                renderJettons();
+            } catch (e) {
+                console.error('refreshJettons failed', e);
+                // Keep whatever list we already had; don't break the rest of the dashboard.
+            } finally {
+                jettonsRefreshing = false;
+            }
+        }
+
+        function renderJettons() {
+            const card = document.getElementById('jettons-card');
+            const list = document.getElementById('jettons-list');
+            list.innerHTML = '';
+            if (jettons.length === 0) { card.classList.add('hidden'); return; }
+            card.classList.remove('hidden');
+            jettons.forEach(function (j) {
+                const row = document.createElement('div');
+                row.className = 'list-card';
+                row.style.padding = '10px 4px';
+                row.onclick = function () { showSendJetton(j); };
+                row.innerHTML = '<div class="left"><span class="emoji-icon">🪙</span><div style="display:flex; flex-direction:column; text-align:left;"><span class="text-sm font-bold">' +
+                    escapeHtml(j.symbol) + '</span><span class="text-xs">' + escapeHtml(j.name) + '</span></div></div><span class="text-sm font-bold">' +
+                    formatJetton(j.balance, j.decimals) + '</span>';
+                list.appendChild(row);
+            });
         }
 
         async function refreshBalance() {
@@ -1206,6 +1458,7 @@
             balancePollTimer = setInterval(function () {
                 if (document.visibilityState === 'hidden') return;
                 refreshBalance();
+                refreshJettons();
             }, BALANCE_POLL_MS);
         }
         function stopBalancePolling() {
@@ -1217,6 +1470,7 @@
         document.addEventListener('visibilitychange', function () {
             if (document.visibilityState === 'visible' && currentAddressObj) {
                 refreshBalance();
+                refreshJettons();
             }
         });
 
@@ -1263,6 +1517,7 @@
             document.getElementById('wd-max').checked = false;
             document.getElementById('wd-comment').value = '';
             document.getElementById('withdraw-available').innerText = 'Available balance: ' + formatTon(currentBalanceNano) + ' TON';
+            renderAddressBook('wd-address-book', 'wd-address');
             showScreen('withdraw-screen');
         }
 
@@ -1314,7 +1569,7 @@
             const okConfirm = confirm('Confirm withdrawal:\n\nAmount: ' + shownAmount + '\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
             if (!okConfirm) return;
 
-            const auth = await requestUnlockPasscode('Enter your wallet PIN to confirm this transaction');
+            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
             if (!auth) return;
 
             sending = true;
@@ -1354,8 +1609,136 @@
                 }));
 
                 setSendingResult(true, 'Transaction broadcast to the network ✅\nConfirmation takes a few seconds.');
+                saveAddressToBook(shownAddr);
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 5000);
+            } catch (e) {
+                console.error(e);
+                setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
+            } finally {
+                words = null;
+                keyPair = null;
+                sending = false;
+                btn.disabled = false;
+                btn.innerText = 'Send';
+            }
+        }
+
+        // ================= Send a Jetton (TON token) =================
+        function showSendJetton(j) {
+            pendingJetton = j;
+            document.getElementById('sj-symbol').innerText = j.symbol;
+            document.getElementById('sj-available').innerText = 'Available balance: ' + formatJetton(j.balance, j.decimals) + ' ' + j.symbol;
+            document.getElementById('sj-address').value = '';
+            document.getElementById('sj-amount').value = '';
+            document.getElementById('sj-comment').value = '';
+            renderAddressBook('sj-address-book', 'sj-address');
+            showScreen('send-jetton-screen');
+        }
+
+        function cancelSendJetton() {
+            pendingJetton = null;
+            showScreen('dashboard-screen');
+        }
+
+        async function sendJettonTransfer() {
+            if (sending || !pendingJetton) return;
+            const jetton = pendingJetton;
+
+            const addrStr = document.getElementById('sj-address').value;
+            const amountStr = normalizeNumber(document.getElementById('sj-amount').value);
+            const comment = document.getElementById('sj-comment').value.trim();
+
+            if (!(await libsReady())) return;
+
+            const recipient = parseRecipient(addrStr);
+            if (!recipient) { alert('The destination address is not valid.'); return; }
+
+            const decimals = jetton.decimals;
+            const re = new RegExp('^\\d+(\\.\\d{1,' + Math.max(decimals, 1) + '})?$');
+            if (!re.test(amountStr)) { alert('The amount entered is not valid.'); return; }
+
+            let amountRaw;
+            try {
+                const parts = amountStr.split('.');
+                const wholePart = parts[0];
+                const fracPart = (parts[1] || '').padEnd(decimals, '0').slice(0, decimals);
+                amountRaw = BigInt(wholePart) * (10n ** BigInt(decimals)) + (fracPart ? BigInt(fracPart) : 0n);
+            } catch (e) { alert('The amount entered is not valid.'); return; }
+
+            if (amountRaw <= 0n) { alert('The amount must be greater than zero.'); return; }
+            if (amountRaw > jetton.balance) { alert('Insufficient token balance.'); return; }
+            if (currentBalanceNano <= FEE_RESERVE) { alert('You need a little TON in your wallet to pay the network fee for this transfer.'); return; }
+
+            if (recipient.address.equals(currentAddressObj)) {
+                if (!confirm('The destination address is your own wallet address. Continue?')) return;
+            }
+
+            const shownAmount = formatJetton(amountRaw, decimals) + ' ' + jetton.symbol;
+            const shownAddr = recipient.address.toString({ urlSafe: true, bounceable: recipient.bounce, testOnly: false });
+            const okConfirm = confirm('Confirm token transfer:\n\nAmount: ' + shownAmount + '\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
+            if (!okConfirm) return;
+
+            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
+            if (!auth) return;
+
+            sending = true;
+            const btn = document.getElementById('btn-send-jetton');
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+            showSendingOverlay('Sending token transfer...');
+
+            let words = null;
+            let keyPair = null;
+            try {
+                words = auth.result;
+
+                keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+
+                if (!wallet.address.equals(currentAddressObj)) {
+                    setSendingResult(false, 'The wallet key does not match the current address. Operation cancelled.');
+                    return;
+                }
+
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(() => contract.getSeqno());
+
+                const forwardCell = comment ? libs.beginCell().storeUint(0, 32).storeStringTail(comment).endCell() : null;
+                const bodyBuilder = libs.beginCell()
+                    .storeUint(0x0f8a7ea5, 32)                 // op: jetton transfer
+                    .storeUint(BigInt(Date.now()), 64)         // query id
+                    .storeCoins(amountRaw)
+                    .storeAddress(recipient.address)
+                    .storeAddress(currentAddressObj)           // response destination (gets any excess TON back)
+                    .storeMaybeRef(null)                       // no custom payload
+                    .storeCoins(libs.toNano('0.01'));          // forward TON amount (so the recipient gets a notification)
+                if (forwardCell) {
+                    bodyBuilder.storeBit(1).storeRef(forwardCell);
+                } else {
+                    bodyBuilder.storeBit(0);
+                }
+                const body = bodyBuilder.endCell();
+
+                const msg = libs.internal({
+                    to: libs.Address.parse(jetton.walletAddress),
+                    value: libs.toNano('0.06'),                // gas for the jetton wallet + forward amount
+                    bounce: true,
+                    body: body
+                });
+
+                await withRetry(() => contract.sendTransfer({
+                    seqno: seqno,
+                    secretKey: keyPair.secretKey,
+                    sendMode: 3,
+                    messages: [msg]
+                }));
+
+                setSendingResult(true, 'Transfer broadcast to the network ✅\nConfirmation takes a few seconds.');
+                saveAddressToBook(shownAddr);
+                pendingJetton = null;
+                showScreen('dashboard-screen');
+                setTimeout(function () { refreshBalance(); refreshJettons(); }, 5000);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
@@ -1524,7 +1907,7 @@
 
         async function confirmTcConnect() {
             if (!tcPendingConnect) { showScreen('tonconnect-screen'); return; }
-            const auth = await requestUnlockPasscode('Enter your wallet PIN to connect');
+            const auth = await authorizeAction('Enter your wallet PIN to connect');
             if (!auth) return;
             const btn = document.getElementById('btn-tc-confirm');
             btn.disabled = true;
@@ -1717,7 +2100,7 @@
 
         async function approveTcTx() {
             if (!tcPendingTx) return;
-            const auth = await requestUnlockPasscode('Enter your wallet PIN to confirm this transaction');
+            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
             if (!auth) return;
             const btn = document.getElementById('btn-tc-tx-approve');
             btn.disabled = true;
