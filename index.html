@@ -1,10 +1,10 @@
-
+```html
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TON Non-Custodial Wallet</title>
+    <title>TON Non-Custodial Wallet - Premium Glass Light Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -12,32 +12,36 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
         :root {
-            --bg: #05070d;
-            --bg-2: #0b0f1c;
-            --glass: rgba(255,255,255,0.055);
-            --glass-strong: rgba(255,255,255,0.09);
-            --border: rgba(255,255,255,0.09);
+            --bg: #f3f6fc;
+            --bg-2: #ffffff;
+            --glass: rgba(255, 255, 255, 0.72);
+            --glass-strong: rgba(255, 255, 255, 0.9);
+            --border: rgba(0, 152, 234, 0.14);
+            --border-hover: rgba(0, 152, 234, 0.35);
             --accent: #0098ea;
-            --accent-2: #34c9ff;
-            --text: #eef3fb;
-            --text-dim: #8b96ab;
-            --success: #22c55e;
-            --danger: #f87171;
-            --warn: #fbbf24;
+            --accent-2: #0081cc;
+            --text: #0f172a;
+            --text-dim: #64748b;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warn: #d97706;
+            --shadow: 0 20px 40px rgba(0, 152, 234, 0.08);
+            --shadow-sm: 0 8px 20px rgba(0, 0, 0, 0.04);
         }
         html, body { height: 100%; }
         body {
             background:
-                radial-gradient(720px 480px at 12% -8%, rgba(0,152,234,0.22), transparent 60%),
-                radial-gradient(620px 460px at 100% 10%, rgba(52,201,255,0.14), transparent 55%),
+                radial-gradient(800px 500px at 10% -10%, rgba(0,152,234,0.12), transparent 60%),
+                radial-gradient(700px 500px at 90% 10%, rgba(52,201,255,0.1), transparent 55%),
                 linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
             color: var(--text);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 16px 16px 96px;
+            padding: 16px 16px 100px;
             max-width: 480px;
             margin: 0 auto;
             position: relative;
@@ -46,83 +50,93 @@
 
         .glass-card {
             background: var(--glass);
-            backdrop-filter: blur(28px) saturate(140%);
-            -webkit-backdrop-filter: blur(28px) saturate(140%);
+            backdrop-filter: blur(28px) saturate(180%);
+            -webkit-backdrop-filter: blur(28px) saturate(180%);
             border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
-            border-radius: 24px;
-            padding: 20px;
+            box-shadow: var(--shadow);
+            border-radius: 26px;
+            padding: 22px;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover {
+            border-color: var(--border-hover);
         }
         .glass-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
             pointer-events: none;
         }
         .glass-input {
             width: 100%;
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 14px;
-            padding: 13px;
+            border: 1px solid rgba(0, 152, 234, 0.18);
+            border-radius: 16px;
+            padding: 14px;
             color: var(--text);
-            font-size: 13px;
+            font-size: 14px;
             outline: none;
-            transition: all 0.2s;
+            transition: all 0.25s;
         }
-        .glass-input::placeholder { color: rgba(238,243,251,0.3); }
+        .glass-input::placeholder { color: #94a3b8; }
         .glass-input:focus {
             border-color: var(--accent);
-            background: rgba(0,152,234,0.08);
-            box-shadow: 0 0 0 4px rgba(0,152,234,0.15);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(0,152,234,0.12);
         }
+        
         .btn-primary {
             width: 100%;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
-            color: #04141f;
+            color: #ffffff;
             border: none;
-            padding: 15px;
-            border-radius: 16px;
+            padding: 16px;
+            border-radius: 18px;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 15px;
             cursor: pointer;
-            box-shadow: 0 10px 24px rgba(0,152,234,0.28);
-            transition: opacity 0.2s, transform 0.1s;
+            box-shadow: 0 10px 25px rgba(0,152,234,0.3);
+            transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
         }
-        .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.5; }
+        .btn-primary:active { opacity: 0.9; transform: scale(0.98); box-shadow: 0 5px 12px rgba(0,152,234,0.2); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .btn-secondary {
             width: 100%;
-            background: rgba(255,255,255,0.06);
+            background: rgba(255, 255, 255, 0.9);
             color: var(--text);
-            border: 1px solid rgba(255,255,255,0.12);
-            padding: 15px;
-            border-radius: 16px;
-            font-weight: 500;
-            font-size: 14px;
+            border: 1px solid rgba(0, 152, 234, 0.2);
+            padding: 16px;
+            border-radius: 18px;
+            font-weight: 600;
+            font-size: 15px;
             cursor: pointer;
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
+            transition: all 0.2s;
         }
+        .btn-secondary:hover { background: #ffffff; border-color: var(--accent); }
+
         .btn-danger {
             width: 100%;
-            background: rgba(248,113,113,0.1);
+            background: rgba(220, 38, 38, 0.08);
             color: var(--danger);
-            border: 1px solid rgba(248,113,113,0.3);
-            padding: 13px;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 14px;
             border-radius: 16px;
-            font-weight: 500;
-            font-size: 13px;
+            font-weight: 600;
+            font-size: 14px;
             cursor: pointer;
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
+            transition: background 0.2s;
         }
+        .btn-danger:hover { background: rgba(220, 38, 38, 0.14); }
+
         .hidden { display: none !important; }
         .flex { display: flex; }
         .flex-col { flex-direction: column; }
@@ -138,193 +152,197 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 6px;
-            max-height: 200px;
+            max-height: 220px;
             overflow-y: auto;
-            direction: ltr;
-            background: rgba(255,255,255,0.04);
-            padding: 8px;
-            border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px;
+            border-radius: 18px;
+            border: 1px solid rgba(0, 152, 234, 0.12);
         }
         .word-chip {
-            background: rgba(255,255,255,0.06);
-            padding: 5px;
-            border-radius: 6px;
-            font-size: 11px;
+            background: #ffffff;
+            padding: 6px 4px;
+            border-radius: 8px;
+            font-size: 12px;
             text-align: center;
             font-family: monospace;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0, 152, 234, 0.1);
             color: var(--text);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .word-chip span { color: #64748b; font-size: 9px; }
+        .word-chip span { color: #94a3b8; font-size: 10px; }
+
         .warn-box {
-            background: rgba(251,191,36,0.1);
-            border: 1px solid rgba(251,191,36,0.3);
+            background: rgba(217, 119, 6, 0.08);
+            border: 1px solid rgba(217, 119, 6, 0.25);
             color: var(--warn);
-            border-radius: 14px;
-            padding: 11px;
-            font-size: 11px;
+            border-radius: 16px;
+            padding: 14px;
+            font-size: 12px;
             line-height: 1.6;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
         }
 
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14px;
-            padding: 4px 4px 0;
+            margin-bottom: 16px;
+            padding: 6px 4px 0;
         }
-        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
         .brand-icon {
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 42px; height: 42px; border-radius: 50%;
             background: linear-gradient(135deg, var(--accent), var(--accent-2));
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px;
+            font-size: 18px;
+            box-shadow: 0 8px 18px rgba(0,152,234,0.25);
         }
         .status-badge {
-            font-size: 10px;
-            background: rgba(34,197,94,0.1);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            font-size: 11px;
+            background: rgba(22, 163, 74, 0.1);
             color: var(--success);
-            padding: 5px 12px;
+            padding: 6px 14px;
             border-radius: 20px;
-            border: 1px solid rgba(34,197,94,0.25);
-            font-weight: 600;
+            border: 1px solid rgba(22, 163, 74, 0.25);
+            font-weight: 700;
         }
-        .balance-card { text-align: center; padding: 30px 20px; }
+
+        .balance-card { text-align: center; padding: 34px 20px; }
         .addr-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            font-size: 11px;
+            font-size: 12px;
             font-family: monospace;
-            background: rgba(255,255,255,0.06);
-            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 8px 16px;
             border-radius: 20px;
             color: var(--text-dim);
-            direction: ltr;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(0, 152, 234, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transition: all 0.2s;
         }
+        .addr-pill:hover { background: #ffffff; color: var(--accent); }
         .balance-num {
-            font-size: 42px;
+            font-size: 44px;
             font-weight: 800;
-            letter-spacing: -1.2px;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, #fff, var(--accent-2));
+            letter-spacing: -1.5px;
+            margin-bottom: 26px;
+            background: linear-gradient(135deg, var(--text), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .action-row { display: flex; gap: 10px; direction: ltr; }
+
+        .action-row { display: flex; gap: 12px; }
         .action-btn {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 7px;
-            background: rgba(255,255,255,0.05);
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 18px;
-            padding: 14px 6px;
+            border: 1px solid rgba(0, 152, 234, 0.15);
+            border-radius: 20px;
+            padding: 16px 8px;
             cursor: pointer;
             color: var(--text);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
         }
+        .action-btn:hover { background: #ffffff; border-color: var(--accent); transform: translateY(-2px); }
         .action-btn .icon-circle {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(0,152,234,0.15);
-            color: var(--accent-2);
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(0, 152, 234, 0.12);
+            color: var(--accent);
             display: flex; align-items: center; justify-content: center;
-            font-size: 17px;
+            font-size: 18px;
             font-weight: 700;
         }
-        .action-btn span { font-size: 11px; font-weight: 600; }
+        .action-btn span { font-size: 12px; font-weight: 600; }
 
         .list-card {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 18px;
+            padding: 18px 20px;
             cursor: pointer;
         }
-        .list-card .left { display: flex; align-items: center; gap: 12px; }
-        .list-card .emoji-icon { font-size: 20px; }
+        .list-card .left { display: flex; align-items: center; gap: 14px; }
+        .list-card .emoji-icon { font-size: 22px; }
 
         .tx-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 10px;
-            padding: 13px 4px;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
+            gap: 12px;
+            padding: 14px 6px;
+            border-bottom: 1px solid rgba(0, 152, 234, 0.08);
             cursor: pointer;
         }
         .tx-row:last-child { border-bottom: none; }
-        .tx-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .tx-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
         .tx-icon {
             flex-shrink: 0;
-            width: 36px; height: 36px; border-radius: 50%;
+            width: 38px; height: 38px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 15px; font-weight: 700;
+            font-size: 16px; font-weight: 700;
         }
-        .tx-icon.in { background: rgba(34,197,94,0.14); color: var(--success); }
-        .tx-icon.out { background: rgba(248,113,113,0.14); color: var(--danger); }
-        .tx-meta { display: flex; flex-direction: column; min-width: 0; text-align: right; }
-        .tx-addr { font-size: 11px; color: var(--text-dim); font-family: monospace; direction: ltr; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-        .tx-date { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-        .tx-amount { font-size: 13px; font-weight: 700; white-space: nowrap; direction: ltr; }
+        .tx-icon.in { background: rgba(22, 163, 74, 0.12); color: var(--success); }
+        .tx-icon.out { background: rgba(220, 38, 38, 0.12); color: var(--danger); }
+        .tx-meta { display: flex; flex-direction: column; min-width: 0; text-align: left; }
+        .tx-addr { font-size: 12px; color: var(--text-dim); font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .tx-date { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+        .tx-amount { font-size: 14px; font-weight: 700; white-space: nowrap; }
         .tx-amount.in { color: var(--success); }
         .tx-amount.out { color: var(--text); }
 
         .bottom-nav {
             position: fixed;
-            bottom: 14px;
+            bottom: 16px;
             left: 50%;
             transform: translateX(-50%);
             width: calc(100% - 32px);
             max-width: 448px;
-            background: rgba(10,14,24,0.7);
-            backdrop-filter: blur(34px) saturate(160%);
-            -webkit-backdrop-filter: blur(34px) saturate(160%);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(34px) saturate(180%);
+            -webkit-backdrop-filter: blur(34px) saturate(180%);
+            border: 1px solid rgba(0, 152, 234, 0.18);
+            border-radius: 24px;
             display: flex;
             justify-content: space-around;
-            padding: 10px 6px;
-            box-shadow: 0 14px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-            direction: ltr;
+            padding: 10px 8px;
+            box-shadow: 0 16px 35px rgba(0, 152, 234, 0.12);
             z-index: 900;
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
-            font-size: 10px;
+            gap: 4px;
+            font-size: 11px;
             color: var(--text-dim);
             cursor: pointer;
-            padding: 4px 10px;
-            border-radius: 12px;
+            padding: 6px 14px;
+            border-radius: 14px;
             font-weight: 600;
+            transition: all 0.2s;
         }
-        .nav-item.active { color: var(--accent-2); background: rgba(0,152,234,0.14); }
-        .nav-item .nav-icon { font-size: 17px; }
+        .nav-item.active { color: var(--accent); background: rgba(0, 152, 234, 0.12); }
+        .nav-item .nav-icon { font-size: 18px; }
 
         .pin-overlay {
             position: fixed;
             top: 0; right: 0; bottom: 0; left: 0;
             z-index: 1000;
-            background: rgba(5,7,13,0.88);
+            background: rgba(243, 246, 252, 0.92);
             backdrop-filter: blur(30px);
             -webkit-backdrop-filter: blur(30px);
             display: flex;
             justify-content: center;
-            direction: ltr;
             overflow-y: auto;
         }
         .pin-inner {
@@ -335,78 +353,81 @@
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 9vh 16px 3vh;
+            padding: 8vh 16px 4vh;
         }
         .pin-top { display: flex; flex-direction: column; align-items: center; }
-        .pin-icon { font-size: 44px; line-height: 1; margin-bottom: 26px; }
+        .pin-icon { font-size: 48px; line-height: 1; margin-bottom: 24px; }
         .pin-title {
-            font-size: 21px;
-            font-weight: 500;
+            font-size: 22px;
+            font-weight: 600;
             color: var(--text);
             text-align: center;
-            margin-bottom: 26px;
-            line-height: 1.5;
+            margin-bottom: 24px;
+            line-height: 1.4;
         }
-        .pin-dots { display: flex; gap: 24px; height: 14px; align-items: center; }
+        .pin-dots { display: flex; gap: 24px; height: 16px; align-items: center; }
         .pin-dot {
-            width: 14px; height: 14px;
+            width: 16px; height: 16px;
             border-radius: 50%;
-            border: 1.5px solid var(--text);
+            border: 2px solid var(--accent);
             background: transparent;
-            transition: background 0.12s;
+            transition: all 0.15s ease;
         }
-        .pin-dot.filled { background: var(--accent-2); border-color: var(--accent-2); }
-        .pin-error { color: var(--danger); font-size: 12px; min-height: 16px; margin-top: 12px; text-align: center; }
+        .pin-dot.filled { background: var(--accent); transform: scale(1.1); }
+        .pin-error { color: var(--danger); font-size: 13px; min-height: 18px; margin-top: 14px; text-align: center; font-weight: 600; }
         .pin-pad {
             display: grid;
             grid-template-columns: repeat(3, auto);
-            gap: 20px 22px;
-            margin-top: 8px;
+            gap: 18px 24px;
+            margin-top: 10px;
         }
         .pin-key {
-            width: min(20vw, 84px);
-            height: min(20vw, 84px);
+            width: min(20vw, 80px);
+            height: min(20vw, 80px);
             border-radius: 50%;
-            border: none;
-            background: rgba(255,255,255,0.06);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 152, 234, 0.15);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             color: var(--text);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
             -webkit-user-select: none;
             user-select: none;
+            transition: all 0.15s;
         }
-        .pin-key:active { background: rgba(255,255,255,0.14); }
-        .pin-key b { font-size: 30px; font-weight: 400; line-height: 1; }
-        .pin-key small { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); margin-top: 4px; height: 12px; line-height: 12px; }
-        .pin-key svg { width: 36px; height: 36px; }
-        .pin-key-empty { width: min(20vw, 84px); height: min(20vw, 84px); visibility: hidden; }
+        .pin-key:active { background: rgba(0, 152, 234, 0.15); transform: scale(0.95); }
+        .pin-key b { font-size: 28px; font-weight: 500; line-height: 1; color: var(--text); }
+        .pin-key small { font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-top: 3px; height: 12px; line-height: 12px; }
+        .pin-key svg { width: 32px; height: 32px; }
+        .pin-key-empty { width: min(20vw, 80px); height: min(20vw, 80px); visibility: hidden; }
         .pin-link {
             background: none;
             border: none;
-            color: var(--accent-2);
-            font-size: 17px;
+            color: var(--accent);
+            font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
             padding: 12px;
-            margin-top: 18px;
+            margin-top: 16px;
         }
         .pin-shake { animation: pin-shake 0.4s; }
         @keyframes pin-shake {
-            10%, 90% { transform: translateX(-2px); }
-            20%, 80% { transform: translateX(4px); }
-            30%, 50%, 70% { transform: translateX(-8px); }
-            40%, 60% { transform: translateX(8px); }
+            10%, 90% { transform: translateX(-3px); }
+            20%, 80% { transform: translateX(6px); }
+            30%, 50%, 70% { transform: translateX(-10px); }
+            40%, 60% { transform: translateX(10px); }
         }
 
         .sending-overlay {
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(5,7,13,0.75);
+            background: rgba(15, 23, 42, 0.5);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             display: flex;
@@ -415,31 +436,31 @@
             padding: 20px;
         }
         .sending-card {
-            background: rgba(11,15,28,0.96);
-            backdrop-filter: blur(34px) saturate(160%);
-            -webkit-backdrop-filter: blur(34px) saturate(160%);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 28px;
-            padding: 34px 26px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(34px) saturate(180%);
+            -webkit-backdrop-filter: blur(34px) saturate(180%);
+            border: 1px solid rgba(0, 152, 234, 0.2);
+            border-radius: 30px;
+            padding: 36px 28px;
             width: 100%;
-            max-width: 320px;
+            max-width: 340px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            box-shadow: 0 25px 55px rgba(0,0,0,0.5);
+            gap: 18px;
+            box-shadow: 0 25px 55px rgba(0,0,0,0.15);
             text-align: center;
         }
         .sending-spinner {
-            width: 46px; height: 46px;
+            width: 48px; height: 48px;
             border-radius: 50%;
             border: 3px solid rgba(0,152,234,0.15);
             border-top-color: var(--accent);
             animation: sending-spin 0.8s linear infinite;
         }
         @keyframes sending-spin { to { transform: rotate(360deg); } }
-        .sending-icon { font-size: 44px; }
-        .sending-text { font-size: 14px; font-weight: 600; color: var(--text); white-space: pre-line; line-height: 1.6; }
+        .sending-icon { font-size: 46px; }
+        .sending-text { font-size: 15px; font-weight: 600; color: var(--text); white-space: pre-line; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -449,58 +470,58 @@
             <div class="brand-icon">💎</div>
             <div style="display: flex; flex-direction: column;">
                 <span class="text-sm font-bold" style="line-height:1.2;">TON Non-Custodial</span>
-                <span style="font-size:11px; color:var(--text-dim);">V5R1 Protocol</span>
+                <span style="font-size:11px; color:var(--text-dim);">V5R1 Security Protocol</span>
             </div>
         </div>
-        <div class="status-badge">Secure v2</div>
+        <div class="status-badge">Secure v2.4</div>
     </div>
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: flex-start; padding-bottom: 20px;">
 
-        <!-- خوش‌آمدگویی -->
+        <!-- Welcome / Onboarding Screen -->
         <div id="welcome-screen" class="glass-card text-center flex flex-col gap-3" style="margin-top: 30px;">
-            <div style="font-size: 44px; margin-bottom: 2px;">🔐</div>
-            <h2 class="text-sm font-bold" style="font-size: 18px;">راه‌اندازی کیف پول TON</h2>
-            <p class="text-xs" style="line-height: 1.6;">مدیریت غیرحضانتی دارایی‌های شما با استانداردهای امنیتی مدرن.</p>
+            <div style="font-size: 48px; margin-bottom: 4px;">🔐</div>
+            <h2 class="text-sm font-bold" style="font-size: 20px;">TON Wallet Setup</h2>
+            <p class="text-xs" style="line-height: 1.6;">Manage your decentralized blockchain assets with maximum cryptographic security and high-speed V5R1 architecture.</p>
 
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px; width: 100%;">
-                <button id="btn-generate" onclick="generateNewWallet()" class="btn-primary">ساخت کیف پول جدید</button>
-                <button onclick="showImportWallet()" class="btn-secondary">وارد کردن ولت (Import)</button>
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 16px; width: 100%;">
+                <button id="btn-generate" onclick="generateNewWallet()" class="btn-primary">Create New Wallet</button>
+                <button onclick="showImportWallet()" class="btn-secondary">Import Existing Wallet</button>
             </div>
         </div>
 
-        <!-- ساخت ولت -->
+        <!-- Create Wallet Mnemonic Backup Screen -->
         <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="color: var(--warn); font-size: 15px;">عبارت بازیابی امن (۲۴ کلمه)</h3>
-            <div class="warn-box">این کلمات تنها کلید دارایی شماست. آن‌ها را یادداشت کرده و در جای امن نگهداری کنید.</div>
+            <h3 class="text-sm font-bold" style="color: var(--warn); font-size: 16px;">Secret Recovery Phrase (24 Words)</h3>
+            <div class="warn-box">These words are the sole master key to your funds. Write them down in order and store them in a secure physical location.</div>
 
             <div id="mnemonic-box-gen" class="grid-24"></div>
 
-            <label class="text-xs" style="display: flex; gap: 8px; align-items: flex-start; color: var(--text);">
-                <input type="checkbox" id="saved-check" style="margin-top: 2px;">
-                <span>کلمات را یادداشت کردم و متوجه ریسک از دست رفتن سرمایه هستم.</span>
+            <label class="text-xs" style="display: flex; gap: 10px; align-items: flex-start; color: var(--text); cursor: pointer; padding: 4px 0;">
+                <input type="checkbox" id="saved-check" style="margin-top: 2px; width: 16px; height: 16px; accent-color: var(--accent);">
+                <span>I have carefully saved my recovery phrase and understand the risks of losing capital.</span>
             </label>
 
-            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #059669, #10b981); color:#fff;">تایید و تعیین رمز ولت</button>
-            <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
+            <button onclick="confirmNewWallet()" class="btn-primary" style="background: linear-gradient(135deg, #16a34a, #22c55e);">Confirm & Set Passcode</button>
+            <button onclick="backToWelcome()" class="btn-secondary">Back</button>
         </div>
 
-        <!-- ایمپورت -->
+        <!-- Import Wallet Screen -->
         <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">وارد کردن ولت</h3>
-            <p class="text-xs">عبارت بازیابی (۱۲ یا ۲۴ کلمه) را با فاصله در کادر زیر وارد کنید:</p>
+            <h3 class="text-sm font-bold" style="font-size: 16px;">Import Wallet</h3>
+            <p class="text-xs">Enter your 12 or 24-word recovery phrase separated by spaces:</p>
 
-            <textarea id="import-mnemonic-area" rows="4" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; line-height: 1.5; direction: ltr; text-align: left;"></textarea>
+            <textarea id="import-mnemonic-area" rows="4" placeholder="word1 word2 word3 ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 13px; line-height: 1.5; text-align: left;"></textarea>
 
-            <button id="btn-import" onclick="processImportWallet()" class="btn-primary">بارگذاری ولت</button>
-            <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
+            <button id="btn-import" onclick="processImportWallet()" class="btn-primary">Load Wallet</button>
+            <button onclick="backToWelcome()" class="btn-secondary">Back</button>
         </div>
 
-        <!-- داشبورد اصلی -->
+        <!-- Dashboard Screen -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card balance-card">
-                <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()">در حال بارگذاری... 📋</div>
-                <div id="wallet-balance" class="balance-num">0.00 <span style="font-size: 24px; font-weight: 600; color: var(--text-dim);">TON</span></div>
+                <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()">Loading address... 📋</div>
+                <div id="wallet-balance" class="balance-num">0.00 <span style="font-size: 26px; font-weight: 600; color: var(--text-dim);">TON</span></div>
 
                 <div class="action-row">
                     <div class="action-btn" onclick="copyAddress()">
@@ -517,103 +538,104 @@
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
                 <div class="left">
                     <div class="emoji-icon">🔗</div>
-                    <div style="display: flex; flex-direction: column; text-align: right;">
-                        <span class="text-sm font-bold">اتصال به مینی‌اپ‌ها</span>
-                        <span class="text-xs">TonConnect Apps</span>
+                    <div style="display: flex; flex-direction: column; text-align: left;">
+                        <span class="text-sm font-bold">TonConnect DApps</span>
+                        <span class="text-xs">Manage mini-app connections</span>
                     </div>
                 </div>
-                <span style="color: var(--text-dim); font-weight: bold; font-size: 16px;">›</span>
+                <span style="color: var(--text-dim); font-weight: bold; font-size: 18px;">›</span>
             </div>
 
             <div class="glass-card flex flex-col gap-2">
-                <div class="flex items-center justify-between" style="margin-bottom: 4px;">
-                    <span class="text-sm font-bold">تراکنش‌های اخیر</span>
-                    <span class="text-xs" style="color: var(--accent-2); cursor: pointer;" onclick="showHistoryScreen()">مشاهده همه</span>
+                <div class="flex items-center justify-between" style="margin-bottom: 6px;">
+                    <span class="text-sm font-bold">Recent Activity</span>
+                    <span class="text-xs" style="color: var(--accent); cursor: pointer; font-weight: 600;" onclick="showHistoryScreen()">View All</span>
                 </div>
                 <div id="quick-history-list" class="flex flex-col">
-                    <div class="text-xs" style="text-align: center; padding: 12px; color: var(--text-dim);">در حال دریافت تراکنش‌ها...</div>
+                    <div class="text-xs" style="text-align: center; padding: 16px; color: var(--text-dim);">Fetching transactions...</div>
                 </div>
             </div>
 
-            <div style="display: flex; gap: 10px;">
-                <button onclick="lockWallet()" class="btn-secondary" style="flex: 1; padding: 12px; font-size: 12px;">قفل ولت</button>
-                <button onclick="resetWallet()" class="btn-danger" style="flex: 1; padding: 12px; font-size: 12px;">حذف دستگاه</button>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="lockWallet()" class="btn-secondary" style="flex: 1; padding: 14px; font-size: 13px;">Lock Wallet</button>
+                <button onclick="resetWallet()" class="btn-danger" style="flex: 1; padding: 14px; font-size: 13px;">Remove Device</button>
             </div>
         </div>
 
-        <!-- برداشت / ارسال -->
+        <!-- Withdraw / Send Screen -->
         <div id="withdraw-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">ارسال TON</h3>
-            <div class="warn-box">تراکنش‌های شبکه بلاک‌چین غیرقابل بازگشت هستند.</div>
+            <h3 class="text-sm font-bold" style="font-size: 16px;">Send TON</h3>
+            <div class="warn-box">Blockchain transactions are irreversible. Verify recipient details before dispatching.</div>
 
-            <div class="text-xs" id="withdraw-available">موجودی قابل برداشت: ...</div>
+            <div class="text-xs" id="withdraw-available" style="font-weight: 600; color: var(--text);">Available Balance: ...</div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">آدرس مقصد:</label>
-                <textarea id="wd-address" rows="2" placeholder="UQ... یا EQ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; direction: ltr; text-align: left;"></textarea>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 600;">Recipient Address:</label>
+                <textarea id="wd-address" rows="2" placeholder="UQ... or EQ..." class="glass-input" style="resize: none; font-family: monospace; font-size: 12px; text-align: left;"></textarea>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">مقدار (TON):</label>
-                <input type="text" inputmode="decimal" id="wd-amount" placeholder="مثلاً 1.5" class="glass-input" style="direction: ltr; text-align: left;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 600;">Amount (TON):</label>
+                <input type="text" inputmode="decimal" id="wd-amount" placeholder="e.g. 1.5" class="glass-input" style="text-align: left;">
             </div>
 
-            <label class="text-xs" style="display: flex; gap: 8px; align-items: center; color: var(--text);">
-                <input type="checkbox" id="wd-max" onchange="onMaxToggle()">
-                <span>برداشت کل موجودی</span>
+            <label class="text-xs" style="display: flex; gap: 10px; align-items: center; color: var(--text); cursor: pointer;">
+                <input type="checkbox" id="wd-max" onchange="onMaxToggle()" style="width: 16px; height: 16px; accent-color: var(--accent);">
+                <span>Send maximum available balance</span>
             </label>
 
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">کامنت یا Memo (اختیاری):</label>
-                <input type="text" id="wd-comment" placeholder="اختیاری" class="glass-input" style="direction: ltr; text-align: left;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 600;">Comment / Memo (Optional):</label>
+                <input type="text" id="wd-comment" placeholder="Optional comment" class="glass-input" style="text-align: left;">
             </div>
 
-            <button id="btn-withdraw" onclick="sendWithdraw()" class="btn-primary">ارسال تراکنش</button>
-            <button onclick="cancelWithdraw()" class="btn-secondary">بازگشت</button>
+            <button id="btn-withdraw" onclick="sendWithdraw()" class="btn-primary">Dispatch Transaction</button>
+            <button onclick="cancelWithdraw()" class="btn-secondary">Back</button>
         </div>
 
-        <!-- تاریخچه کامل -->
+        <!-- Full History Screen -->
         <div id="history-screen" class="glass-card hidden flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <h3 class="text-sm font-bold" style="font-size: 15px;">تاریخچه کامل تراکنش‌ها</h3>
-                <button onclick="loadHistoryScreenData()" class="btn-secondary" style="width:auto; padding:6px 12px; font-size:11px;">تازه‌سازی</button>
+                <h3 class="text-sm font-bold" style="font-size: 16px;">Complete Activity</h3>
+                <button onclick="loadHistoryScreenData()" class="btn-secondary" style="width:auto; padding:8px 14px; font-size:12px;">Refresh</button>
             </div>
-            <div id="history-list" class="flex flex-col" style="max-height: 420px; overflow-y: auto;"></div>
-            <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
+            <div id="history-list" class="flex flex-col" style="max-height: 440px; overflow-y: auto;"></div>
+            <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">Back to Dashboard</button>
         </div>
 
-        <!-- TonConnect -->
+        <!-- TonConnect Screen -->
         <div id="tonconnect-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">اتصال به مینی‌اپ‌ها (TonConnect)</h3>
+            <h3 class="text-sm font-bold" style="font-size: 16px;">TonConnect DApps</h3>
             <div id="tc-connections-list" class="flex flex-col gap-3"></div>
-            <div style="display: flex; flex-direction: column; gap: 5px; margin-top: 10px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">لینک اتصال (Connect Link) را اینجا Paste کنید:</label>
-                <textarea id="tc-link-input" rows="3" placeholder="tc://?v=2&id=..." class="glass-input" style="resize: none; font-family: monospace; font-size: 11px; direction: ltr; text-align: left;"></textarea>
+            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 10px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 600;">Paste Connect Link:</label>
+                <textarea id="tc-link-input" rows="3" placeholder="tc://?v=2&id=..." class="glass-input" style="resize: none; font-family: monospace; font-size: 11px; text-align: left;"></textarea>
             </div>
-            <button id="btn-tc-parse" onclick="handleTcLinkPaste()" class="btn-primary">خواندن لینک اتصال</button>
-            <button onclick="showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
+            <button id="btn-tc-parse" onclick="handleTcLinkPaste()" class="btn-primary">Parse Connection Link</button>
+            <button onclick="showScreen('dashboard-screen')" class="btn-secondary">Back</button>
             <div id="tc-status" class="text-xs" style="text-align:center;"></div>
         </div>
 
-        <!-- TonConnect Confirm -->
+        <!-- TonConnect Confirm Modal -->
         <div id="tc-confirm-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">درخواست اتصال اپلیکیشن</h3>
-            <div class="warn-box" id="tc-confirm-app-info">در حال بارگذاری اطلاعات اپ...</div>
-            <div class="text-xs">این اپلیکیشن تنها به آدرس ولت شما دسترسی پیدا می‌کند.</div>
-            <button id="btn-tc-confirm" onclick="confirmTcConnect()" class="btn-primary">تایید و اتصال</button>
-            <button onclick="cancelTcConnect()" class="btn-secondary">لغو</button>
+            <h3 class="text-sm font-bold" style="font-size: 16px;">Connection Request</h3>
+            <div class="warn-box" id="tc-confirm-app-info">Loading application info...</div>
+            <div class="text-xs">This DApp will receive secure read-only access to your public wallet address.</div>
+            <button id="btn-tc-confirm" onclick="confirmTcConnect()" class="btn-primary">Authorize Connection</button>
+            <button onclick="cancelTcConnect()" class="btn-secondary">Cancel</button>
         </div>
 
-        <!-- TonConnect TX -->
+        <!-- TonConnect Transaction Approval Screen -->
         <div id="tc-tx-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">درخواست تراکنش از مینی‌اپ</h3>
-            <div id="tc-tx-details" class="text-xs flex flex-col gap-2" style="max-height: 220px; overflow-y: auto;"></div>
-            <button id="btn-tc-tx-approve" onclick="approveTcTx()" class="btn-primary">تایید و ارسال</button>
-            <button onclick="rejectTcTx()" class="btn-secondary">رد کردن</button>
+            <h3 class="text-sm font-bold" style="font-size: 16px;">DApp Transaction Request</h3>
+            <div id="tc-tx-details" class="text-xs flex flex-col gap-2" style="max-height: 240px; overflow-y: auto;"></div>
+            <button id="btn-tc-tx-approve" onclick="approveTcTx()" class="btn-primary">Approve & Sign</button>
+            <button onclick="rejectTcTx()" class="btn-secondary">Reject</button>
         </div>
 
     </main>
 
+    <!-- Bottom Navigation Bar -->
     <div class="bottom-nav">
         <div class="nav-item active" id="nav-wallet" onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')">
             <span class="nav-icon">💎</span>
@@ -629,7 +651,7 @@
         </div>
     </div>
 
-    <!-- PIN Overlay -->
+    <!-- PIN Overlay Modal -->
     <div id="pin-overlay" class="pin-overlay hidden">
         <div class="pin-inner">
             <div class="pin-top">
@@ -652,7 +674,7 @@
                 <span class="pin-key-empty"></span>
                 <button class="pin-key" onclick="pinPress('0')"><b>0</b><small>+</small></button>
                 <button class="pin-key" onclick="pinBackspace()" aria-label="Backspace">
-                    <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="#f1f5f9"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="#05070d" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+                    <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="#0f172a"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
                 </button>
             </div>
 
@@ -660,13 +682,13 @@
         </div>
     </div>
 
-    <!-- Sending Status Overlay -->
+    <!-- Sending / Status Spinner Overlay -->
     <div id="sending-overlay" class="sending-overlay hidden">
         <div class="sending-card">
             <div id="sending-spinner" class="sending-spinner"></div>
             <div id="sending-icon" class="sending-icon hidden"></div>
-            <div id="sending-text" class="sending-text">در حال پردازش...</div>
-            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()">باشه</button>
+            <div id="sending-text" class="sending-text">Processing request...</div>
+            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()">Dismiss</button>
         </div>
     </div>
 
@@ -674,10 +696,10 @@
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); }
 
-        const STORAGE_KEY = 'enc_wallet_v2';
+        const STORAGE_KEY = 'enc_wallet_v2_light';
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'history-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '';
-        const FEE_RESERVE = 10000000n;
+        const FEE_RESERVE = 10000000n; // 0.01 TON fee reserve
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
         const PIN_LENGTH = 4;
 
@@ -687,7 +709,6 @@
         let currentAddress = '';
         let currentAddressObj = null;
         let currentBalanceNano = 0n;
-        let tonPriceUsd = 5.80;
         let sending = false;
         let unlockActive = false;
 
@@ -718,7 +739,7 @@
 
         async function libsReady() {
             if (!window.crypto || !window.crypto.subtle) {
-                alert('این محیط از رمزنگاری امن پشتیبانی نمی‌کند.');
+                alert('Secure cryptographic environment is not supported in this browser.');
                 return false;
             }
             try {
@@ -726,7 +747,7 @@
                 return true;
             } catch (e) {
                 console.error(e);
-                alert('خطا در بارگذاری کتابخانه‌های بلاک‌چین.');
+                alert('Failed to load blockchain cryptographic libraries.');
                 return false;
             }
         }
@@ -762,7 +783,7 @@
         function formatTon(nano) {
             const big = BigInt(nano);
             const whole = big / 1000000000n;
-            const frac = (big % 1000000000n).toString().padStart(9, '0').slice(0, 2);
+            const frac = (big % 1000000000n).toString().padStart(9, '0').slice(0, 4);
             return whole.toString() + '.' + frac;
         }
 
@@ -850,7 +871,7 @@
                 const dots = document.getElementById('pin-dots');
                 dots.classList.add('pin-shake');
                 setTimeout(function () { dots.classList.remove('pin-shake'); }, 400);
-                document.getElementById('pin-error').innerText = st.opts.errorText || 'رمز اشتباه است';
+                document.getElementById('pin-error').innerText = st.opts.errorText || 'Incorrect passcode';
                 st.entered = '';
                 st.busy = false;
                 renderPinDots();
@@ -922,17 +943,17 @@
 
         async function setNewPasscode() {
             const first = await requestPasscode({
-                title: 'تعیین رمز عبور ' + PIN_LENGTH + ' رقمی',
-                linkText: 'لغو',
+                title: 'Set ' + PIN_LENGTH + '-digit Passcode',
+                linkText: 'Cancel',
                 onLink: function () { return true; }
             });
             if (!first) return null;
             const second = await requestPasscode({
-                title: 'تکرار رمز عبور',
-                linkText: 'لغو',
+                title: 'Confirm Passcode',
+                linkText: 'Cancel',
                 onLink: function () { return true; },
                 verify: async function (p) { return p === first.pin ? true : null; },
-                errorText: 'رمزها یکسان نیستند'
+                errorText: 'Passcodes do not match'
             });
             if (!second) return null;
             return first.pin;
@@ -941,7 +962,7 @@
         async function requestUnlockPasscode(title) {
             return requestPasscode({
                 title: title,
-                linkText: 'لغو',
+                linkText: 'Cancel',
                 onLink: function () { return true; },
                 verify: decryptWithPin
             });
@@ -953,8 +974,8 @@
             let res = null;
             try {
                 res = await requestPasscode({
-                    title: 'ورود به کیف پول',
-                    linkText: 'فراموشی رمز و حذف ولت',
+                    title: 'Unlock Wallet',
+                    linkText: 'Forgot Passcode & Reset',
                     onLink: function () {
                         resetWallet();
                         return !localStorage.getItem(STORAGE_KEY);
@@ -1000,7 +1021,7 @@
                 showScreen('create-wallet-screen');
             } catch (e) {
                 console.error(e);
-                alert('خطا در تولید کلمات بازیابی.');
+                alert('Error generating recovery words.');
             } finally {
                 btn.disabled = false;
             }
@@ -1008,8 +1029,8 @@
 
         async function confirmNewWallet() {
             const checked = document.getElementById('saved-check').checked;
-            if (!pendingWords) { alert('کلمات ایجاد نشده‌اند.'); backToWelcome(); return; }
-            if (!checked) { alert('لطفاً یادداشت کردن کلمات را تایید کنید.'); return; }
+            if (!pendingWords) { alert('Mnemonic words not generated.'); backToWelcome(); return; }
+            if (!checked) { alert('Please confirm that you have saved your recovery phrase.'); return; }
 
             try {
                 const pin = await setNewPasscode();
@@ -1021,17 +1042,17 @@
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
-                alert('خطا در ذخیره‌سازی امن کیف پول.');
+                alert('Error saving encrypted wallet data.');
             }
         }
 
         async function processImportWallet() {
             const text = document.getElementById('import-mnemonic-area').value.trim();
-            if (!text) { alert('عبارت بازیابی را وارد کنید.'); return; }
+            if (!text) { alert('Please enter your recovery phrase.'); return; }
             const words = text.replace(/[\n\r\t,]+/g, ' ').split(/\s+/).map(w => w.toLowerCase().trim()).filter(w => w.length > 0);
 
             if (words.length !== 24 && words.length !== 12) {
-                alert('تعداد کلمات وارد شده (' + words.length + ') صحیح نیست. باید ۱۲ یا ۲۴ کلمه باشد.');
+                alert('Invalid word count (' + words.length + '). Must be 12 or 24 words.');
                 return;
             }
 
@@ -1041,7 +1062,7 @@
                 if (!(await libsReady())) return;
                 const valid = await libs.mnemonicValidate(words);
                 if (!valid) {
-                    alert('کلمات بازیابی معتبر نیستند.');
+                    alert('Invalid recovery words mnemonic.');
                     return;
                 }
                 const pin = await setNewPasscode();
@@ -1051,7 +1072,7 @@
                 await loadWallet(words);
             } catch (e) {
                 console.error(e);
-                alert('خطا در بارگذاری کیف پول.');
+                alert('Error importing wallet.');
             } finally {
                 btn.disabled = false;
             }
@@ -1065,7 +1086,7 @@
         }
 
         function resetWallet() {
-            const ok = confirm('آیا از حذف کیف پول از روی این دستگاه مطمئن هستید؟ در صورت نداشتن عبارت بازیابی، دسترسی به دارایی غیرقابل بازگشت خواهد بود.');
+            const ok = confirm('Are you sure you want to remove this wallet from your device? Ensure you have saved your recovery phrase.');
             if (!ok) return;
             localStorage.removeItem(STORAGE_KEY);
             currentAddress = '';
@@ -1076,9 +1097,9 @@
             if (!currentAddress) return;
             try {
                 await navigator.clipboard.writeText(currentAddress);
-                alert('آدرس کیف پول کپی شد.');
+                alert('Wallet address copied to clipboard.');
             } catch (e) {
-                alert('کپی خودکار انجام نشد.');
+                alert('Automatic clipboard copy failed.');
             }
         }
 
@@ -1107,13 +1128,13 @@
                     await loadQuickHistory();
                 } catch (e) {
                     console.error(e);
-                    document.getElementById('wallet-balance').innerHTML = '0.00 <span style="font-size: 24px; font-weight: 600; color: var(--text-dim);">TON</span>';
+                    document.getElementById('wallet-balance').innerHTML = '0.00 <span style="font-size: 26px; font-weight: 600; color: var(--text-dim);">TON</span>';
                 }
 
                 startTcListener();
             } catch (error) {
                 console.error('Wallet load error:', error);
-                alert('خطا در راه‌اندازی کیف پول.');
+                alert('Error initializing wallet contract.');
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             }
         }
@@ -1124,7 +1145,7 @@
                 const balanceNano = await withRetry(() => tonClient.getBalance(currentAddressObj));
                 currentBalanceNano = BigInt(balanceNano);
                 const tonStr = formatTon(currentBalanceNano);
-                document.getElementById('wallet-balance').innerHTML = tonStr + ' <span style="font-size: 24px; font-weight: 600; color: var(--text-dim);">TON</span>';
+                document.getElementById('wallet-balance').innerHTML = tonStr + ' <span style="font-size: 26px; font-weight: 600; color: var(--text-dim);">TON</span>';
             } catch (e) {
                 console.error(e);
             }
@@ -1143,7 +1164,7 @@
         }
 
         function normalizeNumber(str) {
-            return str.trim().replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/[٫,،]/g, '.');
+            return str.trim().replace(/[٫,،]/g, '.');
         }
 
         function parseRecipient(str) {
@@ -1166,7 +1187,7 @@
             document.getElementById('wd-amount').disabled = false;
             document.getElementById('wd-max').checked = false;
             document.getElementById('wd-comment').value = '';
-            document.getElementById('withdraw-available').innerText = 'موجودی قابل برداشت: ' + formatTon(currentBalanceNano) + ' TON';
+            document.getElementById('withdraw-available').innerText = 'Available Balance: ' + formatTon(currentBalanceNano) + ' TON';
             showScreen('withdraw-screen');
         }
 
@@ -1190,31 +1211,31 @@
 
             if (!(await libsReady())) return;
             const recipient = parseRecipient(addrStr);
-            if (!recipient) { alert('آدرس مقصد معتبر نیست.'); return; }
+            if (!recipient) { alert('Invalid recipient address.'); return; }
 
             let valueNano = 0n;
             let sendMode = 3;
             if (isMax) {
-                if (currentBalanceNano <= FEE_RESERVE) { alert('موجودی برای پرداخت کارمزد کافی نیست.'); return; }
+                if (currentBalanceNano <= FEE_RESERVE) { alert('Insufficient balance for network transaction fees.'); return; }
                 sendMode = 128;
             } else {
-                if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alert('مقدار وارد شده نامعتبر است.'); return; }
-                try { valueNano = libs.toNano(amountStr); } catch (e) { alert('مقدار وارد شده نامعتبر است.'); return; }
-                if (valueNano <= 0n) { alert('مقدار باید بیشتر از صفر باشد.'); return; }
+                if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alert('Invalid transaction amount.'); return; }
+                try { valueNano = libs.toNano(amountStr); } catch (e) { alert('Invalid transaction amount.'); return; }
+                if (valueNano <= 0n) { alert('Amount must be greater than zero.'); return; }
                 if (valueNano + FEE_RESERVE > currentBalanceNano) {
-                    alert('موجودی کافی نیست (0.01 TON برای کارمزد شبکه نیاز است).');
+                    alert('Insufficient balance (leave 0.01 TON for network gas fees).');
                     return;
                 }
             }
 
-            const okConfirm = confirm('تایید ارسال تراکنش TON؟');
+            const okConfirm = confirm('Confirm sending TON transaction?');
             if (!okConfirm) return;
 
-            const auth = await requestUnlockPasscode('رمز کیف پول را برای تایید وارد کنید');
+            const auth = await requestUnlockPasscode('Enter passcode to authorize transfer');
             if (!auth) return;
 
             sending = true;
-            showSendingOverlay('در حال ارسال تراکنش به شبکه...');
+            showSendingOverlay('Dispatching transaction to blockchain...');
             try {
                 const keyPair = await libs.mnemonicToPrivateKey(auth.result);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
@@ -1235,12 +1256,12 @@
                     messages: [msg]
                 }));
 
-                setSendingResult(true, 'تراکنش با موفقیت انجام شد ✅');
+                setSendingResult(true, 'Transaction completed successfully ✅');
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 6000);
             } catch (e) {
                 console.error(e);
-                setSendingResult(false, 'ارسال تراکنش ناموفق بود.');
+                setSendingResult(false, 'Transaction dispatch failed.');
             } finally {
                 sending = false;
             }
@@ -1272,12 +1293,12 @@
         async function renderTxList(containerId, limit) {
             const box = document.getElementById(containerId);
             if (!box) return;
-            box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px;">در حال دریافت تراکنش‌ها...</div>';
+            box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px;">Fetching activity...</div>';
             try {
                 if (!(await libsReady())) return;
                 const txs = await withRetry(() => tonClient.getTransactions(currentAddressObj, { limit: limit }));
                 if (!txs || txs.length === 0) {
-                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px; color:var(--text-dim);">تراکنشی یافت نشد.</div>';
+                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px; color:var(--text-dim);">No transactions found.</div>';
                     return;
                 }
                 box.innerHTML = '';
@@ -1287,7 +1308,7 @@
                 });
             } catch (e) {
                 console.error(e);
-                box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px; color:var(--danger);">خطا در دریافت تاریخچه.</div>';
+                box.innerHTML = '<div class="text-xs" style="text-align:center; padding:16px; color:var(--danger);">Error loading transaction history.</div>';
             }
         }
 
@@ -1296,7 +1317,7 @@
                 const inMsg = tx.inMessage;
                 let isIncoming = false;
                 let amount = 0n;
-                let addrLabel = 'TON Transaction';
+                let addrLabel = 'TON Transfer';
 
                 if (inMsg && inMsg.info && inMsg.info.type === 'internal' && inMsg.info.src) {
                     isIncoming = true;
@@ -1349,9 +1370,9 @@
         }
 
         const TC_BRIDGE = 'https://connect.ton.org/bridge';
-        const TC_STORAGE_KEY = 'tc_connections_v2';
-        const TC_LAST_EVENT_ID_KEY = 'tc_last_event_id_v2';
-        const TC_RESOLVED_KEY = 'tc_resolved_reqs_v2';
+        const TC_STORAGE_KEY = 'tc_connections_v2_light';
+        const TC_LAST_EVENT_ID_KEY = 'tc_last_event_id_v2_light';
+        const TC_RESOLVED_KEY = 'tc_resolved_reqs_v2_light';
         let tcNacl = null;
         let tcEventSource = null;
         let tcPendingConnect = null;
@@ -1434,19 +1455,19 @@
             const box = document.getElementById('tc-connections-list');
             box.innerHTML = '';
             if (list.length === 0) {
-                box.innerHTML = '<div class="text-xs">هیچ اپلیکیشنی متصل نیست.</div>';
+                box.innerHTML = '<div class="text-xs">No DApps currently connected.</div>';
                 return;
             }
             list.forEach(conn => {
                 const row = document.createElement('div');
                 row.className = 'list-card glass-card';
                 row.style.padding = '12px 14px';
-                row.innerHTML = `<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:right;"><span class="text-sm font-bold">${conn.appName || 'مینی‌اپ'}</span><span class="text-xs">${conn.appUrl || ''}</span></div></div>`;
+                row.innerHTML = `<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:left;"><span class="text-sm font-bold">${conn.appName || 'DApp'}</span><span class="text-xs">${conn.appUrl || ''}</span></div></div>`;
                 const btn = document.createElement('button');
                 btn.className = 'btn-danger';
                 btn.style.width = 'auto';
                 btn.style.padding = '8px 12px';
-                btn.innerText = 'قطع';
+                btn.innerText = 'Disconnect';
                 btn.onclick = (e) => { e.stopPropagation(); disconnectTcApp(conn.dappClientIdHex); };
                 row.appendChild(btn);
                 box.appendChild(row);
@@ -1457,14 +1478,14 @@
             const text = document.getElementById('tc-link-input').value;
             const statusEl = document.getElementById('tc-status');
             const parsed = parseTcLink(text);
-            if (!parsed) { statusEl.innerText = 'لینک TonConnect نامعتبر است.'; return; }
-            statusEl.innerText = 'در حال دریافت اطلاعات مینی‌اپ...';
+            if (!parsed) { statusEl.innerText = 'Invalid TonConnect link.'; return; }
+            statusEl.innerText = 'Fetching DApp manifest...';
             const manifestUrl = parsed.connectRequest && parsed.connectRequest.manifestUrl;
             const manifest = manifestUrl ? await fetchTcManifest(manifestUrl) : null;
             tcPendingConnect = { dappClientIdHex: parsed.dappClientIdHex, connectRequest: parsed.connectRequest, manifest: manifest, manifestUrl: manifestUrl };
 
-            const name = (manifest && manifest.name) || 'مینی‌اپ تلگرام';
-            document.getElementById('tc-confirm-app-info').innerText = `اپلیکیشن "${name}" درخواست اتصال به ولت شما را دارد.`;
+            const name = (manifest && manifest.name) || 'Telegram DApp';
+            document.getElementById('tc-confirm-app-info').innerText = `Application "${name}" is requesting connection to your wallet.`;
             showScreen('tc-confirm-screen');
         }
 
@@ -1475,9 +1496,9 @@
 
         async function confirmTcConnect() {
             if (!tcPendingConnect) { showScreen('tonconnect-screen'); return; }
-            const auth = await requestUnlockPasscode('رمز کیف پول را برای اتصال وارد کنید');
+            const auth = await requestUnlockPasscode('Enter passcode to authorize connection');
             if (!auth) return;
-            showSendingOverlay('در حال برقرارسازی اتصال امن...');
+            showSendingOverlay('Establishing secure DApp bridge...');
             try {
                 if (!(await libsReady())) return;
                 await loadTcNacl();
@@ -1500,7 +1521,7 @@
                             walletStateInit: stateInitB64,
                             publicKey: bytesToHex(keyPair.publicKey)
                         }],
-                        device: { platform: 'browser', appName: 'glass_wallet', appVersion: '2.2', maxProtocolVersion: 2, features: ['SendTransaction'] }
+                        device: { platform: 'browser', appName: 'glass_wallet_light', appVersion: '2.4', maxProtocolVersion: 2, features: ['SendTransaction'] }
                     }
                 };
 
@@ -1522,17 +1543,17 @@
                     dappClientIdHex: tcPendingConnect.dappClientIdHex,
                     ourPubHex: ourPubHex,
                     ourSecB64: ourSecB64,
-                    appName: (tcPendingConnect.manifest && tcPendingConnect.manifest.name) || 'مینی‌اپ',
+                    appName: (tcPendingConnect.manifest && tcPendingConnect.manifest.name) || 'DApp',
                     appUrl: (tcPendingConnect.manifest && tcPendingConnect.manifest.url) || tcPendingConnect.manifestUrl || ''
                 });
                 saveTcConnections(list);
                 tcPendingConnect = null;
 
-                setSendingResult(true, 'اتصال با موفقیت برقرار شد ✅');
+                setSendingResult(true, 'Connection established successfully ✅');
                 showTonConnectScreen();
             } catch (e) {
                 console.error(e);
-                setSendingResult(false, 'خطا در برقراری اتصال.');
+                setSendingResult(false, 'Failed to establish connection.');
             }
         }
 
@@ -1588,7 +1609,6 @@
             (tcPendingTx.txRequest.messages || []).forEach((m, idx) => {
                 const div = document.createElement('div');
                 div.className = 'glass-input';
-                div.style.direction = 'ltr';
                 div.style.textAlign = 'left';
                 div.innerText = `#${idx + 1}\nTo: ${m.address}\nAmount: ${formatTon(m.amount)} TON`;
                 box.appendChild(div);
@@ -1604,9 +1624,9 @@
 
         async function approveTcTx() {
             if (!tcPendingTx) return;
-            const auth = await requestUnlockPasscode('رمز ولت را برای تایید تراکنش مینی‌اپ وارد کنید');
+            const auth = await requestUnlockPasscode('Enter passcode to sign DApp transaction');
             if (!auth) return;
-            showSendingOverlay('در حال ارسال تراکنش مینی‌اپ...');
+            showSendingOverlay('Dispatching DApp transaction...');
             try {
                 if (!(await libsReady())) return;
                 const keyPair = await libs.mnemonicToPrivateKey(auth.result);
@@ -1625,11 +1645,11 @@
                 await withRetry(() => contract.send(transferCell));
 
                 if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-                setSendingResult(true, 'تراکنش مینی‌اپ با موفقیت انجام شد ✅');
+                setSendingResult(true, 'DApp transaction signed & sent successfully ✅');
                 tcPendingTx = null;
                 setTimeout(refreshBalance, 6000);
             } catch (e) {
-                setSendingResult(false, 'ارسال تراکنش ناموفق بود.');
+                setSendingResult(false, 'Transaction dispatch failed.');
             }
         }
 
