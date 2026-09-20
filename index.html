@@ -337,7 +337,6 @@
         }
 
         .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-        .section-head .see-all { font-size: 12px; color: var(--accent-2); cursor: pointer; font-weight: 600; }
 
         /* تاریخچه تراکنش‌ها */
         .tx-row {
@@ -483,7 +482,6 @@
         }
         .pin-key:active { background: var(--pin-key-active); }
         .pin-key b { font-size: 30px; font-weight: 400; line-height: 1; }
-        .pin-key small { font-size: 11px; letter-spacing: 3px; color: var(--text-dim); margin-top: 4px; height: 12px; line-height: 12px; }
         .pin-key svg { width: 36px; height: 36px; }
         .pin-key-empty { width: min(20vw, 84px); height: min(20vw, 84px); visibility: hidden; }
         .pin-link {
@@ -669,8 +667,7 @@
 
             <div class="glass-card flex flex-col gap-3">
                 <div class="section-head">
-                    <h3 class="text-sm font-bold" style="font-size: 15px;">تراکنش‌های اخیر</h3>
-                    <span class="see-all" onclick="showHistoryScreen()">مشاهده همه</span>
+                    <h3 class="text-sm font-bold" style="font-size: 15px;">آخرین تراکنش</h3>
                 </div>
                 <div id="recent-activity-list" class="flex flex-col"></div>
             </div>
@@ -680,25 +677,11 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
                     <span>ولت</span>
                 </div>
-                <div class="nav-item" id="nav-history" onclick="showHistoryScreen()">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
-                    <span>تاریخچه</span>
-                </div>
                 <div class="nav-item" id="nav-settings" onclick="setActiveNav('nav-settings'); showSettingsScreen()">
                     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.96 19a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.96a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15z"/></svg>
                     <span>تنظیمات</span>
                 </div>
             </div>
-        </div>
-
-        <!-- تاریخچه تراکنش‌ها -->
-        <div id="history-screen" class="glass-card hidden flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <h3 class="text-sm font-bold" style="font-size: 15px;">تاریخچه تراکنش‌ها</h3>
-                <button onclick="loadHistory()" class="btn-secondary" style="width:auto; padding:7px 12px; font-size:12px;">تازه‌سازی</button>
-            </div>
-            <div id="history-list" class="flex flex-col" style="max-height: 420px; overflow-y: auto;"></div>
-            <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت</button>
         </div>
 
         <!-- تنظیمات -->
@@ -783,17 +766,17 @@
             </div>
 
             <div class="pin-pad">
-                <button class="pin-key" onclick="pinPress('1')"><b>1</b><small></small></button>
-                <button class="pin-key" onclick="pinPress('2')"><b>2</b><small>ABC</small></button>
-                <button class="pin-key" onclick="pinPress('3')"><b>3</b><small>DEF</small></button>
-                <button class="pin-key" onclick="pinPress('4')"><b>4</b><small>GHI</small></button>
-                <button class="pin-key" onclick="pinPress('5')"><b>5</b><small>JKL</small></button>
-                <button class="pin-key" onclick="pinPress('6')"><b>6</b><small>MNO</small></button>
-                <button class="pin-key" onclick="pinPress('7')"><b>7</b><small>PQRS</small></button>
-                <button class="pin-key" onclick="pinPress('8')"><b>8</b><small>TUV</small></button>
-                <button class="pin-key" onclick="pinPress('9')"><b>9</b><small>WXYZ</small></button>
+                <button class="pin-key" onclick="pinPress('1')"><b>1</b></button>
+                <button class="pin-key" onclick="pinPress('2')"><b>2</b></button>
+                <button class="pin-key" onclick="pinPress('3')"><b>3</b></button>
+                <button class="pin-key" onclick="pinPress('4')"><b>4</b></button>
+                <button class="pin-key" onclick="pinPress('5')"><b>5</b></button>
+                <button class="pin-key" onclick="pinPress('6')"><b>6</b></button>
+                <button class="pin-key" onclick="pinPress('7')"><b>7</b></button>
+                <button class="pin-key" onclick="pinPress('8')"><b>8</b></button>
+                <button class="pin-key" onclick="pinPress('9')"><b>9</b></button>
                 <span class="pin-key-empty"></span>
-                <button class="pin-key" onclick="pinPress('0')"><b>0</b><small>+</small></button>
+                <button class="pin-key" onclick="pinPress('0')"><b>0</b></button>
                 <button class="pin-key" onclick="pinBackspace()" aria-label="Backspace">
                     <svg viewBox="0 0 24 24"><path d="M9 5h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-6-7 6-7z" fill="var(--text)"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
                 </button>
@@ -819,7 +802,7 @@
 
         const STORAGE_KEY = 'enc_wallet_v1';
         const THEME_KEY = 'wallet_theme_pref';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'history-screen', 'settings-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'settings-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '';      // اختیاری: کلید API از @tonapibot برای جلوگیری از محدودیت نرخ
         const FEE_RESERVE = 10000000n;     // 0.01 TON ذخیره برای کارمزد
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
@@ -901,7 +884,7 @@
         }
 
         function setActiveNav(id) {
-            ['nav-wallet', 'nav-history', 'nav-settings'].forEach(function (navId) {
+            ['nav-wallet', 'nav-settings'].forEach(function (navId) {
                 const el = document.getElementById(navId);
                 if (el) el.classList.toggle('active', navId === id);
             });
@@ -1077,8 +1060,7 @@
             else if (e.key === 'Backspace') { pinBackspace(); }
         });
 
-        // ================= صدا و ویبره برای دکمه‌ها =================
-        let tapAudioCtx = null;
+        // ================= ویبره برای دکمه‌ها =================
         function hapticTap() {
             try {
                 if (tg && tg.HapticFeedback && tg.HapticFeedback.impactOccurred) {
@@ -1088,27 +1070,10 @@
                 }
             } catch (e) {}
         }
-        function playTapSound() {
-            try {
-                if (!tapAudioCtx) tapAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (tapAudioCtx.state === 'suspended') tapAudioCtx.resume();
-                const osc = tapAudioCtx.createOscillator();
-                const gain = tapAudioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(760, tapAudioCtx.currentTime);
-                gain.gain.setValueAtTime(0.06, tapAudioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, tapAudioCtx.currentTime + 0.08);
-                osc.connect(gain);
-                gain.connect(tapAudioCtx.destination);
-                osc.start();
-                osc.stop(tapAudioCtx.currentTime + 0.08);
-            } catch (e) {}
-        }
         document.addEventListener('click', function (e) {
             const el = e.target.closest('button, .action-btn, .pill-action, .nav-item, .list-card, .addr-pill, .eye-btn, .theme-toggle-btn');
             if (!el) return;
             hapticTap();
-            playTapSound();
         }, true);
 
         // ================= پنجره‌ی شیشه‌ای وضعیت ارسال/اتصال =================
@@ -1555,53 +1520,20 @@
             }
         }
 
-        async function showHistoryScreen() {
-            setActiveNav('nav-history');
-            showScreen('history-screen');
-            await loadHistory();
-        }
-
-        async function loadHistory() {
-            if (!currentAddressObj) return;
-            const box = document.getElementById('history-list');
-            box.innerHTML = '<div class="text-xs" style="text-align:center; padding:20px 0;">در حال بارگذاری...</div>';
-            try {
-                if (!(await libsReady())) return;
-                const txs = await withRetry(() => tonClient.getTransactions(currentAddressObj, { limit: 25 }));
-                if (!txs || txs.length === 0) {
-                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:20px 0;">هنوز تراکنشی ثبت نشده.</div>';
-                    return;
-                }
-                box.innerHTML = '';
-                txs.forEach(function (tx) {
-                    const row = buildTxRow(tx);
-                    if (row) box.appendChild(row);
-                });
-                if (!box.hasChildNodes()) {
-                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:20px 0;">تراکنشی برای نمایش یافت نشد.</div>';
-                }
-            } catch (e) {
-                console.error(e);
-                box.innerHTML = '<div class="text-xs" style="text-align:center; padding:20px 0; color:var(--danger);">خطا در دریافت تاریخچه.</div>';
-            }
-        }
-
         async function loadRecentActivityPreview() {
             const box = document.getElementById('recent-activity-list');
             if (!currentAddressObj || !box) return;
             box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">در حال بارگذاری...</div>';
             try {
                 if (!(await libsReady())) return;
-                const txs = await withRetry(() => tonClient.getTransactions(currentAddressObj, { limit: 3 }));
+                const txs = await withRetry(() => tonClient.getTransactions(currentAddressObj, { limit: 1 }));
                 box.innerHTML = '';
                 if (!txs || txs.length === 0) {
                     box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">هنوز تراکنشی ثبت نشده.</div>';
                     return;
                 }
-                txs.forEach(function (tx) {
-                    const row = buildTxRow(tx);
-                    if (row) box.appendChild(row);
-                });
+                const row = buildTxRow(txs[0]);
+                if (row) box.appendChild(row);
                 if (!box.hasChildNodes()) {
                     box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">تراکنشی یافت نشد.</div>';
                 }
