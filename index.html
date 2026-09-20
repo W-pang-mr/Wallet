@@ -376,6 +376,38 @@
         .tx-amount.in { color: var(--success); }
         .tx-amount.out { color: var(--text); }
 
+        /* توکن‌ها */
+        .token-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 4px;
+            border-bottom: 1px solid var(--border);
+        }
+        .token-row:last-child { border-bottom: none; }
+        .token-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .token-icon {
+            width: 36px; height: 36px; border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: var(--surface-2);
+            border: 1px solid var(--border-2);
+        }
+        .token-icon-fallback {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .token-meta { display: flex; flex-direction: column; text-align: right; min-width: 0; }
+        .token-symbol { font-size: 13px; font-weight: 700; color: var(--text); }
+        .token-name { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+        .token-balance { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; direction: ltr; }
+
         /* سوییچ تم در تنظیمات */
         .switch { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -552,6 +584,53 @@
         @keyframes sending-spin { to { transform: rotate(360deg); } }
         .sending-icon { font-size: 44px; }
         .sending-text { font-size: 14px; font-weight: 600; color: var(--text); white-space: pre-line; line-height: 1.6; }
+
+        /* ---------- انیمیشن ورود به هر صفحه + لودر بین صفحه‌ها ---------- */
+        @keyframes screenEnter {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .screen-anim { animation: screenEnter 0.46s cubic-bezier(0.22, 1, 0.36, 1); }
+
+        #screen-loader {
+            position: fixed;
+            inset: 0;
+            z-index: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.32s ease;
+        }
+        #screen-loader.active { opacity: 0.97; }
+        .loader-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+        .loader-diamond {
+            width: 46px;
+            height: 46px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            box-shadow: 0 0 30px rgba(0,152,234,0.45);
+            animation: loaderPulse 0.9s ease-in-out infinite;
+        }
+        @keyframes loaderPulse {
+            0%, 100% { transform: scale(0.82) rotate(0deg); opacity: 0.75; }
+            50% { transform: scale(1.08) rotate(10deg); opacity: 1; }
+        }
+        .loader-dots { display: flex; gap: 6px; }
+        .loader-dots span {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent-2);
+            opacity: 0.35;
+            animation: loaderDot 1s ease-in-out infinite;
+        }
+        .loader-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .loader-dots span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes loaderDot {
+            0%, 100% { opacity: 0.3; transform: translateY(0); }
+            50% { opacity: 1; transform: translateY(-4px); }
+        }
     </style>
 </head>
 <body>
@@ -674,6 +753,13 @@
                     </div>
                 </div>
                 <span style="color: var(--text-dim); font-weight: bold;">←</span>
+            </div>
+
+            <div class="glass-card flex flex-col gap-3">
+                <div class="section-head">
+                    <h3 class="text-sm font-bold" style="font-size: 15px;">توکن‌های شما</h3>
+                </div>
+                <div id="tokens-list" class="flex flex-col"></div>
             </div>
 
             <div class="glass-card flex flex-col gap-3">
@@ -807,6 +893,14 @@
         </div>
     </div>
 
+    <!-- لودر انتقال بین صفحه‌ها -->
+    <div id="screen-loader">
+        <div class="loader-wrap">
+            <div class="loader-diamond"></div>
+            <div class="loader-dots"><span></span><span></span><span></span></div>
+        </div>
+    </div>
+
     <script>
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); }
@@ -901,13 +995,25 @@
             });
         }
 
+        let screenLoaderTimer = null;
         function showScreen(id) {
-            SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
             if (id === 'unlock-screen') {
+                SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
                 startUnlockFlow();
                 return;
             }
-            document.getElementById(id).classList.remove('hidden');
+            const loader = document.getElementById('screen-loader');
+            if (loader) {
+                loader.classList.add('active');
+                if (screenLoaderTimer) clearTimeout(screenLoaderTimer);
+                screenLoaderTimer = setTimeout(function () { loader.classList.remove('active'); }, 360);
+            }
+            SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
+            const target = document.getElementById(id);
+            target.classList.remove('hidden');
+            target.classList.remove('screen-anim');
+            void target.offsetWidth;
+            target.classList.add('screen-anim');
         }
 
         function setStatus(text, ok) {
@@ -1312,6 +1418,7 @@
                 try {
                     await refreshBalance();
                     await loadRecentActivityPreview();
+                    loadTokens();
                 } catch (e) {
                     console.error(e);
                     document.getElementById('wallet-balance').innerText = 'خطا در استعلام';
@@ -1488,6 +1595,7 @@
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
                 setTimeout(loadRecentActivityPreview, 9000);
+                setTimeout(loadTokens, 9500);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
@@ -1551,6 +1659,101 @@
             } catch (e) {
                 console.error(e);
                 box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0; color:var(--danger);">خطا در دریافت.</div>';
+            }
+        }
+
+        // ================= توکن‌ها (Jettons) =================
+        async function loadTokens() {
+            const box = document.getElementById('tokens-list');
+            if (!currentAddress || !box) return;
+            box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">در حال بارگذاری...</div>';
+            try {
+                const res = await withRetry(() => fetch('https://tonapi.io/v2/accounts/' + encodeURIComponent(currentAddress) + '/jettons?currencies=usd')
+                    .then(function (r) { if (!r.ok) throw new Error('jettons fetch failed'); return r.json(); }));
+                const balances = (res && res.balances) || [];
+                box.innerHTML = '';
+                if (balances.length === 0) {
+                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">توکنی پیدا نشد.</div>';
+                    return;
+                }
+                balances.forEach(function (b) {
+                    const row = buildTokenRow(b);
+                    if (row) box.appendChild(row);
+                });
+                if (!box.hasChildNodes()) {
+                    box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0;">توکنی پیدا نشد.</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                box.innerHTML = '<div class="text-xs" style="text-align:center; padding:14px 0; color:var(--danger);">خطا در دریافت توکن‌ها.</div>';
+            }
+        }
+
+        function makeTokenFallback(meta) {
+            const el = document.createElement('div');
+            el.className = 'token-icon-fallback';
+            const symbol = (meta && meta.symbol) ? meta.symbol : '?';
+            el.innerText = symbol.slice(0, 1).toUpperCase();
+            return el;
+        }
+
+        function buildTokenRow(b) {
+            try {
+                const meta = (b && b.jetton) || {};
+                const decimals = typeof meta.decimals === 'number' ? meta.decimals : 9;
+                const rawBal = BigInt(b.balance || '0');
+                const divisor = 10n ** BigInt(decimals);
+                const whole = rawBal / divisor;
+                let balanceStr = whole.toString();
+                if (decimals > 0) {
+                    const frac = (rawBal % divisor).toString().padStart(decimals, '0').slice(0, 4);
+                    balanceStr += '.' + frac;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'token-row';
+
+                const left = document.createElement('div');
+                left.className = 'token-left';
+
+                let iconEl;
+                if (meta.image) {
+                    iconEl = document.createElement('img');
+                    iconEl.className = 'token-icon';
+                    iconEl.src = meta.image;
+                    iconEl.alt = meta.symbol || '';
+                    iconEl.onerror = function () {
+                        const fallback = makeTokenFallback(meta);
+                        if (this.parentNode) this.parentNode.replaceChild(fallback, this);
+                    };
+                } else {
+                    iconEl = makeTokenFallback(meta);
+                }
+
+                const metaBox = document.createElement('div');
+                metaBox.className = 'token-meta';
+                const symbolEl = document.createElement('div');
+                symbolEl.className = 'token-symbol';
+                symbolEl.innerText = meta.symbol || 'TOKEN';
+                const nameEl = document.createElement('div');
+                nameEl.className = 'token-name';
+                nameEl.innerText = meta.name || '';
+                metaBox.appendChild(symbolEl);
+                metaBox.appendChild(nameEl);
+
+                left.appendChild(iconEl);
+                left.appendChild(metaBox);
+
+                const balEl = document.createElement('div');
+                balEl.className = 'token-balance';
+                balEl.innerText = balanceStr;
+
+                row.appendChild(left);
+                row.appendChild(balEl);
+                return row;
+            } catch (e) {
+                console.error('buildTokenRow error', e);
+                return null;
             }
         }
 
@@ -2031,6 +2234,7 @@
                 setTimeout(refreshBalance, 8000);
                 setTimeout(refreshBalance, 20000);
                 setTimeout(loadRecentActivityPreview, 9000);
+                setTimeout(loadTokens, 9500);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'ارسال ناموفق بود.\n' + (e && e.message ? e.message : ''));
@@ -2049,25 +2253,3 @@
                 const dappPub = hexToBytes(connection.dappClientIdHex);
                 const ourSec = b64ToBytes(connection.ourSecB64);
                 const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
-                const fullMsg = new Uint8Array(nonce.length + cipher.length);
-                fullMsg.set(nonce, 0);
-                fullMsg.set(cipher, nonce.length);
-                const bodyB64 = bytesToB64(fullMsg);
-                await fetch(TC_BRIDGE + '/message?client_id=' + connection.ourPubHex + '&to=' + connection.dappClientIdHex + '&ttl=300', {
-                    method: 'POST',
-                    body: bodyB64
-                });
-            } catch (e) {
-                console.error('sendTcResponse error', e);
-            }
-        }
-
-        // ---------- شروع ----------
-        window.addEventListener('load', function () {
-            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
-            loadLibs().catch(function (e) { console.error('preload failed', e); });
-            startTcListener();
-        });
-    </script>
-</body>
-</html>
