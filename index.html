@@ -2106,18 +2106,32 @@
 
         function parseTcMessages(reqObj) {
             try {
-                const params = reqObj && reqObj.params;
-                if (!params || !params[0]) return [];
-                let parsed = params[0];
-                if (typeof parsed === 'string') {
-                    parsed = JSON.parse(parsed);
+                let params = reqObj && reqObj.params;
+                if (!params) return [];
+                if (typeof params === 'string') {
+                    try { params = JSON.parse(params); } catch (e) {}
                 }
-                if (Array.isArray(parsed)) return parsed;
-                if (parsed && Array.isArray(parsed.messages)) return parsed.messages;
+                let payloadObj = Array.isArray(params) ? params[0] : params;
+                if (typeof payloadObj === 'string') {
+                    try { payloadObj = JSON.parse(payloadObj); } catch (e) {}
+                }
+                if (Array.isArray(payloadObj)) return payloadObj;
+                if (payloadObj && Array.isArray(payloadObj.messages)) return payloadObj.messages;
+                if (Array.isArray(params)) return params;
                 return [];
             } catch (e) {
                 console.error('parseTcMessages error:', e);
                 return [];
+            }
+        }
+
+        function getTcMessageComment(m) {
+            if (!m.payload) return '';
+            try {
+                const cell = libs.Cell.fromBoc(b64ToBytes(m.payload))[0];
+                return extractComment(cell);
+            } catch (e) {
+                return '';
             }
         }
 
@@ -2135,12 +2149,14 @@
                     return;
                 }
                 messages.forEach((m, idx) => {
+                    const comment = getTcMessageComment(m);
                     const card = document.createElement('div');
                     card.className = 'glass-card';
                     card.style.padding = '10px 12px';
                     card.style.background = 'var(--surface-2)';
                     card.innerHTML = '<span class="text-xs font-bold">تراکنش شماره ' + (idx + 1) + '</span><div class="text-xs" style="font-family:monospace; direction:ltr; text-align:left; margin-top:4px;">مقصد: ' +
-                        escapeHtml(m.address) + '<br>مبلغ: ' + formatTon(m.amount || '0') + ' TON</div>';
+                        escapeHtml(m.address) + '<br>مبلغ: ' + formatTon(m.amount || '0') + ' TON' +
+                        (comment ? '<br>کامنت: <span style="color:var(--accent-2);">' + escapeHtml(comment) + '</span>' : '') + '</div>';
                     details.appendChild(card);
                 });
             } catch (e) {
