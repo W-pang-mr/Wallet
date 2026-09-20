@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
@@ -587,6 +588,7 @@
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
 
+        <!-- Welcome Screen -->
         <div id="welcome-screen" class="glass-card text-center flex flex-col gap-3">
             <div style="font-size: 38px; margin-bottom: 2px;">🔐</div>
             <h2 class="text-sm font-bold" style="font-size: 16px;">کیف پول غیرحضانتی TON</h2>
@@ -598,6 +600,7 @@
             </div>
         </div>
 
+        <!-- Create Wallet Screen -->
         <div id="create-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="color: var(--warn); font-size: 14px;">عبارت بازیابی امن</h3>
             <div class="warn-box">این ۲۴ کلمه تنها راه دسترسی به دارایی شماست. آن‌ها را روی کاغذ یادداشت کنید و هرگز در اختیار کسی قرار ندهید.</div>
@@ -613,6 +616,7 @@
             <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
         </div>
 
+        <!-- Import Wallet Screen -->
         <div id="import-wallet-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">وارد کردن ولت</h3>
             <p class="text-xs">۱۲ یا ۲۴ کلمه بازیابی خود را با فاصله در کادر زیر وارد کنید:</p>
@@ -623,6 +627,7 @@
             <button onclick="backToWelcome()" class="btn-secondary">بازگشت</button>
         </div>
 
+        <!-- Withdraw Screen -->
         <div id="withdraw-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">ارسال TON</h3>
             <div class="warn-box">تراکنش‌های بلاک‌چین غیرقابل بازگشت هستند. از صحت آدرس و کامنت مقصد اطمینان حاصل کنید.</div>
@@ -653,6 +658,7 @@
             <button onclick="cancelWithdraw()" class="btn-secondary">بازگشت</button>
         </div>
 
+        <!-- Dashboard Screen -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="glass-card balance-card">
                 <div class="balance-top-row">
@@ -712,6 +718,7 @@
             </div>
         </div>
 
+        <!-- Settings Screen -->
         <div id="settings-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">تنظیمات و امنیت</h3>
 
@@ -745,6 +752,7 @@
             <button onclick="setActiveNav('nav-wallet'); showScreen('dashboard-screen')" class="btn-secondary">بازگشت به ولت</button>
         </div>
 
+        <!-- TonConnect Screen -->
         <div id="tonconnect-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">مینی‌اپ‌های متصل (TonConnect)</h3>
             <div id="tc-connections-list" class="flex flex-col gap-3"></div>
@@ -757,6 +765,7 @@
             <div id="tc-status" class="text-xs" style="text-align:center;"></div>
         </div>
 
+        <!-- TonConnect Confirm Screen -->
         <div id="tc-confirm-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">درخواست اتصال امن</h3>
             <div class="warn-box" id="tc-confirm-app-info">در حال بارگذاری اطلاعات اپ...</div>
@@ -765,6 +774,7 @@
             <button onclick="cancelTcConnect()" class="btn-secondary">لغو درخواست</button>
         </div>
 
+        <!-- TonConnect Transaction Request Screen -->
         <div id="tc-tx-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 14px;">درخواست تراکنش TonConnect</h3>
             <div class="warn-box" id="tc-tx-from-app">درخواست از اپلیکیشن متصل</div>
@@ -779,6 +789,7 @@
         TON Non-Custodial Wallet &bull; v2.4 &bull; V5R1 Standard
     </footer>
 
+    <!-- PIN Overlay -->
     <div id="pin-overlay" class="pin-overlay hidden">
         <div class="pin-inner">
             <div class="pin-top">
@@ -809,6 +820,7 @@
         </div>
     </div>
 
+    <!-- Sending Overlay -->
     <div id="sending-overlay" class="sending-overlay hidden">
         <div class="sending-card">
             <div id="sending-spinner" class="sending-spinner"></div>
@@ -818,6 +830,7 @@
         </div>
     </div>
 
+    <!-- Screen Loader -->
     <div id="screen-loader">
         <div class="loader-wrap">
             <div class="loader-diamond"></div>
@@ -2154,56 +2167,37 @@
                     card.className = 'glass-card';
                     card.style.padding = '10px 12px';
                     card.style.background = 'var(--surface-2)';
-                    card.innerHTML = '<span class="text-xs font-bold">تراکنش شماره ' + (idx + 1) + '</span><div class="text-xs" style="font-family:monospace; direction:ltr; text-align:left; margin-top:4px;">مقصد: ' +
-                        escapeHtml(m.address) + '<br>مبلغ: ' + formatTon(m.amount || '0') + ' TON' +
-                        (comment ? '<br>کامنت: <span style="color:var(--accent-2);">' + escapeHtml(comment) + '</span>' : '') + '</div>';
+                    card.innerHTML = '<div style="font-weight:700; margin-bottom:4px;">پیام شماره ' + (idx + 1) + '</div>' +
+                        '<div style="font-family:monospace; word-break:break-all; font-size:10px;">مقصد: ' + escapeHtml(m.address) + '</div>' +
+                        '<div style="margin-top:2px;">مبلغ: ' + formatTon(m.amount || '0') + ' TON</div>' +
+                        (comment ? '<div style="margin-top:2px; color:var(--text-dim);">کامنت: ' + escapeHtml(comment) + '</div>' : '');
                     details.appendChild(card);
                 });
             } catch (e) {
-                details.innerText = 'اطلاعات جزئیات تراکنش قابل نمایش نیست.';
+                console.error(e);
+                details.innerHTML = '<div class="text-xs" style="color:var(--danger);">خطا در پردازش جزئیات تراکنش.</div>';
             }
         }
 
         function rejectTcTx() {
             const tx = window.tcPendingTx;
-            if (!tx) { showScreen('dashboard-screen'); return; }
-            markReqResolved(tx.reqKey);
-            sendTcErrorResponse(tx.fromHex, tx.conn, tx.reqObj.id, 300, 'User declined transaction');
-            window.tcPendingTx = null;
-            showScreen('dashboard-screen');
-        }
-
-        async function sendTcErrorResponse(toHex, conn, id, code, message) {
-            try {
-                await loadTcNacl();
-                const privBytes = b64ToBytes(conn.ourSecB64);
-                const dappPubBytes = hexToBytes(toHex);
-                const resp = { error: { code: code, message: message }, id: id };
-                const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(resp));
-                const cipher = tcNacl.box(plain, nonce, dappPubBytes, privBytes);
-                const fullMsg = new Uint8Array(nonce.length + cipher.length);
-                fullMsg.set(nonce, 0);
-                fullMsg.set(cipher, nonce.length);
-                await fetch(TC_BRIDGE + '/message?client_id=' + conn.ourPubHex + '&to=' + toHex + '&ttl=300', {
-                    method: 'POST',
-                    body: bytesToB64(fullMsg)
-                });
-            } catch (e) {
-                console.error(e);
+            if (tx) {
+                markReqResolved(tx.reqKey);
+                window.tcPendingTx = null;
             }
+            showScreen('dashboard-screen');
         }
 
         async function approveTcTx() {
             const tx = window.tcPendingTx;
-            if (!tx) return;
+            if (!tx) { showScreen('dashboard-screen'); return; }
 
             const auth = await requestUnlockPasscode('رمز ولت را برای تایید تراکنش TonConnect وارد کنید');
             if (!auth) return;
 
             const btn = document.getElementById('btn-tc-tx-approve');
             if (btn) btn.disabled = true;
-            showSendingOverlay('در حال ارسال تراکنش به شبکه...');
+            showSendingOverlay('در حال امضا و ارسال تراکنش TonConnect...');
 
             let words = null;
             try {
@@ -2214,24 +2208,21 @@
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
 
-                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'خطای تطابق آدرس ولت.');
-                    return;
-                }
-
                 const contract = tonClient.open(wallet);
                 const seqno = await withRetry(() => contract.getSeqno());
 
                 const messages = parseTcMessages(tx.reqObj);
-                const builtMsgs = messages.map(m => {
+                const internalMsgs = messages.map(m => {
                     const destAddr = libs.Address.parse(m.address);
                     let bodyCell = undefined;
                     if (m.payload) {
-                        try { bodyCell = libs.Cell.fromBoc(b64ToBytes(m.payload))[0]; } catch (e2) {}
+                        try {
+                            bodyCell = libs.Cell.fromBoc(b64ToBytes(m.payload))[0];
+                        } catch (e) {}
                     }
                     return libs.internal({
                         to: destAddr,
-                        value: BigInt(m.amount),
+                        value: BigInt(m.amount || '0'),
                         bounce: true,
                         body: bodyCell
                     });
@@ -2241,31 +2232,33 @@
                     seqno: seqno,
                     secretKey: keyPair.secretKey,
                     sendMode: 3,
-                    messages: builtMsgs
+                    messages: internalMsgs
                 }));
 
-                markReqResolved(tx.reqKey);
-                const privBytes = b64ToBytes(tx.conn.ourSecB64);
-                const dappPubBytes = hexToBytes(tx.fromHex);
-
-                const resp = {
-                    result: bytesToHex(crypto.getRandomValues(new Uint8Array(32))),
+                const respPayload = {
+                    result: 'signed_and_sent',
                     id: tx.reqObj.id
                 };
+
+                const dappPubBytes = hexToBytes(tx.fromHex);
+                const privBytes = b64ToBytes(tx.conn.ourSecB64);
                 const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(resp));
+                const plain = new TextEncoder().encode(JSON.stringify(respPayload));
                 const cipher = tcNacl.box(plain, nonce, dappPubBytes, privBytes);
                 const fullMsg = new Uint8Array(nonce.length + cipher.length);
                 fullMsg.set(nonce, 0);
                 fullMsg.set(cipher, nonce.length);
 
-                await fetch(TC_BRIDGE + '/message?client_id=' + tx.conn.ourPubHex + '&to=' + tx.fromHex + '&ttl=300', {
+                await withRetry(() => fetch(TC_BRIDGE + '/message?client_id=' + tx.conn.ourPubHex + '&to=' + tx.fromHex + '&ttl=300', {
                     method: 'POST',
                     body: bytesToB64(fullMsg)
-                });
+                }));
 
+                markReqResolved(tx.reqKey);
                 window.tcPendingTx = null;
-                setSendingResult(true, 'تراکنش TonConnect با موفقیت ارسال شد ✅');
+                words = null;
+
+                setSendingResult(true, 'تراکنش TonConnect با موفقیت امضا و ارسال شد ✅');
                 showScreen('dashboard-screen');
                 setTimeout(refreshBalance, 6000);
             } catch (e) {
@@ -2277,13 +2270,15 @@
             }
         }
 
-        window.onload = function () {
-            if (localStorage.getItem(STORAGE_KEY)) {
-                showScreen('unlock-screen');
-            } else {
+        window.addEventListener('load', async function () {
+            const hasStored = !!localStorage.getItem(STORAGE_KEY);
+            if (!hasStored) {
                 showScreen('welcome-screen');
+            } else {
+                showScreen('unlock-screen');
             }
-        };
+        });
     </script>
 </body>
 </html>
+```
