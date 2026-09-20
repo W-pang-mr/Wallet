@@ -2406,6 +2406,7 @@
             }
         }
 
+        
         function renderTcTxScreen() {
             const connection = tcPendingTx.connection;
             const txRequest = tcPendingTx.txRequest;
@@ -2414,120 +2415,104 @@
             box.innerHTML = '';
             (txRequest.messages || []).forEach(function (m, idx) {
                 const div = document.createElement('div');
-                div.className = 'glass-input';
-                div.style.direction = 'ltr';
-                div.style.textAlign = 'left';
-                div.style.whiteSpace = 'pre-line';
-                let addr = m.address;
-                try { addr = libs.Address.parse(m.address).toString({ urlSafe: true, bounceable: true }); } catch (e) {}
-                div.innerText = '#' + (idx + 1) + '\nTo: ' + addr + '\nAmount: ' + formatTon(m.amount) + ' TON';
+                div.className = 'glass-card';
+                div.style.padding = '10px';
+                div.innerHTML = '<b>Message #' + (idx + 1) + '</b><br>To: ' + escapeHtml(m.address) + '<br>Value: ' + formatTon(BigInt(m.amount || 0)) + ' TON';
                 box.appendChild(div);
             });
         }
 
+        async function approveTcTx() {
+            if (!tcPendingTx || sending) return;
+            const { connection, requestId, txRequest, reqKey } = tcPendingTx;
+            if (!(await libsReady())) return;
+
+            const auth = await authorizeAction('Enter your wallet PIN to approve transaction');
+            if (!auth) return;
+
+            sending = true;
+            const btn = document.getElementById('btn-tc-tx-approve');
+            btn.disabled = true;
+            btn.innerText = 'Approving...';
+            showSendingOverlay('Sending transaction to app...');
+
+            let words = null;
+            try {
+                words = auth.result;
+                const keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(() => contract.getSeqno());
+
+                const messages = (txRequest.messages || []).map(function (m) {
+                    return libs.internal({
+                        to: libs.Address.parse(m.address),
+                        value: BigInt(m.amount || 0),
+                        bounce: true,
+                        body: m.payload ? libs.Cell.fromBoc(b64ToBytes(m.payload))[0] : undefined
+                    });
+                });
+
+                await withRetry(() => contract.sendTransfer({
+                    seqno: seqno,
+                    secretKey: keyPair.secretKey,
+                    sendMode: 3,
+                    messages: messages
+                }));
+
+                markReqResolved(reqKey);
+                await sendTcResponse(connection, requestId, { result: 'success' });
+
+                setSendingResult(true, 'Transaction approved and sent! ✅');
+                tcPendingTx = null;
+                showScreen('dashboard-screen');
+                setTimeout(refreshBalance, 5000);
+            } catch (e) {
+                console.error(e);
+                setSendingResult(false, 'Approval failed:\n' + (e && e.message ? e.message : ''));
+            } finally {
+                sending = false;
+                btn.disabled = false;
+                btn.innerText = 'Approve & Send';
+            }
+        }
+
         async function rejectTcTx() {
             if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
-            if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-            await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
+            const { connection, requestId, reqKey } = tcPendingTx;
+            markReqResolved(reqKey);
+            try {
+                await sendTcResponse(connection, requestId, { error: { code: 300, message: 'User rejected the request' } });
+            } catch (e) {}
             tcPendingTx = null;
             showScreen('dashboard-screen');
         }
 
-        async function approveTcTx() {
-            if (!tcPendingTx) return;
-            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
-            if (!auth) return;
-            const btn = document.getElementById('btn-tc-tx-approve');
-            btn.disabled = true;
-            showSendingOverlay('Sending transaction...');
-            let words = null;
-            try {
-                if (!(await libsReady())) return;
-                words = auth.result;
-                const keyPair = await libs.mnemonicToPrivateKey(words);
-                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
-                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'Internal error: wallet mismatch.');
-                    return;
-                }
+        async function sendTcResponse(conn, requestId, responsePayload) {
+            await loadTcNacl();
+            const ourSec = b64ToBytes(conn.ourSecB64);
+            const ourPub = hexToBytes(conn.ourPubHex);
+            const dappPub = hexToBytes(conn.dappClientIdHex);
 
-                const contract = tonClient.open(wallet);
-                const seqno = await withRetry(() => contract.getSeqno());
+            const responseObj = {
+                id: requestId,
+                result: responsePayload.result,
+                error: responsePayload.error
+            };
 
-                const txRequest = tcPendingTx.txRequest;
-                const outMessages = (txRequest.messages || []).map(function (m) {
-                    let body = undefined;
-                    let init = undefined;
-                    if (m.payload) { body = libs.Cell.fromBase64(m.payload); }
-                    if (m.stateInit) {
-                        const initCell = libs.Cell.fromBase64(m.stateInit);
-                        init = libs.loadStateInit(initCell.beginParse());
-                    }
-                    return libs.internal({
-                        to: libs.Address.parse(m.address),
-                        value: BigInt(m.amount),
-                        bounce: true,
-                        body: body,
-                        init: init
-                    });
-                });
+            const nonce = tcNacl.randomBytes(24);
+            const plain = new TextEncoder().encode(JSON.stringify(responseObj));
+            const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
+            const fullMsg = new Uint8Array(nonce.length + cipher.length);
+            fullMsg.set(nonce, 0);
+            fullMsg.set(cipher, nonce.length);
+            const bodyB64 = bytesToB64(fullMsg);
 
-                const transferCell = wallet.createTransfer({
-                    seqno: seqno,
-                    secretKey: keyPair.secretKey,
-                    sendMode: 3,
-                    messages: outMessages
-                });
-
-                await withRetry(() => contract.send(transferCell));
-
-                const resultB64 = transferCell.toBoc().toString('base64');
-                await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
-                if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-
-                tcPendingTx = null;
-
-                await loadWallet(words);
-                words = null;
-                setSendingResult(true, 'Transaction sent ✅');
-                setTimeout(refreshBalance, 5000);
-            } catch (e) {
-                console.error(e);
-                setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
-            } finally {
-                words = null;
-                btn.disabled = false;
-            }
+            await fetch(TC_BRIDGE + '/message?client_id=' + bytesToHex(ourPub) + '&to=' + conn.dappClientIdHex + '&ttl=300', {
+                method: 'POST',
+                body: bodyB64
+            });
         }
-
-        async function sendTcResponse(connection, requestId, resultB64, error) {
-            try {
-                await loadTcNacl();
-                const responseObj = error ? { id: requestId, error: error } : { id: requestId, result: resultB64 };
-                const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(responseObj));
-                const dappPub = hexToBytes(connection.dappClientIdHex);
-                const ourSec = b64ToBytes(connection.ourSecB64);
-                const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
-                const fullMsg = new Uint8Array(nonce.length + cipher.length);
-                fullMsg.set(nonce, 0);
-                fullMsg.set(cipher, nonce.length);
-                const bodyB64 = bytesToB64(fullMsg);
-                await fetch(TC_BRIDGE + '/message?client_id=' + connection.ourPubHex + '&to=' + connection.dappClientIdHex + '&ttl=300', {
-                    method: 'POST',
-                    body: bodyB64
-                });
-            } catch (e) {
-                console.error('sendTcResponse error', e);
-            }
-        }
-
-        // ---------- Start ----------
-        window.addEventListener('load', function () {
-            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
-            loadLibs().catch(function (e) { console.error('preload failed', e); });
-            startTcListener();
-        });
     </script>
 </body>
 </html>
