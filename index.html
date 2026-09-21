@@ -6,7 +6,7 @@
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* Optimized Blue Glass — lighter blur, fewer paints */
+        /* Matte Black — flat surfaces, no blur, no glass */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -20,20 +20,21 @@
         }
         :root {
             color-scheme: dark;
-            --bg: #071525;
-            --text: #f4f7fb;
-            --text-dim: rgba(255, 255, 255, 0.55);
-            --accent: #38bdf8;
-            --accent-2: #38bdf8;
-            --accent-2-light: #7dd3fc;
-            --accent-glow: rgba(56, 189, 248, 0.25);
-            --success: #4ade80;
+            --bg: #000000;
+            --text: #f5f5f7;
+            --text-dim: rgba(245, 245, 247, 0.5);
+            --accent: #ffffff;
+            --accent-2: #d4d4d8;
+            --accent-2-light: #ffffff;
+            --accent-glow: rgba(255, 255, 255, 0.08);
+            --success: #34d399;
             --danger: #f87171;
             --warn: #fbbf24;
-            --card: rgba(255, 255, 255, 0.08);
-            --card-border: rgba(255, 255, 255, 0.14);
-            --radius-lg: 22px;
-            --radius-md: 16px;
+            --card: #121214;
+            --card-border: rgba(255, 255, 255, 0.09);
+            --surface-2: #1b1b1e;
+            --radius-lg: 20px;
+            --radius-md: 14px;
             --radius-sm: 12px;
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
         }
@@ -55,43 +56,23 @@
             position: relative;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            background: #071525;
-            background-image:
-                radial-gradient(ellipse 90% 55% at 85% -10%, rgba(14, 165, 233, 0.35), transparent 55%),
-                radial-gradient(ellipse 70% 45% at 0% 110%, rgba(37, 99, 235, 0.22), transparent 50%);
-        }
-
-        /* Static soft glow — no animated blobs (was causing lag) */
-        body::before {
-            content: '';
-            position: fixed;
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            background: rgba(56, 189, 248, 0.18);
-            filter: blur(80px);
-            top: -80px;
-            right: -60px;
-            z-index: -1;
-            pointer-events: none;
+            background: #000000;
         }
 
         .glass-card {
             position: relative;
             background: var(--card);
-            -webkit-backdrop-filter: blur(16px);
-            backdrop-filter: blur(16px);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+            box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03) inset;
             padding: 16px;
             overflow: hidden;
         }
 
         .glass-input {
             width: 100%;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: var(--surface-2);
+            border: 1px solid rgba(255, 255, 255, 0.10);
             border-radius: var(--radius-sm);
             padding: 12px 14px;
             color: #fff;
@@ -99,10 +80,10 @@
             outline: none;
             transition: border-color 0.15s ease;
         }
-        .glass-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+        .glass-input::placeholder { color: rgba(255, 255, 255, 0.32); }
         .glass-input:focus {
-            border-color: rgba(56, 189, 248, 0.55);
-            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            background: #202023;
         }
 
         .btn-primary {
@@ -110,27 +91,27 @@
             appearance: none;
             -webkit-appearance: none;
             border: none;
-            color: #fff;
-            font-weight: 600;
+            color: #000;
+            font-weight: 700;
             font-size: 14px;
             padding: 14px;
             border-radius: 14px;
             cursor: pointer;
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
-            box-shadow: 0 6px 16px rgba(14, 165, 233, 0.25);
+            background: #ffffff;
+            box-shadow: none;
             transition: opacity 0.15s ease, transform 0.12s ease;
         }
-        .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
+        .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.35; pointer-events: none; }
         .btn-blue { /* same as primary for consistency */ }
 
         .btn-secondary {
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--surface-2);
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             padding: 14px;
             border-radius: 14px;
             font-weight: 500;
@@ -138,22 +119,22 @@
             cursor: pointer;
             transition: background 0.15s ease, transform 0.12s ease;
         }
-        .btn-secondary:active { background: rgba(255, 255, 255, 0.14); transform: scale(0.98); }
+        .btn-secondary:active { background: #26262a; transform: scale(0.98); }
 
         .btn-danger {
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            background: rgba(248, 113, 113, 0.12);
+            background: rgba(248, 113, 113, 0.1);
             color: #fca5a5;
-            border: 1px solid rgba(248, 113, 113, 0.22);
+            border: 1px solid rgba(248, 113, 113, 0.2);
             padding: 12px;
             border-radius: 14px;
             font-weight: 500;
             font-size: 13px;
             cursor: pointer;
         }
-        .btn-danger:active { background: rgba(248, 113, 113, 0.2); }
+        .btn-danger:active { background: rgba(248, 113, 113, 0.18); }
 
         .hidden { display: none !important; }
         .flex { display: flex; }
@@ -200,9 +181,9 @@
             line-height: 1.55;
         }
         .info-box {
-            background: rgba(56, 189, 248, 0.1);
-            border: 1px solid rgba(56, 189, 248, 0.22);
-            color: #bae6fd;
+            background: var(--surface-2);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #e4e4e7;
             border-radius: 12px;
             padding: 10px 12px;
             font-size: 11px;
@@ -221,7 +202,8 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: linear-gradient(145deg, #0ea5e9, #2563eb);
+            background: #1c1c1f;
+            border: 1px solid rgba(255, 255, 255, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -230,11 +212,11 @@
         .status-badge {
             font-size: 10px;
             font-weight: 600;
-            background: rgba(74, 222, 128, 0.12);
-            color: #86efac;
+            background: rgba(52, 211, 153, 0.1);
+            color: #6ee7b7;
             padding: 5px 11px;
             border-radius: 999px;
-            border: 1px solid rgba(74, 222, 128, 0.25);
+            border: 1px solid rgba(52, 211, 153, 0.22);
         }
 
         .balance-card { text-align: center; padding: 20px 16px; }
@@ -244,15 +226,15 @@
             gap: 6px;
             font-size: 11px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--surface-2);
             padding: 6px 12px;
             border-radius: 999px;
             color: var(--text-dim);
             margin-bottom: 12px;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .addr-pill:active { background: rgba(255, 255, 255, 0.14); }
+        .addr-pill:active { background: #232326; }
         .balance-num {
             font-size: 36px;
             font-weight: 800;
@@ -268,21 +250,22 @@
             flex-direction: column;
             align-items: center;
             gap: 6px;
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: var(--surface-2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: var(--radius-md);
             padding: 12px 6px;
             cursor: pointer;
             color: #fff;
             transition: background 0.12s ease, transform 0.12s ease;
         }
-        .action-btn:active { background: rgba(255, 255, 255, 0.12); transform: scale(0.97); }
+        .action-btn:active { background: #232326; transform: scale(0.97); }
         .action-btn .icon-circle {
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: rgba(56, 189, 248, 0.18);
-            color: #e0f2fe;
+            background: #26262a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -305,8 +288,8 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: rgba(56, 189, 248, 0.15);
-            border: 1px solid rgba(255,255,255,0.12);
+            background: #1c1c1f;
+            border: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -323,7 +306,7 @@
         .token-meta { display: flex; flex-direction: column; text-align: left; gap: 1px; min-width: 0; }
         .token-symbol { font-size: 14px; font-weight: 700; color: #fff; }
         .token-name { font-size: 11px; color: var(--text-dim); }
-        .token-bal { font-size: 14px; font-weight: 700; color: #e0f2fe; text-align: right; }
+        .token-bal { font-size: 14px; font-weight: 700; color: #f4f4f5; text-align: right; }
         .token-empty {
             text-align: center;
             padding: 14px 8px;
@@ -337,12 +320,12 @@
             border-radius: 12px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--accent-2-light);
+            color: #fff;
             cursor: pointer;
-            background: rgba(56, 189, 248, 0.08);
-            border: 1px solid rgba(56, 189, 248, 0.15);
+            background: var(--surface-2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        .history-more:active { background: rgba(56, 189, 248, 0.14); }
+        .history-more:active { background: #232326; }
 
         /* History */
         .tx-row {
@@ -398,7 +381,7 @@
         .list-card .left { display: flex; align-items: center; gap: 10px; }
         .list-card .emoji-icon { font-size: 18px; }
 
-        /* Bottom nav — lighter glass */
+        /* Bottom nav — solid matte, no blur */
         .bottom-nav {
             position: fixed;
             left: 50%;
@@ -412,11 +395,9 @@
             justify-content: space-around;
             padding: 8px 6px;
             border-radius: 22px;
-            background: rgba(12, 24, 42, 0.82);
-            -webkit-backdrop-filter: blur(16px);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            background: #0d0d0f;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
         }
         .nav-item {
             display: flex;
@@ -432,8 +413,8 @@
             transition: color 0.15s ease, background 0.15s ease;
         }
         .nav-item.active {
-            color: #e0f2fe;
-            background: rgba(56, 189, 248, 0.16);
+            color: #fff;
+            background: #232326;
         }
         .nav-item .nav-icon { font-size: 17px; }
 
@@ -442,9 +423,7 @@
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(5, 12, 24, 0.72);
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.92);
             display: flex;
             justify-content: center;
             overflow-y: auto;
@@ -495,8 +474,8 @@
             width: min(19vw, 76px);
             height: min(19vw, 76px);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #141416;
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -507,7 +486,7 @@
             user-select: none;
             transition: background 0.1s ease, transform 0.1s ease;
         }
-        .pin-key:active { background: rgba(255, 255, 255, 0.16); transform: scale(0.94); }
+        .pin-key:active { background: #232326; transform: scale(0.94); }
         .pin-key b { font-size: 28px; font-weight: 400; line-height: 1; }
         .pin-key small {
             font-size: 10px;
@@ -522,11 +501,12 @@
         .pin-link {
             background: none;
             border: none;
-            color: #7dd3fc;
+            color: #ffffff;
             font-size: 16px;
             cursor: pointer;
             padding: 12px;
             margin-top: 14px;
+            opacity: 0.7;
         }
         .pin-shake { animation: pin-shake 0.35s; }
         @keyframes pin-shake {
@@ -536,14 +516,12 @@
             40%, 60% { transform: translateX(6px); }
         }
 
-        /* Send overlay — simple, no heavy filters */
+        /* Send overlay — solid matte, no blur */
         .sending-overlay {
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(5, 12, 24, 0.7);
-            -webkit-backdrop-filter: blur(8px);
-            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.88);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -559,9 +537,9 @@
             flex-direction: column;
             align-items: center;
             gap: 12px;
-            background: rgba(16, 32, 56, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            background: #121214;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
         }
         .send-anim {
             position: relative;
@@ -575,35 +553,35 @@
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 3px solid rgba(56, 189, 248, 0.15);
-            border-top-color: #38bdf8;
+            border: 3px solid rgba(255, 255, 255, 0.12);
+            border-top-color: #ffffff;
             animation: sending-spin 0.8s linear infinite;
         }
         .send-ring.done {
-            border-color: rgba(74, 222, 128, 0.3);
-            border-top-color: #4ade80;
+            border-color: rgba(52, 211, 153, 0.3);
+            border-top-color: #34d399;
             animation: none;
         }
         .send-core {
             width: 48px;
             height: 48px;
             border-radius: 50%;
-            background: rgba(56, 189, 248, 0.2);
-            border: 1px solid rgba(255,255,255,0.15);
+            background: #1c1c1f;
+            border: 1px solid rgba(255,255,255,0.12);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
         }
-        .send-core.success { background: rgba(74, 222, 128, 0.25); font-size: 24px; }
-        .send-core.fail { background: rgba(248, 113, 113, 0.25); }
+        .send-core.success { background: rgba(52, 211, 153, 0.18); font-size: 24px; }
+        .send-core.fail { background: rgba(248, 113, 113, 0.2); }
         @keyframes sending-spin { to { transform: rotate(360deg); } }
 
         .sending-spinner {
             width: 40px; height: 40px;
             border-radius: 50%;
-            border: 3px solid rgba(56, 189, 248, 0.15);
-            border-top-color: #7dd3fc;
+            border: 3px solid rgba(255, 255, 255, 0.12);
+            border-top-color: #ffffff;
             animation: sending-spin 0.75s linear infinite;
         }
         .sending-icon { font-size: 36px; }
@@ -637,14 +615,6 @@
             }
         }
 
-        @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-            .glass-card,
-            .bottom-nav,
-            .pin-overlay,
-            .sending-overlay {
-                background: rgba(12, 28, 48, 0.96);
-            }
-        }
     </style>
 </head>
 <body>
@@ -2308,334 +2278,4 @@
             }
             list.forEach(conn => {
                 const row = document.createElement('div');
-                row.className = 'list-card';
-                row.style.padding = '12px 14px';
-                row.innerHTML = '<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:left;"><span class="text-sm font-bold">' +
-                    escapeHtml(conn.appName || conn.appUrl || 'Unknown app') + '</span><span class="text-xs">' + escapeHtml(conn.appUrl || '') + '</span></div></div>';
-                const btn = document.createElement('button');
-                btn.className = 'btn-danger';
-                btn.style.width = 'auto';
-                btn.style.padding = '8px 12px';
-                btn.innerText = 'Disconnect';
-                btn.onclick = function (e) { e.stopPropagation(); disconnectTcApp(conn.dappClientIdHex); };
-                row.appendChild(btn);
-                box.appendChild(row);
-            });
-        }
-
-        async function handleTcLinkPaste() {
-            const text = document.getElementById('tc-link-input').value;
-            const statusEl = document.getElementById('tc-status');
-            const parsed = parseTcLink(text);
-            if (!parsed) { statusEl.innerText = 'This link could not be read.'; return; }
-            statusEl.innerText = 'Loading app info...';
-            const manifestUrl = parsed.connectRequest && parsed.connectRequest.manifestUrl;
-            const manifest = manifestUrl ? await fetchTcManifest(manifestUrl) : null;
-            tcPendingConnect = { dappClientIdHex: parsed.dappClientIdHex, connectRequest: parsed.connectRequest, manifest: manifest, manifestUrl: manifestUrl };
-
-            const infoEl = document.getElementById('tc-confirm-app-info');
-            let name = 'Unknown app';
-            let url = manifestUrl || '';
-            if (manifest && manifest.name) name = manifest.name;
-            else if (manifestUrl) { try { name = new URL(manifestUrl).hostname; } catch (e) {} }
-            if (manifest && manifest.url) url = manifest.url;
-            infoEl.innerText = '"' + name + '" (' + url + ') wants to connect to your wallet.';
-            showScreen('tc-confirm-screen');
-        }
-
-        function cancelTcConnect() {
-            tcPendingConnect = null;
-            showScreen('tonconnect-screen');
-        }
-
-        async function confirmTcConnect() {
-            if (!tcPendingConnect) { showScreen('tonconnect-screen'); return; }
-            const auth = await authorizeAction('Enter your wallet PIN to connect');
-            if (!auth) return;
-            const btn = document.getElementById('btn-tc-confirm');
-            btn.disabled = true;
-            showSendingOverlay('Connecting...');
-            let words = null;
-            try {
-                if (!(await libsReady())) return;
-                await loadTcNacl();
-
-                words = auth.result;
-                const keyPair = await libs.mnemonicToPrivateKey(words);
-                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
-                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'Internal error: wallet mismatch.');
-                    return;
-                }
-
-                const stateInitCell = libs.beginCell().store(libs.storeStateInit(wallet.init)).endCell();
-                const stateInitB64 = stateInitCell.toBoc().toString('base64');
-
-                const sessionKeys = tcNacl.box.keyPair();
-                const ourPubHex = bytesToHex(sessionKeys.publicKey);
-                const ourSecB64 = bytesToB64(sessionKeys.secretKey);
-
-                const connectEvent = {
-                    event: 'connect',
-                    payload: {
-                        items: [{
-                            name: 'ton_addr',
-                            address: wallet.address.toRawString(),
-                            network: '-239',
-                            walletStateInit: stateInitB64,
-                            publicKey: bytesToHex(keyPair.publicKey)
-                        }],
-                        device: {
-                            platform: 'browser',
-                            appName: 'glass_wallet',
-                            appVersion: '2.2.0',
-                            maxProtocolVersion: 2,
-                            features: [{ name: 'SendTransaction', maxMessages: 4 }]
-                        }
-                    }
-                };
-
-                const dappPubBytes = hexToBytes(tcPendingConnect.dappClientIdHex);
-                const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(connectEvent));
-                const cipher = tcNacl.box(plain, nonce, dappPubBytes, sessionKeys.secretKey);
-                const fullMsg = new Uint8Array(nonce.length + cipher.length);
-                fullMsg.set(nonce, 0);
-                fullMsg.set(cipher, nonce.length);
-                const bodyB64 = bytesToB64(fullMsg);
-
-                await withRetry(() => fetch(TC_BRIDGE + '/message?client_id=' + ourPubHex + '&to=' + tcPendingConnect.dappClientIdHex + '&ttl=300', {
-                    method: 'POST',
-                    body: bodyB64
-                }).then(function (r) { if (!r.ok) throw new Error('bridge post failed'); return r; }));
-
-                const list = loadTcConnections().filter(c => c.dappClientIdHex !== tcPendingConnect.dappClientIdHex);
-                list.push({
-                    dappClientIdHex: tcPendingConnect.dappClientIdHex,
-                    ourPubHex: ourPubHex,
-                    ourSecB64: ourSecB64,
-                    appName: (tcPendingConnect.manifest && tcPendingConnect.manifest.name) || '',
-                    appUrl: (tcPendingConnect.manifest && tcPendingConnect.manifest.url) || tcPendingConnect.manifestUrl || ''
-                });
-                saveTcConnections(list);
-                tcPendingConnect = null;
-
-                await loadWallet(words);
-                words = null;
-                setSendingResult(true, 'Connected! Go back to that app and check.');
-                showTonConnectScreen();
-            } catch (e) {
-                console.error(e);
-                setSendingResult(false, 'Connection failed.\n' + (e && e.message ? e.message : ''));
-            } finally {
-                words = null;
-                btn.disabled = false;
-            }
-        }
-
-        function disconnectTcApp(dappClientIdHex) {
-            const ok = confirm('Disconnect this app from your wallet?');
-            if (!ok) return;
-            const list = loadTcConnections().filter(c => c.dappClientIdHex !== dappClientIdHex);
-            saveTcConnections(list);
-            renderTcConnectionsList();
-            startTcListener();
-        }
-
-        async function startTcListener() {
-            if (tcEventSource) {
-                tcEventSource.close();
-                tcEventSource = null;
-            }
-            const list = loadTcConnections();
-            if (list.length === 0) return;
-            try {
-                await loadTcNacl();
-            } catch (e) {
-                console.error('tweetnacl load failed', e);
-                return;
-            }
-            const ids = list.map(c => c.ourPubHex).join(',');
-            let url = TC_BRIDGE + '/events?client_id=' + ids;
-            const lastId = localStorage.getItem(TC_LAST_EVENT_ID_KEY);
-            if (lastId) url += '&last_event_id=' + encodeURIComponent(lastId);
-            tcEventSource = new EventSource(url);
-            tcEventSource.onmessage = function (e) {
-                if (e.lastEventId) {
-                    localStorage.setItem(TC_LAST_EVENT_ID_KEY, e.lastEventId);
-                }
-                handleTcBridgeMessage(e.data);
-            };
-            tcEventSource.onerror = function (e) { console.error('tc SSE error', e); };
-        }
-
-        async function handleTcBridgeMessage(rawData) {
-            try {
-                const data = JSON.parse(rawData);
-                const fromHex = data.from;
-                const msgB64 = data.message;
-                if (!fromHex || !msgB64) return;
-
-                const list = loadTcConnections();
-                const conn = list.find(c => c.dappClientIdHex === fromHex);
-                if (!conn) { console.error('no matching connection for', fromHex); return; }
-
-                await loadTcNacl();
-                const full = b64ToBytes(msgB64);
-                const nonce = full.slice(0, 24);
-                const cipher = full.slice(24);
-                const ourSec = b64ToBytes(conn.ourSecB64);
-                const dappPub = hexToBytes(fromHex);
-                const plainBytes = tcNacl.box.open(cipher, nonce, dappPub, ourSec);
-                if (!plainBytes) { console.error('decrypt failed for tc message'); return; }
-                const payload = JSON.parse(new TextDecoder().decode(plainBytes));
-
-                if (payload.method === 'disconnect') {
-                    const filtered = list.filter(c => c.dappClientIdHex !== fromHex);
-                    saveTcConnections(filtered);
-                    startTcListener();
-                    return;
-                }
-
-                if (payload.method === 'sendTransaction') {
-                    const reqKey = fromHex + ':' + payload.id;
-                    if (isReqResolved(reqKey)) {
-                        console.log('duplicate tx request ignored (already resolved):', reqKey);
-                        return;
-                    }
-                    const txRequest = JSON.parse(payload.params[0]);
-                    tcPendingTx = { connection: conn, requestId: payload.id, txRequest: txRequest, reqKey: reqKey };
-                    if (!(await libsReady())) return;
-                    renderTcTxScreen();
-                    showScreen('tc-tx-screen');
-                }
-            } catch (e) {
-                console.error('handleTcBridgeMessage error', e);
-            }
-        }
-
-        function renderTcTxScreen() {
-            const connection = tcPendingTx.connection;
-            const txRequest = tcPendingTx.txRequest;
-            document.getElementById('tc-tx-from-app').innerText = 'Request from: ' + (connection.appName || connection.appUrl || 'a connected app');
-            const box = document.getElementById('tc-tx-details');
-            box.innerHTML = '';
-            (txRequest.messages || []).forEach(function (m, idx) {
-                const div = document.createElement('div');
-                div.className = 'glass-input';
-                div.style.direction = 'ltr';
-                div.style.textAlign = 'left';
-                div.style.whiteSpace = 'pre-line';
-                let addr = m.address;
-                try { addr = libs.Address.parse(m.address).toString({ urlSafe: true, bounceable: true }); } catch (e) {}
-                div.innerText = '#' + (idx + 1) + '\nTo: ' + addr + '\nAmount: ' + formatTon(m.amount) + ' TON';
-                box.appendChild(div);
-            });
-        }
-
-        async function rejectTcTx() {
-            if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
-            if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-            await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
-            tcPendingTx = null;
-            showScreen('dashboard-screen');
-        }
-
-        async function approveTcTx() {
-            if (!tcPendingTx) return;
-            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
-            if (!auth) return;
-            const btn = document.getElementById('btn-tc-tx-approve');
-            btn.disabled = true;
-            showSendingOverlay('Sending transaction...');
-            let words = null;
-            try {
-                if (!(await libsReady())) return;
-                words = auth.result;
-                const keyPair = await libs.mnemonicToPrivateKey(words);
-                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
-                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'Internal error: wallet mismatch.');
-                    return;
-                }
-
-                const contract = tonClient.open(wallet);
-                const seqno = await withRetry(() => contract.getSeqno());
-
-                const txRequest = tcPendingTx.txRequest;
-                const outMessages = (txRequest.messages || []).map(function (m) {
-                    let body = undefined;
-                    let init = undefined;
-                    if (m.payload) { body = libs.Cell.fromBase64(m.payload); }
-                    if (m.stateInit) {
-                        const initCell = libs.Cell.fromBase64(m.stateInit);
-                        init = libs.loadStateInit(initCell.beginParse());
-                    }
-                    return libs.internal({
-                        to: libs.Address.parse(m.address),
-                        value: BigInt(m.amount),
-                        bounce: true,
-                        body: body,
-                        init: init
-                    });
-                });
-
-                const transferCell = wallet.createTransfer({
-                    seqno: seqno,
-                    secretKey: keyPair.secretKey,
-                    sendMode: 3,
-                    messages: outMessages
-                });
-
-                await withRetry(() => contract.send(transferCell));
-
-                const resultB64 = transferCell.toBoc().toString('base64');
-                await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
-                if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
-
-                tcPendingTx = null;
-
-                await loadWallet(words);
-                words = null;
-                setSendingResult(true, 'Transaction sent ✅');
-                setTimeout(refreshBalance, 5000);
-            } catch (e) {
-                console.error(e);
-                setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
-            } finally {
-                words = null;
-                btn.disabled = false;
-            }
-        }
-
-        async function sendTcResponse(connection, requestId, resultB64, error) {
-            try {
-                await loadTcNacl();
-                const responseObj = error ? { id: requestId, error: error } : { id: requestId, result: resultB64 };
-                const nonce = tcNacl.randomBytes(24);
-                const plain = new TextEncoder().encode(JSON.stringify(responseObj));
-                const dappPub = hexToBytes(connection.dappClientIdHex);
-                const ourSec = b64ToBytes(connection.ourSecB64);
-                const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
-                const fullMsg = new Uint8Array(nonce.length + cipher.length);
-                fullMsg.set(nonce, 0);
-                fullMsg.set(cipher, nonce.length);
-                const bodyB64 = bytesToB64(fullMsg);
-                await fetch(TC_BRIDGE + '/message?client_id=' + connection.ourPubHex + '&to=' + connection.dappClientIdHex + '&ttl=300', {
-                    method: 'POST',
-                    body: bodyB64
-                });
-            } catch (e) {
-                console.error('sendTcResponse error', e);
-            }
-        }
-
-        // ---------- Start ----------
-        window.addEventListener('load', function () {
-            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
-            loadLibs().catch(function (e) { console.error('preload failed', e); });
-            startTcListener();
-        });
-    </script>
-</body>
-</html>
+        
