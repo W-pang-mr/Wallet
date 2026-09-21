@@ -431,6 +431,45 @@
             font-size: 12px;
         }
 
+        /* History */
+        .tx-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 8px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.18s var(--ease);
+            animation: chipIn 0.35s var(--ease) both;
+        }
+        .tx-row:active { background: rgba(255, 255, 255, 0.08); }
+        .tx-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .tx-icon {
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; flex-shrink: 0;
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+        .tx-icon.in { background: rgba(74, 222, 128, 0.15); }
+        .tx-icon.out { background: rgba(248, 113, 113, 0.15); }
+        .tx-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .tx-title { font-size: 13px; font-weight: 600; color: #fff; }
+        .tx-sub { font-size: 11px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+        .tx-right { text-align: right; flex-shrink: 0; }
+        .tx-amt { font-size: 13px; font-weight: 700; }
+        .tx-amt.in { color: #86efac; }
+        .tx-amt.out { color: #fca5a5; }
+        .tx-time { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+        .tx-detail-row {
+            display: flex; justify-content: space-between; gap: 12px;
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 12px;
+        }
+        .tx-detail-row:last-child { border-bottom: none; }
+        .tx-detail-label { color: var(--text-dim); flex-shrink: 0; }
+        .tx-detail-val { color: #fff; text-align: right; word-break: break-all; font-family: ui-monospace, monospace; font-size: 11px; }
+
+
         .list-card {
             display: flex;
             align-items: center;
@@ -851,6 +890,15 @@
         </div>
 
         <!-- Security settings -->
+        <div 
+        <!-- Transaction detail -->
+        <div id="tx-detail-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size: 15px;">Transaction Details</h3>
+            <div id="tx-detail-body" class="flex flex-col"></div>
+            <a id="tx-detail-link" href="#" target="_blank" rel="noopener" class="btn-primary btn-blue" style="text-align:center;text-decoration:none;">Open in Tonviewer</a>
+            <button onclick="showScreen('dashboard-screen')" class="btn-secondary">Back</button>
+        </div>
+
         <div id="security-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 15px;">Security</h3>
             <div class="info-box" id="sec-status">PIN protection is ON.</div>
@@ -889,6 +937,16 @@
                 </div>
                 <div id="jettons-list" class="flex flex-col gap-1">
                     <div class="token-empty">Loading tokens...</div>
+                </div>
+            </div>
+
+            <div id="history-card" class="glass-card flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm font-bold">History</div>
+                    <span class="text-xs" id="history-refresh" style="cursor:pointer;color:var(--accent-2-light);" onclick="refreshHistory()">Refresh</span>
+                </div>
+                <div id="history-list" class="flex flex-col gap-1">
+                    <div class="token-empty">Loading transactions...</div>
                 </div>
             </div>
 
@@ -1021,7 +1079,7 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17'; // toncenter API key
         const FEE_RESERVE = 10000000n;     // 0.01 TON reserved for network fees
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
@@ -1633,7 +1691,7 @@
                     document.getElementById('wallet-balance').innerText = 'Error';
                     setStatus('Network error', false);
                 }
-                refreshJettons();
+                refreshJettons(); refreshHistory();
 
                 startBalancePolling();
                 startTcListener();
@@ -1726,16 +1784,30 @@
             const countEl = document.getElementById('jettons-count');
             list.innerHTML = '';
             card.classList.remove('hidden');
-            if (!jettons || jettons.length === 0) {
-                if (countEl) countEl.innerText = '0';
-                list.innerHTML = '<div class="token-empty">No tokens found in this wallet</div>';
-                return;
-            }
-            if (countEl) countEl.innerText = jettons.length + ' token' + (jettons.length > 1 ? 's' : '');
-            jettons.forEach(function (j, idx) {
+
+            // Always show native TON first
+            const tonBal = (typeof currentBalanceNano !== 'undefined' && currentBalanceNano != null)
+                ? currentBalanceNano : 0n;
+            const tonRow = document.createElement('div');
+            tonRow.className = 'token-row';
+            tonRow.onclick = function () { showWithdraw(); };
+            tonRow.innerHTML =
+                '<div class="token-left">' +
+                  '<div class="token-icon">💎</div>' +
+                  '<div class="token-meta">' +
+                    '<span class="token-symbol">TON</span>' +
+                    '<span class="token-name">Toncoin</span>' +
+                  '</div>' +
+                '</div>' +
+                '<span class="token-bal">' + formatTon(tonBal) + '</span>';
+            list.appendChild(tonRow);
+
+            const extra = jettons || [];
+            if (countEl) countEl.innerText = (1 + extra.length) + ' token' + ((1 + extra.length) > 1 ? 's' : '');
+            extra.forEach(function (j, idx) {
                 const row = document.createElement('div');
                 row.className = 'token-row';
-                row.style.animationDelay = (idx * 0.04) + 's';
+                row.style.animationDelay = ((idx + 1) * 0.04) + 's';
                 row.onclick = function () { showSendJetton(j); };
                 const iconLetter = (j.symbol || '?').slice(0, 1).toUpperCase();
                 row.innerHTML =
@@ -1751,6 +1823,155 @@
             });
         }
 
+        
+        let txHistory = [];
+        let historyRefreshing = false;
+
+        async function fetchTransactions(addressStr) {
+            const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
+            const url = 'https://toncenter.com/api/v2/getTransactions?address=' + encodeURIComponent(addressStr) + '&limit=25';
+            const res = await fetch(url, { headers: headers });
+            if (!res.ok) throw new Error('tx fetch failed ' + res.status);
+            const data = await res.json();
+            if (!data.ok) throw new Error(data.error || 'tx api error');
+            return data.result || [];
+        }
+
+        function shortAddr(a) {
+            a = String(a || '');
+            return a.length > 14 ? a.slice(0, 6) + '...' + a.slice(-4) : a;
+        }
+
+        function parseTx(tx) {
+            const inMsg = tx.in_msg || {};
+            const outs = (tx.out_msgs || []).filter(function (m) { return m.destination; });
+            const utime = tx.utime || 0;
+            let hashHex = '';
+            try {
+                if (tx.transaction_id && tx.transaction_id.hash) {
+                    const b64 = tx.transaction_id.hash;
+                    const bin = atob(b64);
+                    hashHex = Array.from(bin).map(function (c) { return c.charCodeAt(0).toString(16).padStart(2, '0'); }).join('');
+                }
+            } catch (e) {}
+
+            // Incoming: has source on in_msg and value > 0
+            const inVal = BigInt(inMsg.value || '0');
+            if (inMsg.source && inVal > 0n) {
+                return {
+                    dir: 'in',
+                    amountNano: inVal,
+                    counterparty: inMsg.source,
+                    comment: inMsg.message || '',
+                    fee: BigInt(tx.fee || '0'),
+                    utime: utime,
+                    hash: hashHex,
+                    lt: tx.transaction_id ? tx.transaction_id.lt : '',
+                    raw: tx
+                };
+            }
+            if (outs.length) {
+                let total = 0n;
+                outs.forEach(function (m) { total += BigInt(m.value || '0'); });
+                return {
+                    dir: 'out',
+                    amountNano: total,
+                    counterparty: outs[0].destination,
+                    comment: (outs[0].message || ''),
+                    fee: BigInt(tx.fee || '0'),
+                    utime: utime,
+                    hash: hashHex,
+                    lt: tx.transaction_id ? tx.transaction_id.lt : '',
+                    outs: outs,
+                    raw: tx
+                };
+            }
+            return null;
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            if (!list) return;
+            list.innerHTML = '';
+            if (!txHistory.length) {
+                list.innerHTML = '<div class="token-empty">No transactions yet</div>';
+                return;
+            }
+            txHistory.forEach(function (tx, idx) {
+                const row = document.createElement('div');
+                row.className = 'tx-row';
+                row.style.animationDelay = (idx * 0.03) + 's';
+                const isIn = tx.dir === 'in';
+                const when = tx.utime ? new Date(tx.utime * 1000).toLocaleString() : '—';
+                row.innerHTML =
+                    '<div class="tx-left">' +
+                      '<div class="tx-icon ' + (isIn ? 'in' : 'out') + '">' + (isIn ? '↓' : '↑') + '</div>' +
+                      '<div class="tx-meta">' +
+                        '<span class="tx-title">' + (isIn ? 'Received' : 'Sent') + '</span>' +
+                        '<span class="tx-sub">' + escapeHtml(shortAddr(tx.counterparty)) + '</span>' +
+                      '</div>' +
+                    '</div>' +
+                    '<div class="tx-right">' +
+                      '<div class="tx-amt ' + (isIn ? 'in' : 'out') + '">' + (isIn ? '+' : '−') + formatTon(tx.amountNano) + ' TON</div>' +
+                      '<div class="tx-time">' + escapeHtml(when) + '</div>' +
+                    '</div>';
+                row.onclick = function () { showTxDetail(tx); };
+                list.appendChild(row);
+            });
+        }
+
+        function showTxDetail(tx) {
+            const body = document.getElementById('tx-detail-body');
+            const link = document.getElementById('tx-detail-link');
+            const isIn = tx.dir === 'in';
+            const when = tx.utime ? new Date(tx.utime * 1000).toLocaleString() : '—';
+            const rows = [
+                ['Type', isIn ? 'Received' : 'Sent'],
+                ['Amount', (isIn ? '+' : '−') + formatTon(tx.amountNano) + ' TON'],
+                [isIn ? 'From' : 'To', tx.counterparty || '—'],
+                ['Fee', formatTon(tx.fee) + ' TON'],
+                ['Time', when],
+                ['LT', String(tx.lt || '—')],
+                ['Hash', tx.hash || '—']
+            ];
+            if (tx.comment) rows.splice(3, 0, ['Comment', tx.comment]);
+            body.innerHTML = rows.map(function (r) {
+                return '<div class="tx-detail-row"><span class="tx-detail-label">' + escapeHtml(r[0]) +
+                    '</span><span class="tx-detail-val">' + escapeHtml(String(r[1])) + '</span></div>';
+            }).join('');
+            if (tx.hash) {
+                link.href = 'https://tonviewer.com/transaction/' + tx.hash;
+                link.classList.remove('hidden');
+            } else {
+                link.href = '#';
+                link.classList.add('hidden');
+            }
+            showScreen('tx-detail-screen');
+        }
+
+        async function refreshHistory() {
+            if (!currentAddressObj || historyRefreshing) return;
+            historyRefreshing = true;
+            const list = document.getElementById('history-list');
+            try {
+                if (list) list.innerHTML = '<div class="token-empty">Loading transactions...</div>';
+                const addr = currentAddressObj.toString({ urlSafe: true, bounceable: false });
+                const raw = await withRetry(function () { return fetchTransactions(addr); }, 2);
+                txHistory = [];
+                (raw || []).forEach(function (t) {
+                    const p = parseTx(t);
+                    if (p) txHistory.push(p);
+                });
+                renderHistory();
+            } catch (e) {
+                console.error('refreshHistory', e);
+                if (list) list.innerHTML = '<div class="token-empty">Failed to load history</div>';
+            } finally {
+                historyRefreshing = false;
+            }
+        }
+
+
         async function refreshBalance() {
             if (!currentAddressObj || balanceRefreshing) return;
             balanceRefreshing = true;
@@ -1760,6 +1981,7 @@
                 document.getElementById('wallet-balance').innerText = formatTon(currentBalanceNano) + ' TON';
                 document.getElementById('balance-updated').innerText = 'Updated ' + formatTime(new Date());
                 setStatus('Connected', true);
+                try { renderJettons(); } catch (e) {}
 
                 // Keep the withdraw screen's shown balance in sync if it's open
                 const withdrawScreen = document.getElementById('withdraw-screen');
