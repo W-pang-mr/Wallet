@@ -6,7 +6,7 @@
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ========== True iPhone Liquid Glass ========== */
+        /* ========== Blue Liquid Glass + Trust-style send ========== */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -19,13 +19,13 @@
             height: 100%;
         }
         :root {
-            color-scheme: light;
-            --bg: #1a1040;
+            color-scheme: dark;
+            --bg: #061428;
             --text: #ffffff;
-            --text-dim: rgba(255, 255, 255, 0.62);
-            --accent-2: #a78bfa;
-            --accent-2-light: #c4b5fd;
-            --accent-glow: rgba(167, 139, 250, 0.35);
+            --text-dim: rgba(255, 255, 255, 0.58);
+            --accent-2: #38bdf8;
+            --accent-2-light: #7dd3fc;
+            --accent-glow: rgba(56, 189, 248, 0.35);
             --success: #4ade80;
             --danger: #f87171;
             --warn: #fbbf24;
@@ -37,8 +37,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background: var(--bg);
-            color: #fff;
+            color: var(--text);
             min-height: 100%;
             min-height: 100dvh;
             display: flex;
@@ -53,10 +52,12 @@
             position: relative;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            background:
+                radial-gradient(ellipse 120% 80% at 80% 0%, rgba(14, 165, 233, 0.45) 0%, transparent 55%),
+                radial-gradient(ellipse 100% 70% at 0% 100%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse 90% 60% at 50% 40%, rgba(6, 20, 40, 0.95) 0%, #030a16 100%);
         }
 
-        /* Deep liquid ambient — purple / blue like iPhone wallpaper */
         body::before,
         body::after {
             content: '';
@@ -70,19 +71,19 @@
         body::before {
             width: min(130vw, 520px);
             height: min(130vw, 520px);
-            background: radial-gradient(circle at 40% 40%, #7c3aed 0%, #4f46e5 35%, #312e81 70%, transparent 100%);
+            background: radial-gradient(circle at 40% 40%, #0ea5e9 0%, #2563eb 40%, #0c1a3a 75%, transparent 100%);
             top: -25%;
-            right: -30%;
-            opacity: 0.85;
+            right: -28%;
+            opacity: 0.75;
             animation: blobFloat 16s var(--ease) infinite alternate;
         }
         body::after {
             width: min(120vw, 480px);
             height: min(120vw, 480px);
-            background: radial-gradient(circle at 60% 60%, #06b6d4 0%, #2563eb 40%, #1e1b4b 75%, transparent 100%);
-            bottom: -20%;
-            left: -28%;
-            opacity: 0.7;
+            background: radial-gradient(circle at 60% 60%, #38bdf8 0%, #1d4ed8 45%, #061428 80%, transparent 100%);
+            bottom: -18%;
+            left: -26%;
+            opacity: 0.55;
             animation: blobFloat 20s var(--ease) infinite alternate-reverse;
         }
         @keyframes blobFloat {
@@ -90,38 +91,28 @@
             100% { transform: translate3d(24px, 32px, 0) scale(1.1); }
         }
 
-        /* Extra mid glow layer via fixed pseudo on html not possible — use body gradient base */
-        body {
-            background:
-                radial-gradient(ellipse 120% 80% at 70% 10%, rgba(139, 92, 246, 0.45) 0%, transparent 50%),
-                radial-gradient(ellipse 100% 70% at 10% 90%, rgba(37, 99, 235, 0.4) 0%, transparent 50%),
-                radial-gradient(ellipse 80% 60% at 50% 50%, rgba(15, 10, 40, 0.9) 0%, #0c0820 100%);
-        }
-
-        /* ========== LIQUID GLASS PLATE (iPhone style) ========== */
         .glass-card {
             position: relative;
             background: linear-gradient(
                 155deg,
-                rgba(255, 255, 255, 0.22) 0%,
-                rgba(255, 255, 255, 0.08) 45%,
-                rgba(255, 255, 255, 0.04) 100%
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.07) 45%,
+                rgba(255, 255, 255, 0.03) 100%
             );
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.24);
             border-radius: var(--radius-lg);
             box-shadow:
-                0 20px 50px rgba(0, 0, 0, 0.25),
+                0 20px 50px rgba(0, 0, 0, 0.28),
                 0 4px 16px rgba(0, 0, 0, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.35),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+                inset 0 1px 0 rgba(255, 255, 255, 0.32),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
             padding: 22px;
             overflow: hidden;
             isolation: isolate;
             animation: cardIn 0.48s var(--ease) both;
         }
-        /* top specular — liquid shine */
         .glass-card::before {
             content: '';
             position: absolute;
@@ -130,8 +121,8 @@
             border-radius: var(--radius-lg) var(--radius-lg) 0 0;
             background: linear-gradient(
                 180deg,
-                rgba(255, 255, 255, 0.28) 0%,
-                rgba(255, 255, 255, 0.06) 50%,
+                rgba(255, 255, 255, 0.22) 0%,
+                rgba(255, 255, 255, 0.05) 55%,
                 transparent 100%
             );
             pointer-events: none;
@@ -145,47 +136,42 @@
         }
         .screen-enter { animation: cardIn 0.42s var(--ease) both; }
 
-        /* Inputs on dark glass */
         .glass-input {
             width: 100%;
             background: rgba(255, 255, 255, 0.1);
             -webkit-backdrop-filter: blur(16px) saturate(150%);
             backdrop-filter: blur(16px) saturate(150%);
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: var(--radius-sm);
             padding: 14px;
             color: #fff;
             font-size: 13px;
             outline: none;
             transition: border-color 0.22s var(--ease), box-shadow 0.22s var(--ease), background 0.22s var(--ease);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
         .glass-input::placeholder { color: rgba(255, 255, 255, 0.35); }
         .glass-input:focus {
-            border-color: rgba(167, 139, 250, 0.65);
+            border-color: rgba(56, 189, 248, 0.65);
             background: rgba(255, 255, 255, 0.14);
-            box-shadow: 0 0 0 4px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            box-shadow: 0 0 0 4px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.15);
         }
 
-        /* Buttons */
         .btn-primary {
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.28);
             color: #fff;
             font-weight: 600;
             font-size: 14px;
             padding: 15px;
             border-radius: 18px;
             cursor: pointer;
-            background: linear-gradient(145deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%);
+            background: linear-gradient(145deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.06) 100%);
             -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow:
-                0 10px 28px rgba(0, 0, 0, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.35);
+            box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.3);
             transition: transform 0.18s var(--ease), opacity 0.18s var(--ease);
             position: relative;
             overflow: hidden;
@@ -194,11 +180,9 @@
         .btn-primary:disabled { opacity: 0.4; pointer-events: none; }
 
         .btn-blue {
-            background: linear-gradient(145deg, rgba(124, 58, 237, 0.75) 0%, rgba(79, 70, 229, 0.85) 100%);
-            border: 1px solid rgba(196, 181, 253, 0.4);
-            box-shadow:
-                0 12px 32px rgba(124, 58, 237, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            background: linear-gradient(145deg, rgba(14, 165, 233, 0.85) 0%, rgba(37, 99, 235, 0.9) 100%);
+            border: 1px solid rgba(125, 211, 252, 0.4);
+            box-shadow: 0 12px 32px rgba(14, 165, 233, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary {
@@ -207,7 +191,7 @@
             -webkit-appearance: none;
             background: rgba(255, 255, 255, 0.1);
             color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             padding: 15px;
             border-radius: 18px;
             font-weight: 500;
@@ -215,13 +199,10 @@
             cursor: pointer;
             -webkit-backdrop-filter: blur(16px) saturate(150%);
             backdrop-filter: blur(16px) saturate(150%);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
             transition: transform 0.18s var(--ease), background 0.18s var(--ease);
         }
-        .btn-secondary:active {
-            transform: scale(0.975);
-            background: rgba(255, 255, 255, 0.18);
-        }
+        .btn-secondary:active { transform: scale(0.975); background: rgba(255, 255, 255, 0.18); }
 
         .btn-danger {
             width: 100%;
@@ -239,10 +220,7 @@
             backdrop-filter: blur(14px);
             transition: transform 0.18s var(--ease), background 0.18s var(--ease);
         }
-        .btn-danger:active {
-            transform: scale(0.975);
-            background: rgba(248, 113, 113, 0.2);
-        }
+        .btn-danger:active { transform: scale(0.975); background: rgba(248, 113, 113, 0.2); }
 
         .hidden { display: none !important; }
         .flex { display: flex; }
@@ -265,7 +243,7 @@
             background: rgba(255, 255, 255, 0.06);
             padding: 10px;
             border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
         }
@@ -276,7 +254,7 @@
             font-size: 11px;
             text-align: center;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             color: #fff;
             animation: chipIn 0.35s var(--ease) both;
         }
@@ -298,16 +276,15 @@
             backdrop-filter: blur(12px);
         }
         .info-box {
-            background: rgba(167, 139, 250, 0.12);
-            border: 1px solid rgba(167, 139, 250, 0.28);
-            color: #ddd6fe;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            color: #bae6fd;
             border-radius: 16px;
             padding: 12px;
             font-size: 11px;
             line-height: 1.6;
         }
 
-        /* Top bar */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -325,7 +302,7 @@
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: linear-gradient(145deg, rgba(167,139,250,0.5), rgba(79,70,229,0.6));
+            background: linear-gradient(145deg, rgba(56,189,248,0.5), rgba(37,99,235,0.6));
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255,255,255,0.3);
@@ -333,7 +310,7 @@
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            box-shadow: 0 6px 18px rgba(124, 58, 237, 0.35);
+            box-shadow: 0 6px 18px rgba(14, 165, 233, 0.35);
         }
         .status-badge {
             font-size: 10px;
@@ -347,7 +324,6 @@
             border: 1px solid rgba(74, 222, 128, 0.3);
         }
 
-        /* Dashboard */
         .balance-card { text-align: center; padding: 28px 20px; }
         .addr-pill {
             display: inline-flex;
@@ -361,21 +337,18 @@
             color: var(--text-dim);
             margin-bottom: 16px;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             -webkit-backdrop-filter: blur(12px);
             backdrop-filter: blur(12px);
             transition: transform 0.18s var(--ease), background 0.18s var(--ease);
         }
-        .addr-pill:active {
-            transform: scale(0.97);
-            background: rgba(255, 255, 255, 0.18);
-        }
+        .addr-pill:active { transform: scale(0.97); background: rgba(255, 255, 255, 0.18); }
         .balance-num {
             font-size: 42px;
             font-weight: 800;
             letter-spacing: -1.2px;
             margin-bottom: 4px;
-            background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #a78bfa 100%);
+            background: linear-gradient(135deg, #ffffff 0%, #7dd3fc 50%, #38bdf8 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -386,11 +359,7 @@
             from { opacity: 0; transform: scale(0.92); }
             to   { opacity: 1; transform: scale(1); }
         }
-        .balance-updated {
-            font-size: 10px;
-            color: var(--text-dim);
-            margin-bottom: 18px;
-        }
+        .balance-updated { font-size: 10px; color: var(--text-dim); margin-bottom: 18px; }
         .action-row { display: flex; gap: 10px; }
         .action-btn {
             flex: 1;
@@ -401,27 +370,22 @@
             background: rgba(255, 255, 255, 0.1);
             -webkit-backdrop-filter: blur(24px) saturate(170%);
             backdrop-filter: blur(24px) saturate(170%);
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: var(--radius-md);
             padding: 15px 6px;
             cursor: pointer;
             color: #fff;
             transition: transform 0.2s var(--ease), background 0.2s var(--ease);
-            box-shadow:
-                0 8px 24px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
-        .action-btn:active {
-            transform: scale(0.96);
-            background: rgba(255, 255, 255, 0.16);
-        }
+        .action-btn:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.16); }
         .action-btn .icon-circle {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(145deg, rgba(167, 139, 250, 0.35), rgba(79, 70, 229, 0.2));
+            background: linear-gradient(145deg, rgba(56, 189, 248, 0.35), rgba(37, 99, 235, 0.2));
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e9d5ff;
+            color: #e0f2fe;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -430,6 +394,42 @@
         }
         .action-btn:active .icon-circle { transform: scale(1.1); }
         .action-btn span { font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.9); }
+
+        /* Tokens */
+        .token-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: background 0.18s var(--ease);
+            animation: chipIn 0.35s var(--ease) both;
+        }
+        .token-row:active { background: rgba(255, 255, 255, 0.08); }
+        .token-left { display: flex; align-items: center; gap: 12px; }
+        .token-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(56,189,248,0.3), rgba(37,99,235,0.2));
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .token-meta { display: flex; flex-direction: column; text-align: left; gap: 2px; }
+        .token-symbol { font-size: 14px; font-weight: 700; color: #fff; }
+        .token-name { font-size: 11px; color: var(--text-dim); }
+        .token-bal { font-size: 14px; font-weight: 700; color: #e0f2fe; text-align: right; }
+        .token-empty {
+            text-align: center;
+            padding: 18px 8px;
+            color: var(--text-dim);
+            font-size: 12px;
+        }
 
         .list-card {
             display: flex;
@@ -444,7 +444,6 @@
         .list-card .left { display: flex; align-items: center; gap: 12px; }
         .list-card .emoji-icon { font-size: 20px; }
 
-        /* ========== BOTTOM DOCK — true liquid glass ========== */
         .bottom-nav {
             position: fixed;
             left: 50%;
@@ -458,15 +457,14 @@
             justify-content: space-around;
             padding: 10px 8px;
             border-radius: 28px;
-            background: rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.1);
             -webkit-backdrop-filter: blur(48px) saturate(200%);
             backdrop-filter: blur(48px) saturate(200%);
-            border: 1px solid rgba(255, 255, 255, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.24);
             box-shadow:
                 0 12px 40px rgba(0, 0, 0, 0.3),
-                0 2px 8px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.35),
-                inset 0 -1px 0 rgba(255, 255, 255, 0.06);
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.05);
             animation: navUp 0.5s var(--ease) both;
         }
         @keyframes navUp {
@@ -480,29 +478,26 @@
             gap: 3px;
             font-size: 10px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.45);
             cursor: pointer;
             padding: 6px 14px;
             border-radius: 16px;
-            transition: color 0.2s var(--ease), background 0.2s var(--ease), transform 0.15s var(--ease);
+            transition: color 0.2s var(--ease), background 0.2s var(--ease);
         }
         .nav-item.active {
-            color: #e9d5ff;
-            background: rgba(167, 139, 250, 0.22);
-            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: #e0f2fe;
+            background: rgba(56, 189, 248, 0.2);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
         }
-        .nav-item .nav-icon {
-            font-size: 18px;
-            transition: transform 0.2s var(--ease);
-        }
+        .nav-item .nav-icon { font-size: 18px; transition: transform 0.2s var(--ease); }
         .nav-item:active .nav-icon { transform: scale(1.18); }
 
-        /* PIN overlay */
+        /* PIN */
         .pin-overlay {
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(12, 8, 32, 0.55);
+            background: rgba(3, 10, 22, 0.55);
             -webkit-backdrop-filter: blur(36px) saturate(160%);
             backdrop-filter: blur(36px) saturate(160%);
             display: flex;
@@ -510,10 +505,7 @@
             overflow-y: auto;
             animation: fadeIn 0.28s ease both;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .pin-inner {
             width: 100%;
             max-width: 480px;
@@ -528,12 +520,7 @@
                 max(3vh, env(safe-area-inset-bottom, 0px) + 12px);
         }
         .pin-top { display: flex; flex-direction: column; align-items: center; }
-        .pin-icon {
-            font-size: 44px;
-            line-height: 1;
-            margin-bottom: 26px;
-            animation: popIn 0.4s var(--ease);
-        }
+        .pin-icon { font-size: 44px; line-height: 1; margin-bottom: 26px; animation: popIn 0.4s var(--ease); }
         @keyframes popIn {
             from { opacity: 0; transform: scale(0.65); }
             to   { opacity: 1; transform: scale(1); }
@@ -546,15 +533,9 @@
             margin-bottom: 26px;
             line-height: 1.5;
         }
-        .pin-dots {
-            display: flex;
-            gap: 24px;
-            height: 14px;
-            align-items: center;
-        }
+        .pin-dots { display: flex; gap: 24px; height: 14px; align-items: center; }
         .pin-dot {
-            width: 14px;
-            height: 14px;
+            width: 14px; height: 14px;
             border-radius: 50%;
             border: 1.5px solid rgba(255, 255, 255, 0.7);
             background: transparent;
@@ -565,13 +546,7 @@
             transform: scale(1.12);
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.15);
         }
-        .pin-error {
-            color: #fca5a5;
-            font-size: 12px;
-            min-height: 16px;
-            margin-top: 12px;
-            text-align: center;
-        }
+        .pin-error { color: #fca5a5; font-size: 12px; min-height: 16px; margin-top: 12px; text-align: center; }
         .pin-pad {
             display: grid;
             grid-template-columns: repeat(3, auto);
@@ -582,7 +557,7 @@
             width: min(20vw, 84px);
             height: min(20vw, 84px);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.22);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             background: rgba(255, 255, 255, 0.1);
             -webkit-backdrop-filter: blur(18px) saturate(160%);
             backdrop-filter: blur(18px) saturate(160%);
@@ -594,15 +569,10 @@
             cursor: pointer;
             -webkit-user-select: none;
             user-select: none;
-            box-shadow:
-                0 4px 16px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.18);
             transition: transform 0.12s var(--ease), background 0.12s var(--ease);
         }
-        .pin-key:active {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(0.92);
-        }
+        .pin-key:active { background: rgba(255, 255, 255, 0.2); transform: scale(0.92); }
         .pin-key b { font-size: 30px; font-weight: 400; line-height: 1; }
         .pin-key small {
             font-size: 11px;
@@ -613,15 +583,11 @@
             line-height: 12px;
         }
         .pin-key svg { width: 36px; height: 36px; }
-        .pin-key-empty {
-            width: min(20vw, 84px);
-            height: min(20vw, 84px);
-            visibility: hidden;
-        }
+        .pin-key-empty { width: min(20vw, 84px); height: min(20vw, 84px); visibility: hidden; }
         .pin-link {
             background: none;
             border: none;
-            color: #c4b5fd;
+            color: #7dd3fc;
             font-size: 17px;
             cursor: pointer;
             padding: 12px;
@@ -635,14 +601,14 @@
             40%, 60% { transform: translateX(8px); }
         }
 
-        /* Sending overlay */
+        /* ========== Trust Wallet style send overlay ========== */
         .sending-overlay {
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(8, 5, 24, 0.45);
-            -webkit-backdrop-filter: blur(20px) saturate(140%);
-            backdrop-filter: blur(20px) saturate(140%);
+            background: rgba(3, 10, 22, 0.55);
+            -webkit-backdrop-filter: blur(22px) saturate(140%);
+            backdrop-filter: blur(22px) saturate(140%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -652,35 +618,83 @@
         .sending-card {
             width: 100%;
             max-width: 320px;
-            padding: 36px 28px;
+            padding: 36px 28px 28px;
             border-radius: 32px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            background: linear-gradient(155deg, rgba(255,255,255,0.16), rgba(255,255,255,0.05));
+            gap: 14px;
+            background: linear-gradient(155deg, rgba(255,255,255,0.14), rgba(255,255,255,0.04));
             -webkit-backdrop-filter: blur(40px) saturate(180%);
             backdrop-filter: blur(40px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.28);
-            box-shadow:
-                0 24px 60px rgba(0, 0, 0, 0.35),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.28);
             animation: cardIn 0.4s var(--ease) both;
+            overflow: hidden;
         }
-        .sending-spinner {
-            width: 48px;
-            height: 48px;
+        .send-anim {
+            position: relative;
+            width: 88px;
+            height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .send-ring {
+            position: absolute;
+            inset: 0;
             border-radius: 50%;
-            border: 3px solid rgba(167, 139, 250, 0.2);
-            border-top-color: #c4b5fd;
-            animation: sending-spin 0.75s linear infinite;
+            border: 3px solid rgba(56, 189, 248, 0.15);
+            border-top-color: #38bdf8;
+            animation: sending-spin 0.85s linear infinite;
+        }
+        .send-ring.done {
+            border-color: rgba(74, 222, 128, 0.35);
+            border-top-color: #4ade80;
+            animation: none;
+        }
+        .send-core {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, rgba(56,189,248,0.35), rgba(37,99,235,0.25));
+            border: 1px solid rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
+            animation: sendPulse 1.2s var(--ease) infinite;
+        }
+        .send-core.success {
+            background: linear-gradient(145deg, rgba(74,222,128,0.4), rgba(34,197,94,0.25));
+            animation: successPop 0.45s var(--ease) both;
+            font-size: 28px;
+        }
+        .send-core.fail {
+            background: linear-gradient(145deg, rgba(248,113,113,0.4), rgba(220,38,38,0.25));
+            animation: successPop 0.45s var(--ease) both;
+        }
+        @keyframes sendPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+        @keyframes successPop {
+            0% { transform: scale(0.6); opacity: 0.5; }
+            60% { transform: scale(1.12); }
+            100% { transform: scale(1); opacity: 1; }
         }
         @keyframes sending-spin { to { transform: rotate(360deg); } }
-        .sending-icon {
-            font-size: 44px;
-            animation: popIn 0.35s var(--ease);
+
+        .sending-spinner {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 3px solid rgba(56, 189, 248, 0.2);
+            border-top-color: #7dd3fc;
+            animation: sending-spin 0.75s linear infinite;
         }
+        .sending-icon { font-size: 44px; animation: popIn 0.35s var(--ease); }
         .sending-text {
             font-size: 14px;
             font-weight: 600;
@@ -688,18 +702,19 @@
             white-space: pre-line;
             line-height: 1.6;
         }
+        .sending-sub {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-top: -6px;
+        }
 
-        /* Force light text on cards that had dark text */
         .glass-card h2,
         .glass-card h3,
         .glass-card .font-bold,
         .glass-card label,
-        .list-card {
-            color: #fff;
-        }
+        .list-card { color: #fff; }
         .list-card .text-xs { color: var(--text-dim); }
 
-        /* Reduced motion */
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: 0.01ms !important;
@@ -708,7 +723,6 @@
             }
         }
 
-        /* Fallback without backdrop-filter */
         @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
             .glass-card,
             .bottom-nav,
@@ -718,7 +732,7 @@
             .glass-input,
             .pin-key,
             .sending-card {
-                background: rgba(40, 30, 80, 0.92);
+                background: rgba(10, 30, 60, 0.94);
             }
         }
     </style>
@@ -868,9 +882,14 @@
                 </div>
             </div>
 
-            <div id="jettons-card" class="glass-card hidden flex flex-col gap-3">
-                <div class="text-sm font-bold">Tokens</div>
-                <div id="jettons-list" class="flex flex-col gap-3"></div>
+            <div id="jettons-card" class="glass-card flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm font-bold">Tokens</div>
+                    <span class="text-xs" id="jettons-count">—</span>
+                </div>
+                <div id="jettons-list" class="flex flex-col gap-1">
+                    <div class="token-empty">Loading tokens...</div>
+                </div>
             </div>
 
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
@@ -985,10 +1004,15 @@
     <!-- Sending / connecting status overlay -->
     <div id="sending-overlay" class="sending-overlay hidden">
         <div class="sending-card">
-            <div id="sending-spinner" class="sending-spinner"></div>
+            <div class="send-anim">
+                <div id="send-ring" class="send-ring"></div>
+                <div id="send-core" class="send-core">↑</div>
+            </div>
+            <div id="sending-spinner" class="sending-spinner hidden"></div>
             <div id="sending-icon" class="sending-icon hidden"></div>
             <div id="sending-text" class="sending-text">Sending...</div>
-            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()">OK</button>
+            <div id="sending-sub" class="sending-sub">Please wait</div>
+            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()" style="margin-top:6px;">OK</button>
         </div>
     </div>
 
@@ -1273,18 +1297,33 @@
 
         // ================= status overlay (sending / connecting) =================
         function showSendingOverlay(text) {
-            document.getElementById('sending-spinner').classList.remove('hidden');
+            const ring = document.getElementById('send-ring');
+            const core = document.getElementById('send-core');
+            const sub = document.getElementById('sending-sub');
+            if (ring) { ring.classList.remove('done', 'hidden'); }
+            if (core) { core.className = 'send-core'; core.innerText = '↑'; }
+            document.getElementById('sending-spinner').classList.add('hidden');
             document.getElementById('sending-icon').classList.add('hidden');
             document.getElementById('sending-close').classList.add('hidden');
-            document.getElementById('sending-text').innerText = text;
+            document.getElementById('sending-text').innerText = text || 'Sending...';
+            if (sub) { sub.classList.remove('hidden'); sub.innerText = 'Confirming on network'; }
             document.getElementById('sending-overlay').classList.remove('hidden');
         }
         function setSendingResult(success, text) {
+            const ring = document.getElementById('send-ring');
+            const core = document.getElementById('send-core');
+            const sub = document.getElementById('sending-sub');
             document.getElementById('sending-spinner').classList.add('hidden');
-            const icon = document.getElementById('sending-icon');
-            icon.classList.remove('hidden');
-            icon.innerText = success ? '✅' : '⚠️';
+            document.getElementById('sending-icon').classList.add('hidden');
+            if (ring) ring.classList.add('done');
+            if (core) {
+                core.className = 'send-core ' + (success ? 'success' : 'fail');
+                core.innerText = success ? '✓' : '!';
+            }
             document.getElementById('sending-text').innerText = text;
+            if (sub) {
+                sub.innerText = success ? 'Transaction broadcast' : 'Something went wrong';
+            }
             document.getElementById('sending-close').classList.remove('hidden');
         }
         function hideSendingOverlay() {
@@ -1684,17 +1723,30 @@
         function renderJettons() {
             const card = document.getElementById('jettons-card');
             const list = document.getElementById('jettons-list');
+            const countEl = document.getElementById('jettons-count');
             list.innerHTML = '';
-            if (jettons.length === 0) { card.classList.add('hidden'); return; }
             card.classList.remove('hidden');
-            jettons.forEach(function (j) {
+            if (!jettons || jettons.length === 0) {
+                if (countEl) countEl.innerText = '0';
+                list.innerHTML = '<div class="token-empty">No tokens found in this wallet</div>';
+                return;
+            }
+            if (countEl) countEl.innerText = jettons.length + ' token' + (jettons.length > 1 ? 's' : '');
+            jettons.forEach(function (j, idx) {
                 const row = document.createElement('div');
-                row.className = 'list-card';
-                row.style.padding = '10px 4px';
+                row.className = 'token-row';
+                row.style.animationDelay = (idx * 0.04) + 's';
                 row.onclick = function () { showSendJetton(j); };
-                row.innerHTML = '<div class="left"><span class="emoji-icon">🪙</span><div style="display:flex; flex-direction:column; text-align:left;"><span class="text-sm font-bold">' +
-                    escapeHtml(j.symbol) + '</span><span class="text-xs">' + escapeHtml(j.name) + '</span></div></div><span class="text-sm font-bold">' +
-                    formatJetton(j.balance, j.decimals) + '</span>';
+                const iconLetter = (j.symbol || '?').slice(0, 1).toUpperCase();
+                row.innerHTML =
+                    '<div class="token-left">' +
+                      '<div class="token-icon">' + escapeHtml(iconLetter) + '</div>' +
+                      '<div class="token-meta">' +
+                        '<span class="token-symbol">' + escapeHtml(j.symbol) + '</span>' +
+                        '<span class="token-name">' + escapeHtml(j.name) + '</span>' +
+                      '</div>' +
+                    '</div>' +
+                    '<span class="token-bal">' + formatJetton(j.balance, j.decimals) + '</span>';
                 list.appendChild(row);
             });
         }
@@ -2469,4 +2521,4 @@
         });
     </script>
 </body>
-    </html>
+</html>
