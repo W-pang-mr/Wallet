@@ -419,6 +419,7 @@
             justify-content: center;
             font-size: 18px;
             flex-shrink: 0;
+            overflow: hidden;
         }
         .token-meta { display: flex; flex-direction: column; text-align: left; gap: 2px; }
         .token-symbol { font-size: 14px; font-weight: 700; color: #fff; }
@@ -430,6 +431,26 @@
             color: var(--text-dim);
             font-size: 12px;
         }
+        .token-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .history-more {
+            text-align: center;
+            padding: 12px 8px;
+            margin-top: 4px;
+            border-radius: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-2-light);
+            cursor: pointer;
+            background: rgba(56, 189, 248, 0.08);
+            border: 1px solid rgba(56, 189, 248, 0.18);
+            transition: background 0.18s var(--ease);
+        }
+        .history-more:active { background: rgba(56, 189, 248, 0.16); }
 
         /* History */
         .tx-row {
@@ -1735,7 +1756,8 @@
                 return {
                     symbol: c.symbol || '???',
                     name: c.name || 'Unknown Token',
-                    decimals: c.decimals !== undefined && c.decimals !== null ? parseInt(c.decimals) : 9
+                    decimals: c.decimals !== undefined && c.decimals !== null ? parseInt(c.decimals) : 9,
+                    image: c.image || c.image_data || ''
                 };
             } catch (e) {
                 console.error('jetton master fetch failed', e);
@@ -1766,7 +1788,8 @@
                         balance: BigInt(w.balance),
                         decimals: meta.decimals,
                         symbol: meta.symbol,
-                        name: meta.name
+                        name: meta.name,
+                        image: meta.image || ''
                     };
                 });
                 renderJettons();
@@ -1785,6 +1808,15 @@
             list.innerHTML = '';
             card.classList.remove('hidden');
 
+            const TON_IMG = 'https://ton.org/download/ton_symbol.png';
+
+            function tokenIconHtml(imageUrl, fallback) {
+                if (imageUrl) {
+                    return '<img src="' + escapeHtml(imageUrl) + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + escapeHtml(fallback) + '\';" />';
+                }
+                return escapeHtml(fallback);
+            }
+
             // Always show native TON first
             const tonBal = (typeof currentBalanceNano !== 'undefined' && currentBalanceNano != null)
                 ? currentBalanceNano : 0n;
@@ -1793,7 +1825,7 @@
             tonRow.onclick = function () { showWithdraw(); };
             tonRow.innerHTML =
                 '<div class="token-left">' +
-                  '<div class="token-icon">💎</div>' +
+                  '<div class="token-icon">' + tokenIconHtml(TON_IMG, '💎') + '</div>' +
                   '<div class="token-meta">' +
                     '<span class="token-symbol">TON</span>' +
                     '<span class="token-name">Toncoin</span>' +
@@ -1812,7 +1844,7 @@
                 const iconLetter = (j.symbol || '?').slice(0, 1).toUpperCase();
                 row.innerHTML =
                     '<div class="token-left">' +
-                      '<div class="token-icon">' + escapeHtml(iconLetter) + '</div>' +
+                      '<div class="token-icon">' + tokenIconHtml(j.image, iconLetter) + '</div>' +
                       '<div class="token-meta">' +
                         '<span class="token-symbol">' + escapeHtml(j.symbol) + '</span>' +
                         '<span class="token-name">' + escapeHtml(j.name) + '</span>' +
@@ -1889,7 +1921,7 @@
             return null;
         }
 
-        function renderHistory() {
+        function renderHistory(showAll) {
             const list = document.getElementById('history-list');
             if (!list) return;
             list.innerHTML = '';
@@ -1897,7 +1929,9 @@
                 list.innerHTML = '<div class="token-empty">No transactions yet</div>';
                 return;
             }
-            txHistory.forEach(function (tx, idx) {
+            const limit = showAll ? txHistory.length : 3;
+            const slice = txHistory.slice(0, limit);
+            slice.forEach(function (tx, idx) {
                 const row = document.createElement('div');
                 row.className = 'tx-row';
                 row.style.animationDelay = (idx * 0.03) + 's';
@@ -1918,6 +1952,19 @@
                 row.onclick = function () { showTxDetail(tx); };
                 list.appendChild(row);
             });
+            if (!showAll && txHistory.length > 3) {
+                const more = document.createElement('div');
+                more.className = 'history-more';
+                more.innerText = 'Show more (' + (txHistory.length - 3) + ')';
+                more.onclick = function () { renderHistory(true); };
+                list.appendChild(more);
+            } else if (showAll && txHistory.length > 3) {
+                const less = document.createElement('div');
+                less.className = 'history-more';
+                less.innerText = 'Show less';
+                less.onclick = function () { renderHistory(false); };
+                list.appendChild(less);
+            }
         }
 
         function showTxDetail(tx) {
@@ -2743,4 +2790,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
