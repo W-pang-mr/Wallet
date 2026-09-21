@@ -635,6 +635,86 @@
         }
         .sending-sub { font-size: 12px; color: var(--muted); margin-top: -4px; }
 
+
+        /* Swap */
+        .swap-box { display: flex; flex-direction: column; gap: 8px; }
+        .swap-leg {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 12px;
+        }
+        .swap-leg-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 8px; font-size: 11px; color: var(--muted);
+        }
+        .swap-leg-row { display: flex; gap: 10px; align-items: center; }
+        .swap-amount {
+            flex: 1; min-width: 0;
+            background: transparent; border: none; outline: none;
+            color: #fff; font-size: 22px; font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .swap-amount::placeholder { color: rgba(255,255,255,0.25); font-weight: 600; }
+        .swap-token-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 6px 10px 6px 6px;
+            color: #fff; font-weight: 700; font-size: 13px;
+            cursor: pointer; flex-shrink: 0;
+            transition: background 0.15s ease;
+        }
+        .swap-token-btn:active { background: rgba(255,255,255,0.14); }
+        .swap-token-btn img, .swap-token-ico {
+            width: 28px; height: 28px; border-radius: 50%;
+            object-fit: cover; background: rgba(59,158,255,0.15);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 700;
+        }
+        .swap-flip {
+            align-self: center;
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1px solid var(--line);
+            background: rgba(59,158,255,0.12);
+            color: #fff; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; margin: -4px 0;
+            transition: transform 0.25s var(--spring), background 0.15s ease;
+            z-index: 2;
+        }
+        .swap-flip:active { transform: rotate(180deg) scale(0.95); background: rgba(59,158,255,0.22); }
+        .swap-details {
+            background: rgba(0,0,0,0.18);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 10px 12px;
+            font-size: 12px;
+        }
+        .swap-detail-row {
+            display: flex; justify-content: space-between; gap: 10px;
+            padding: 6px 0; color: var(--muted);
+        }
+        .swap-detail-row b { color: #fff; font-weight: 650; text-align: right; }
+        .swap-picker {
+            max-height: 260px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 4px;
+            margin-top: 8px;
+        }
+        .swap-picker-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px; border-radius: 12px; cursor: pointer;
+        }
+        .swap-picker-item:active { background: rgba(255,255,255,0.06); }
+        .swap-picker-item img, .swap-picker-ico {
+            width: 32px; height: 32px; border-radius: 50%;
+            object-fit: cover; background: rgba(59,158,255,0.12);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; font-weight: 700; flex-shrink: 0;
+        }
+        .swap-rate { font-size: 11px; color: var(--muted); text-align: center; min-height: 16px; }
+    
         .screen-enter { animation: rise 0.35s var(--ease) both; }
 
         .glass-card h2, .glass-card h3, .glass-card .font-bold, .glass-card label, .list-card { color: #fff; }
@@ -764,6 +844,64 @@
 
         <!-- Security settings -->
         <div 
+        
+        <!-- Swap (STON.fi) -->
+        <div id="swap-screen" class="glass-card hidden flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold" style="font-size:15px;">Swap</h3>
+                <span class="text-xs">via STON.fi</span>
+            </div>
+            <div class="swap-box">
+                <div class="swap-leg">
+                    <div class="swap-leg-top">
+                        <span>You pay</span>
+                        <span id="swap-from-bal" style="cursor:pointer;" onclick="swapSetMax()">Balance: —</span>
+                    </div>
+                    <div class="swap-leg-row">
+                        <input id="swap-from-amount" class="swap-amount" type="text" inputmode="decimal" placeholder="0" oninput="scheduleSwapQuote()" />
+                        <button type="button" class="swap-token-btn" onclick="openSwapPicker('from')">
+                            <span id="swap-from-ico" class="swap-token-ico">💎</span>
+                            <span id="swap-from-sym">TON</span>
+                            <span style="opacity:.5;">▾</span>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="swap-flip" onclick="flipSwapTokens()" title="Flip">⇅</button>
+                <div class="swap-leg">
+                    <div class="swap-leg-top">
+                        <span>You receive</span>
+                        <span id="swap-to-bal">Balance: —</span>
+                    </div>
+                    <div class="swap-leg-row">
+                        <input id="swap-to-amount" class="swap-amount" type="text" inputmode="decimal" placeholder="0" readonly />
+                        <button type="button" class="swap-token-btn" onclick="openSwapPicker('to')">
+                            <span id="swap-to-ico" class="swap-token-ico">$</span>
+                            <span id="swap-to-sym">USD₮</span>
+                            <span style="opacity:.5;">▾</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="swap-rate" id="swap-rate">Enter an amount to get a quote</div>
+            <div id="swap-details" class="swap-details hidden"></div>
+            <div class="flex justify-between items-center" style="gap:8px;">
+                <span class="text-xs">Slippage</span>
+                <select id="swap-slippage" class="glass-input" style="width:auto;padding:8px 12px;" onchange="scheduleSwapQuote()">
+                    <option value="0.005">0.5%</option>
+                    <option value="0.01" selected>1%</option>
+                    <option value="0.02">2%</option>
+                    <option value="0.05">5%</option>
+                </select>
+            </div>
+            <button id="btn-swap" class="btn-primary btn-blue" onclick="executeSwap()" disabled>Enter amount</button>
+            <button class="btn-secondary" onclick="showScreen('dashboard-screen')">Back</button>
+            <div id="swap-picker-panel" class="hidden">
+                <input id="swap-picker-search" class="glass-input" placeholder="Search symbol or paste address" oninput="renderSwapPicker()" />
+                <div id="swap-picker-list" class="swap-picker"></div>
+                <button class="btn-secondary" style="margin-top:8px;" onclick="closeSwapPicker()">Close</button>
+            </div>
+        </div>
+
         <!-- Transaction detail -->
         <div id="tx-detail-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 15px;">Transaction Details</h3>
@@ -796,7 +934,7 @@
                         <div class="icon-circle">↓</div>
                         <span>Receive</span>
                     </div>
-                    <div class="action-btn" onclick="alert('Swap is coming soon')">
+                    <div class="action-btn" onclick="showSwapScreen()">
                         <div class="icon-circle">⇄</div>
                         <span>Swap</span>
                     </div>
@@ -853,7 +991,7 @@
                     <span class="nav-icon">💎</span>
                     <span>Wallet</span>
                 </div>
-                <div class="nav-item" onclick="alert('Swap is coming soon')">
+                <div class="nav-item" onclick="showSwapScreen()">
                     <span class="nav-icon">⇄</span>
                     <span>Swap</span>
                 </div>
@@ -952,7 +1090,7 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'swap-screen', 'tx-detail-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17'; // toncenter API key
         const FEE_RESERVE = 10000000n;     // 0.01 TON reserved for network fees
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
@@ -2249,6 +2387,468 @@
             }
         }
 
+        
+        // ================= STON.fi Swap =================
+        const STON_API = 'https://api.ston.fi';
+        const STON_TON = 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c';
+        const STON_POPULAR = [
+            { address: STON_TON, symbol: 'TON', name: 'Toncoin', decimals: 9, image: 'https://raw.githubusercontent.com/ton-community/ton-docs/main/static/img/ton_symbol.png', isTon: true },
+            { address: 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs', symbol: 'USD₮', name: 'Tether USD', decimals: 6, image: '', isTon: false },
+            { address: 'EQA2kCVNwVsil2EM2mB0SkXytxCqQjS4mttjDpnXmwG9T6bO', symbol: 'STON', name: 'STON', decimals: 9, image: '', isTon: false },
+            { address: 'EQC98_qAmNEptUtPc7W6xdHh_ZHrBUFpw5Ft_IzNU20QAJav', symbol: 'tsTON', name: 'tsTON', decimals: 9, image: '', isTon: false },
+            { address: 'EQD0vdSA_NedR9uvbgN9EikRX-suesDxGeFg69XQMavfLqIw', symbol: 'NOT', name: 'Notcoin', decimals: 9, image: '', isTon: false }
+        ];
+
+        let stonSdk = null;
+        let swapFrom = Object.assign({}, STON_POPULAR[0]);
+        let swapTo = Object.assign({}, STON_POPULAR[1]);
+        let swapQuote = null;
+        let swapQuoteTimer = null;
+        let swapPickerSide = 'from';
+        let swapBusy = false;
+
+        async function loadStonSdk() {
+            if (stonSdk) return stonSdk;
+            stonSdk = await import('https://esm.sh/@ston-fi/sdk@2.7.0');
+            return stonSdk;
+        }
+
+        function isStonTon(addr) {
+            try {
+                if (!addr || addr === STON_TON) return true;
+                const a = libs.Address.parse(addr);
+                return a.equals(libs.Address.parse(STON_TON));
+            } catch (e) { return addr === STON_TON; }
+        }
+
+        function swapTokenBalance(token) {
+            if (!token) return 0n;
+            if (token.isTon || isStonTon(token.address)) return currentBalanceNano || 0n;
+            const j = (jettons || []).find(function (x) {
+                try { return libs.Address.parse(x.masterAddress).equals(libs.Address.parse(token.address)); }
+                catch (e) { return x.masterAddress === token.address; }
+            });
+            return j ? j.balance : 0n;
+        }
+
+        function formatUnits(raw, decimals) {
+            const d = Number(decimals) || 0;
+            const n = BigInt(raw || 0);
+            const base = 10n ** BigInt(d);
+            const whole = n / base;
+            const frac = (n % base).toString().padStart(d, '0').replace(/0+$/, '');
+            return frac ? whole.toString() + '.' + frac : whole.toString();
+        }
+
+        function parseUnits(str, decimals) {
+            const s = normalizeNumber(String(str || ''));
+            if (!/^\d+(\.\d+)?$/.test(s)) throw new Error('bad amount');
+            const d = Number(decimals) || 0;
+            const parts = s.split('.');
+            const whole = parts[0];
+            const frac = (parts[1] || '').padEnd(d, '0').slice(0, d);
+            return BigInt(whole) * (10n ** BigInt(d)) + (frac ? BigInt(frac) : 0n);
+        }
+
+        function renderSwapTokenBtn(side) {
+            const t = side === 'from' ? swapFrom : swapTo;
+            const sym = document.getElementById(side === 'from' ? 'swap-from-sym' : 'swap-to-sym');
+            const ico = document.getElementById(side === 'from' ? 'swap-from-ico' : 'swap-to-ico');
+            sym.innerText = t.symbol || '???';
+            if (t.image) {
+                ico.outerHTML = '<img id="' + (side === 'from' ? 'swap-from-ico' : 'swap-to-ico') + '" class="swap-token-ico" src="' + escapeHtml(t.image) + '" alt="" onerror="this.outerHTML=\'<span id=\\\'\' + this.id + \'\\\' class=\\\'swap-token-ico\\\'>' + escapeHtml((t.symbol || '?').slice(0,1)) + '</span>\'" />';
+            } else {
+                // ensure span
+                if (ico.tagName === 'IMG') {
+                    ico.outerHTML = '<span id="' + (side === 'from' ? 'swap-from-ico' : 'swap-to-ico') + '" class="swap-token-ico">' + escapeHtml((t.symbol || '?').slice(0, 1)) + '</span>';
+                } else {
+                    ico.innerText = (t.symbol || '?').slice(0, 1);
+                }
+            }
+            const balEl = document.getElementById(side === 'from' ? 'swap-from-bal' : 'swap-to-bal');
+            const bal = swapTokenBalance(t);
+            balEl.innerText = 'Balance: ' + formatUnits(bal, t.decimals);
+        }
+
+        function refreshSwapBalances() {
+            renderSwapTokenBtn('from');
+            renderSwapTokenBtn('to');
+        }
+
+        function showSwapScreen() {
+            if (!currentAddressObj) { alert('Open your wallet first.'); return; }
+            document.getElementById('swap-from-amount').value = '';
+            document.getElementById('swap-to-amount').value = '';
+            document.getElementById('swap-details').classList.add('hidden');
+            document.getElementById('swap-details').innerHTML = '';
+            document.getElementById('swap-rate').innerText = 'Enter an amount to get a quote';
+            const btn = document.getElementById('btn-swap');
+            btn.disabled = true;
+            btn.innerText = 'Enter amount';
+            swapQuote = null;
+            closeSwapPicker();
+            refreshSwapBalances();
+            // enrich popular images from jettons if possible
+            showScreen('swap-screen');
+            // preload ston sdk in background
+            loadStonSdk().catch(function (e) { console.error(e); });
+        }
+
+        function flipSwapTokens() {
+            const a = swapFrom; swapFrom = swapTo; swapTo = a;
+            const fromAmt = document.getElementById('swap-from-amount').value;
+            document.getElementById('swap-from-amount').value = '';
+            document.getElementById('swap-to-amount').value = '';
+            refreshSwapBalances();
+            if (fromAmt) {
+                document.getElementById('swap-from-amount').value = fromAmt;
+            }
+            scheduleSwapQuote();
+        }
+
+        function swapSetMax() {
+            const bal = swapTokenBalance(swapFrom);
+            document.getElementById('swap-from-amount').value = formatUnits(bal, swapFrom.decimals);
+            scheduleSwapQuote();
+        }
+
+        function openSwapPicker(side) {
+            swapPickerSide = side;
+            document.getElementById('swap-picker-panel').classList.remove('hidden');
+            document.getElementById('swap-picker-search').value = '';
+            renderSwapPicker();
+        }
+        function closeSwapPicker() {
+            const p = document.getElementById('swap-picker-panel');
+            if (p) p.classList.add('hidden');
+        }
+
+        function swapTokenList() {
+            const map = {};
+            STON_POPULAR.forEach(function (t) { map[t.address] = Object.assign({}, t); });
+            // user jettons
+            (jettons || []).forEach(function (j) {
+                const addr = j.masterAddress;
+                map[addr] = {
+                    address: addr,
+                    symbol: j.symbol,
+                    name: j.name,
+                    decimals: j.decimals,
+                    image: j.image || '',
+                    isTon: false
+                };
+            });
+            return Object.keys(map).map(function (k) { return map[k]; });
+        }
+
+        function renderSwapPicker() {
+            const q = (document.getElementById('swap-picker-search').value || '').trim().toLowerCase();
+            const list = document.getElementById('swap-picker-list');
+            list.innerHTML = '';
+            let tokens = swapTokenList();
+            if (q) {
+                tokens = tokens.filter(function (t) {
+                    return (t.symbol || '').toLowerCase().includes(q)
+                        || (t.name || '').toLowerCase().includes(q)
+                        || (t.address || '').toLowerCase().includes(q);
+                });
+            }
+            // if query looks like address and not in list, allow custom
+            if (q.length > 40 && tokens.length === 0) {
+                const row = document.createElement('div');
+                row.className = 'swap-picker-item';
+                row.innerHTML = '<div class="swap-picker-ico">+</div><div><div class="text-sm font-bold">Use address</div><div class="text-xs">' + escapeHtml(q.slice(0, 12) + '...' + q.slice(-6)) + '</div></div>';
+                row.onclick = async function () {
+                    try {
+                        if (!(await libsReady())) return;
+                        const parsed = libs.Address.parse(q);
+                        const meta = await fetchJettonMaster(parsed.toString()) || {};
+                        selectSwapToken({
+                            address: parsed.toString({ urlSafe: true, bounceable: true }),
+                            symbol: meta.symbol || 'JETTON',
+                            name: meta.name || 'Custom token',
+                            decimals: meta.decimals != null ? meta.decimals : 9,
+                            image: meta.image || '',
+                            isTon: false
+                        });
+                    } catch (e) { alert('Invalid token address'); }
+                };
+                list.appendChild(row);
+                return;
+            }
+            tokens.forEach(function (t) {
+                const row = document.createElement('div');
+                row.className = 'swap-picker-item';
+                const letter = (t.symbol || '?').slice(0, 1);
+                const icon = t.image
+                    ? '<img class="swap-picker-ico" src="' + escapeHtml(t.image) + '" alt="" onerror="this.outerHTML=\\'<div class=\\\\\'swap-picker-ico\\\\\'>' + letter + '</div>\\\'" />'
+                    : '<div class="swap-picker-ico">' + escapeHtml(letter) + '</div>';
+                const bal = swapTokenBalance(t);
+                row.innerHTML = icon + '<div style="flex:1;min-width:0;"><div class="text-sm font-bold">' + escapeHtml(t.symbol) + '</div><div class="text-xs">' + escapeHtml(t.name || '') + '</div></div><div class="text-xs">' + formatUnits(bal, t.decimals) + '</div>';
+                row.onclick = function () { selectSwapToken(t); };
+                list.appendChild(row);
+            });
+            if (!tokens.length) {
+                list.innerHTML = '<div class="token-empty">No tokens found</div>';
+            }
+        }
+
+        function selectSwapToken(t) {
+            if (swapPickerSide === 'from') {
+                if (swapTo && t.address === swapTo.address) flipSwapTokens();
+                else swapFrom = Object.assign({}, t, { isTon: !!t.isTon || isStonTon(t.address) });
+            } else {
+                if (swapFrom && t.address === swapFrom.address) flipSwapTokens();
+                else swapTo = Object.assign({}, t, { isTon: !!t.isTon || isStonTon(t.address) });
+            }
+            closeSwapPicker();
+            refreshSwapBalances();
+            scheduleSwapQuote();
+        }
+
+        function scheduleSwapQuote() {
+            if (swapQuoteTimer) clearTimeout(swapQuoteTimer);
+            const btn = document.getElementById('btn-swap');
+            btn.disabled = true;
+            btn.innerText = 'Fetching quote...';
+            document.getElementById('swap-rate').innerText = 'Fetching quote...';
+            swapQuoteTimer = setTimeout(function () { fetchSwapQuote().catch(function (e) { console.error(e); }); }, 400);
+        }
+
+        async function fetchSwapQuote() {
+            swapQuote = null;
+            const amountStr = normalizeNumber(document.getElementById('swap-from-amount').value);
+            const btn = document.getElementById('btn-swap');
+            const details = document.getElementById('swap-details');
+            const rateEl = document.getElementById('swap-rate');
+            if (!amountStr || amountStr === '0') {
+                document.getElementById('swap-to-amount').value = '';
+                details.classList.add('hidden');
+                rateEl.innerText = 'Enter an amount to get a quote';
+                btn.disabled = true;
+                btn.innerText = 'Enter amount';
+                return;
+            }
+            let offerUnits;
+            try { offerUnits = parseUnits(amountStr, swapFrom.decimals); }
+            catch (e) {
+                rateEl.innerText = 'Invalid amount';
+                btn.disabled = true;
+                btn.innerText = 'Invalid amount';
+                return;
+            }
+            if (offerUnits <= 0n) {
+                rateEl.innerText = 'Amount must be > 0';
+                btn.disabled = true;
+                btn.innerText = 'Enter amount';
+                return;
+            }
+            const bal = swapTokenBalance(swapFrom);
+            if (offerUnits > bal) {
+                rateEl.innerText = 'Insufficient balance';
+                btn.disabled = true;
+                btn.innerText = 'Insufficient balance';
+                document.getElementById('swap-to-amount').value = '';
+                details.classList.add('hidden');
+                return;
+            }
+            if (swapFrom.address === swapTo.address) {
+                rateEl.innerText = 'Select different tokens';
+                btn.disabled = true;
+                btn.innerText = 'Select tokens';
+                return;
+            }
+
+            const slip = document.getElementById('swap-slippage').value || '0.01';
+            const offerAddr = (swapFrom.isTon || isStonTon(swapFrom.address)) ? STON_TON : swapFrom.address;
+            const askAddr = (swapTo.isTon || isStonTon(swapTo.address)) ? STON_TON : swapTo.address;
+
+            try {
+                const url = STON_API + '/v1/swap/simulate?offer_address=' + encodeURIComponent(offerAddr)
+                    + '&ask_address=' + encodeURIComponent(askAddr)
+                    + '&units=' + offerUnits.toString()
+                    + '&slippage_tolerance=' + encodeURIComponent(slip)
+                    + '&dex_v2=true';
+                const res = await fetch(url, { method: 'POST' });
+                if (!res.ok) {
+                    const errTxt = await res.text().catch(function () { return ''; });
+                    throw new Error('Quote failed (' + res.status + ') ' + errTxt.slice(0, 120));
+                }
+                const sim = await res.json();
+                if (!sim.ask_units || !sim.router_address) throw new Error('Incomplete quote');
+                swapQuote = sim;
+
+                const outStr = formatUnits(sim.ask_units, swapTo.decimals);
+                document.getElementById('swap-to-amount').value = outStr;
+
+                const inHuman = Number(formatUnits(sim.offer_units, swapFrom.decimals));
+                const outHuman = Number(formatUnits(sim.ask_units, swapTo.decimals));
+                const rate = inHuman > 0 ? (outHuman / inHuman) : 0;
+                rateEl.innerText = '1 ' + swapFrom.symbol + ' ≈ ' + (rate > 0 ? rate.toPrecision(6) : '—') + ' ' + swapTo.symbol;
+
+                const minOut = formatUnits(sim.min_ask_units || sim.recommended_min_ask_units || sim.ask_units, swapTo.decimals);
+                const impact = sim.price_impact != null ? (Number(sim.price_impact) * 100).toFixed(4) + '%' : '—';
+                const feePct = sim.fee_percent != null ? (Number(sim.fee_percent) * 100).toFixed(3) + '%' : '—';
+                const gasFwd = sim.gas_params && sim.gas_params.forward_gas
+                    ? formatUnits(sim.gas_params.forward_gas, 9) + ' TON' : '—';
+                const routerVer = sim.router
+                    ? ('v' + sim.router.major_version + '.' + (sim.router.minor_version || 0))
+                    : '—';
+
+                details.classList.remove('hidden');
+                details.innerHTML =
+                    '<div class="swap-detail-row"><span>Min received</span><b>' + escapeHtml(minOut) + ' ' + escapeHtml(swapTo.symbol) + '</b></div>' +
+                    '<div class="swap-detail-row"><span>Price impact</span><b>' + escapeHtml(impact) + '</b></div>' +
+                    '<div class="swap-detail-row"><span>LP fee</span><b>' + escapeHtml(feePct) + '</b></div>' +
+                    '<div class="swap-detail-row"><span>Forward gas</span><b>' + escapeHtml(gasFwd) + '</b></div>' +
+                    '<div class="swap-detail-row"><span>Router</span><b>' + escapeHtml(routerVer) + '</b></div>' +
+                    '<div class="swap-detail-row"><span>Pool</span><b style="font-size:10px;word-break:break-all;">' + escapeHtml(shortAddr(sim.pool_address || '—')) + '</b></div>';
+
+                btn.disabled = false;
+                btn.innerText = 'Swap ' + swapFrom.symbol + ' → ' + swapTo.symbol;
+            } catch (e) {
+                console.error('swap quote', e);
+                document.getElementById('swap-to-amount').value = '';
+                details.classList.add('hidden');
+                rateEl.innerText = 'Quote unavailable: ' + (e.message || 'error');
+                btn.disabled = true;
+                btn.innerText = 'Quote failed';
+                swapQuote = null;
+            }
+        }
+
+        async function executeSwap() {
+            if (swapBusy || sending || !swapQuote) return;
+            if (!currentAddressObj) return;
+            const sim = swapQuote;
+            const amountStr = normalizeNumber(document.getElementById('swap-from-amount').value);
+            let offerUnits;
+            try { offerUnits = parseUnits(amountStr, swapFrom.decimals); }
+            catch (e) { alert('Invalid amount'); return; }
+            if (offerUnits <= 0n) { alert('Amount must be greater than zero'); return; }
+            if (offerUnits > swapTokenBalance(swapFrom)) { alert('Insufficient balance'); return; }
+
+            const auth = await authorizeAction('Enter PIN to confirm swap');
+            if (!auth) return;
+
+            swapBusy = true;
+            sending = true;
+            const btn = document.getElementById('btn-swap');
+            btn.disabled = true;
+            showSendingOverlay('Preparing STON.fi swap...');
+
+            let words = null;
+            try {
+                if (!(await libsReady())) throw new Error('Libraries not ready');
+                const ston = await loadStonSdk();
+                const dexFactory = ston.dexFactory;
+                if (!dexFactory) throw new Error('STON SDK dexFactory missing');
+
+                const routerInfo = sim.router || {};
+                const contracts = dexFactory({
+                    majorVersion: routerInfo.major_version,
+                    minorVersion: routerInfo.minor_version,
+                    routerType: routerInfo.router_type
+                });
+
+                const routerAddr = libs.Address.parse(sim.router_address);
+                const router = tonClient.open(new contracts.Router(routerAddr));
+
+                // pTON instance for this router
+                let proxyTon;
+                if (routerInfo.pton_master_address) {
+                    proxyTon = new contracts.pTON(libs.Address.parse(routerInfo.pton_master_address));
+                } else if (contracts.pTON && contracts.pTON.create) {
+                    proxyTon = contracts.pTON.create(routerAddr);
+                } else {
+                    proxyTon = new contracts.pTON();
+                }
+
+                const offerIsTon = swapFrom.isTon || isStonTon(swapFrom.address);
+                const askIsTon = swapTo.isTon || isStonTon(swapTo.address);
+                const minAsk = BigInt(sim.min_ask_units || sim.recommended_min_ask_units || sim.ask_units);
+                const queryId = Date.now();
+
+                let txParams;
+                if (offerIsTon && !askIsTon) {
+                    txParams = await router.getSwapTonToJettonTxParams({
+                        userWalletAddress: currentAddressObj,
+                        proxyTon: proxyTon,
+                        offerAmount: offerUnits,
+                        askJettonAddress: libs.Address.parse(swapTo.address),
+                        minAskAmount: minAsk,
+                        queryId: queryId
+                    });
+                } else if (!offerIsTon && askIsTon) {
+                    txParams = await router.getSwapJettonToTonTxParams({
+                        userWalletAddress: currentAddressObj,
+                        offerJettonAddress: libs.Address.parse(swapFrom.address),
+                        proxyTon: proxyTon,
+                        offerAmount: offerUnits,
+                        minAskAmount: minAsk,
+                        queryId: queryId
+                    });
+                } else if (!offerIsTon && !askIsTon) {
+                    txParams = await router.getSwapJettonToJettonTxParams({
+                        userWalletAddress: currentAddressObj,
+                        offerJettonAddress: libs.Address.parse(swapFrom.address),
+                        askJettonAddress: libs.Address.parse(swapTo.address),
+                        offerAmount: offerUnits,
+                        minAskAmount: minAsk,
+                        queryId: queryId
+                    });
+                } else {
+                    throw new Error('TON → TON swap is not supported');
+                }
+
+                if (!txParams || !txParams.to) throw new Error('Failed to build swap transaction');
+
+                showSendingOverlay('Signing & sending swap...');
+                words = auth.result;
+                const keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
+                    throw new Error('Wallet mismatch');
+                }
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(function () { return contract.getSeqno(); });
+
+                const msg = libs.internal({
+                    to: txParams.to,
+                    value: txParams.value,
+                    bounce: true,
+                    body: txParams.body
+                });
+
+                await withRetry(function () {
+                    return contract.sendTransfer({
+                        seqno: seqno,
+                        secretKey: keyPair.secretKey,
+                        sendMode: 3,
+                        messages: [msg]
+                    });
+                });
+
+                setSendingResult(true, 'Swap submitted ✅\\n' + swapFrom.symbol + ' → ' + swapTo.symbol + '\\nMin out: ' + formatUnits(minAsk, swapTo.decimals) + ' ' + swapTo.symbol);
+                showScreen('dashboard-screen');
+                setTimeout(function () {
+                    refreshBalance();
+                    refreshJettons();
+                    if (typeof refreshHistory === 'function') refreshHistory();
+                }, 5000);
+            } catch (e) {
+                console.error('executeSwap', e);
+                setSendingResult(false, 'Swap failed.\\n' + (e && e.message ? e.message : String(e)));
+            } finally {
+                words = null;
+                swapBusy = false;
+                sending = false;
+                btn.disabled = false;
+                btn.innerText = 'Swap';
+            }
+        }
+
+
         // ================= TonConnect =================
         const TC_BRIDGE = 'https://connect.ton.org/bridge';
         const TC_STORAGE_KEY = 'tc_connections_v1';
@@ -2693,4 +3293,4 @@
         });
     </script>
 </body>
-</html>
+    </html>
