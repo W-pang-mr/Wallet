@@ -567,39 +567,6 @@
             <button onclick="cancelSendJetton()" class="btn-secondary">Back</button>
         </div>
 
-        <!-- Swap (STON.fi) -->
-        <div id="swap-screen" class="glass-card hidden flex flex-col gap-3">
-            <h3 class="text-sm font-bold" style="font-size: 15px;">Swap (via STON.fi)</h3>
-            <div class="warn-box">Swaps run on-chain through STON.fi. Prices can move between quote and execution — the minimum amount shown is what you're guaranteed to receive. This is new code: start with a small amount.</div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">From:</label>
-                <select id="swap-from-select" class="glass-input" onchange="onSwapFromChange()"></select>
-                <div class="text-xs" id="swap-from-available">Available: ...</div>
-                <input type="text" inputmode="decimal" id="swap-from-amount" placeholder="Amount" class="glass-input" style="direction: ltr; text-align: left;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">To:</label>
-                <select id="swap-to-select" class="glass-input" onchange="onSwapToChange()"></select>
-                <input type="text" id="swap-to-custom-address" placeholder="Token address (UQ... or EQ...)" class="glass-input hidden" style="font-family: monospace; font-size: 12px; direction: ltr; text-align: left;">
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 5px;">
-                <label class="text-xs" style="color: var(--text); font-weight: 500;">Slippage tolerance:</label>
-                <select id="swap-slippage" class="glass-input">
-                    <option value="0.005">0.5%</option>
-                    <option value="0.01" selected>1%</option>
-                    <option value="0.03">3%</option>
-                </select>
-            </div>
-
-            <button id="btn-swap-quote" onclick="getSwapQuote()" class="btn-secondary">Get Quote</button>
-            <div id="swap-quote-info"></div>
-            <button id="btn-swap-confirm" onclick="confirmSwap()" class="btn-primary btn-blue" disabled>Confirm Swap</button>
-            <button onclick="cancelSwap()" class="btn-secondary">Back</button>
-        </div>
-
         <!-- Security settings -->
         <div id="security-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 15px;">Security</h3>
@@ -625,7 +592,7 @@
                         <div class="icon-circle">↓</div>
                         <span>Receive</span>
                     </div>
-                    <div class="action-btn" onclick="showSwapScreen()">
+                    <div class="action-btn" onclick="alert('Swap is coming soon')">
                         <div class="icon-circle">⇄</div>
                         <span>Swap</span>
                     </div>
@@ -667,7 +634,7 @@
                     <span class="nav-icon">💎</span>
                     <span>Wallet</span>
                 </div>
-                <div class="nav-item" onclick="showSwapScreen()">
+                <div class="nav-item" onclick="alert('Swap is coming soon')">
                     <span class="nav-icon">⇄</span>
                     <span>Swap</span>
                 </div>
@@ -761,7 +728,7 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'swap-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17'; // toncenter API key
         const FEE_RESERVE = 10000000n;     // 0.01 TON reserved for network fees
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
@@ -781,9 +748,6 @@
         let jettons = [];
         let jettonsRefreshing = false;
         let pendingJetton = null;
-        let stonfiLibs = null;
-        let swapAssetsList = [];
-        let swapQuote = null;
 
         const ADDRESS_BOOK_KEY = 'address_book_v1';
         const ADDRESS_BOOK_MAX = 3;
@@ -1787,297 +1751,6 @@
             }
         }
 
-        // ================= Swap (via STON.fi) =================
-        // Swaps go through the STON.fi DEX (https://ston.fi). This is new code —
-        // start with a small amount, since a bug here could cost real funds.
-        const STONFI_API = 'https://api.ston.fi/v1/swap/simulate';
-
-        async function loadStonfi() {
-            if (stonfiLibs) return stonfiLibs;
-            const mod = await import('https://esm.sh/@ston-fi/sdk@2.7.0');
-            stonfiLibs = { DEX: mod.DEX, pTON: mod.pTON };
-            return stonfiLibs;
-        }
-
-        function tonAsset() {
-            return { type: 'ton', symbol: 'TON', name: 'Toncoin', decimals: 9 };
-        }
-
-        function assetOptionsList() {
-            const list = [tonAsset()];
-            jettons.forEach(function (j) {
-                list.push({ type: 'jetton', symbol: j.symbol, name: j.name, decimals: j.decimals, masterAddress: j.masterAddress, walletAddress: j.walletAddress, balance: j.balance });
-            });
-            return list;
-        }
-
-        async function toUnitsStr(amountStr, decimals) {
-            const parts = amountStr.split('.');
-            const wholePart = parts[0] || '0';
-            const fracPart = (parts[1] || '').padEnd(decimals, '0').slice(0, decimals);
-            return (BigInt(wholePart) * (10n ** BigInt(decimals)) + (fracPart ? BigInt(fracPart) : 0n)).toString();
-        }
-
-        async function fetchSwapQuote(offerAddress, askAddress, units, slippage) {
-            const params = new URLSearchParams({
-                offer_address: offerAddress,
-                ask_address: askAddress,
-                units: units,
-                slippage_tolerance: slippage
-            });
-            const res = await fetch(STONFI_API + '?' + params.toString(), { method: 'POST' });
-            if (!res.ok) throw new Error('quote request failed (' + res.status + ')');
-            return res.json();
-        }
-
-        function populateSwapSelects() {
-            const assets = assetOptionsList();
-            swapAssetsList = assets;
-            const fromSelect = document.getElementById('swap-from-select');
-            const toSelect = document.getElementById('swap-to-select');
-            const optionsHtml = assets.map(function (a, i) {
-                return '<option value="' + i + '">' + escapeHtml(a.symbol) + '</option>';
-            }).join('');
-            fromSelect.innerHTML = optionsHtml;
-            toSelect.innerHTML = optionsHtml + '<option value="other">Other token (paste address)</option>';
-            // default "to" to a different asset than "from" when possible
-            toSelect.value = assets.length > 1 ? '1' : 'other';
-        }
-
-        function resetSwapQuoteUi() {
-            document.getElementById('swap-quote-info').innerHTML = '';
-            document.getElementById('btn-swap-confirm').disabled = true;
-            swapQuote = null;
-        }
-
-        function onSwapFromChange() {
-            const idx = parseInt(document.getElementById('swap-from-select').value, 10);
-            const asset = swapAssetsList[idx];
-            const availEl = document.getElementById('swap-from-available');
-            if (asset) {
-                const bal = asset.type === 'ton' ? currentBalanceNano : asset.balance;
-                availEl.innerText = 'Available: ' + formatJetton(bal, asset.decimals) + ' ' + asset.symbol;
-            }
-            resetSwapQuoteUi();
-        }
-
-        function onSwapToChange() {
-            const val = document.getElementById('swap-to-select').value;
-            document.getElementById('swap-to-custom-address').classList.toggle('hidden', val !== 'other');
-            resetSwapQuoteUi();
-        }
-
-        function showSwapScreen() {
-            if (!currentAddressObj) return;
-            populateSwapSelects();
-            document.getElementById('swap-from-amount').value = '';
-            document.getElementById('swap-to-custom-address').value = '';
-            document.getElementById('swap-to-custom-address').classList.add('hidden');
-            onSwapFromChange();
-            resetSwapQuoteUi();
-            showScreen('swap-screen');
-        }
-
-        function cancelSwap() {
-            swapQuote = null;
-            showScreen('dashboard-screen');
-        }
-
-        async function resolveAsset(kind) {
-            if (kind === 'to' && document.getElementById('swap-to-select').value === 'other') {
-                const addrStr = document.getElementById('swap-to-custom-address').value.trim();
-                if (!addrStr) { alert('Enter the address of the token you want to receive.'); return null; }
-                if (!(await libsReady())) return null;
-                let addrObj;
-                try { addrObj = libs.Address.parse(addrStr); } catch (e) { alert('That token address is not valid.'); return null; }
-                const master = addrObj.toString({ urlSafe: true, bounceable: true, testOnly: false });
-                const meta = await fetchJettonMaster(master);
-                if (!meta) { alert('Could not read that token. Double-check the address.'); return null; }
-                return { type: 'jetton', symbol: meta.symbol, name: meta.name, decimals: meta.decimals, masterAddress: master };
-            }
-            const selectId = kind === 'from' ? 'swap-from-select' : 'swap-to-select';
-            const idx = parseInt(document.getElementById(selectId).value, 10);
-            return swapAssetsList[idx] || null;
-        }
-
-        function sameAsset(a, b) {
-            if (a.type !== b.type) return false;
-            if (a.type === 'ton') return true;
-            return a.masterAddress === b.masterAddress;
-        }
-
-        async function getSwapQuote() {
-            const fromAsset = await resolveAsset('from');
-            if (!fromAsset) return;
-            const toAsset = await resolveAsset('to');
-            if (!toAsset) return;
-            if (sameAsset(fromAsset, toAsset)) { alert('Choose two different tokens.'); return; }
-
-            const amountStr = normalizeNumber(document.getElementById('swap-from-amount').value);
-            if (!/^\d+(\.\d+)?$/.test(amountStr) || Number(amountStr) <= 0) { alert('Enter a valid amount.'); return; }
-
-            const btn = document.getElementById('btn-swap-quote');
-            btn.disabled = true;
-            btn.innerText = 'Getting quote...';
-            resetSwapQuoteUi();
-            try {
-                if (!(await libsReady())) return;
-                const { pTON } = await loadStonfi();
-                const proxyTon = new pTON.v1();
-                const tonAssetAddr = proxyTon.address.toString({ urlSafe: true, bounceable: true, testOnly: false });
-
-                const offerAddress = fromAsset.type === 'ton' ? tonAssetAddr : fromAsset.masterAddress;
-                const askAddress = toAsset.type === 'ton' ? tonAssetAddr : toAsset.masterAddress;
-                const offerUnits = await toUnitsStr(amountStr, fromAsset.decimals);
-                const slippage = document.getElementById('swap-slippage').value;
-
-                const quote = await withRetry(() => fetchSwapQuote(offerAddress, askAddress, offerUnits, slippage), 2);
-                swapQuote = { fromAsset: fromAsset, toAsset: toAsset, offerUnits: offerUnits, slippage: slippage };
-
-                const received = formatJetton(BigInt(quote.ask_units), toAsset.decimals);
-                const minReceived = formatJetton(BigInt(quote.min_ask_units), toAsset.decimals);
-                const impact = quote.price_impact ? (parseFloat(quote.price_impact) * 100).toFixed(2) : '?';
-                document.getElementById('swap-quote-info').innerHTML =
-                    '<div class="info-box">You receive ~' + received + ' ' + escapeHtml(toAsset.symbol) +
-                    '<br>Minimum: ' + minReceived + ' ' + escapeHtml(toAsset.symbol) +
-                    '<br>Price impact: ' + impact + '%</div>';
-                document.getElementById('btn-swap-confirm').disabled = false;
-            } catch (e) {
-                console.error(e);
-                swapQuote = null;
-                document.getElementById('swap-quote-info').innerHTML = '<div class="warn-box">Could not get a quote for this pair. Check the tokens and try again.</div>';
-            } finally {
-                btn.disabled = false;
-                btn.innerText = 'Get Quote';
-            }
-        }
-
-        async function confirmSwap() {
-            if (!swapQuote || sending) return;
-            const fromAsset = swapQuote.fromAsset;
-            const toAsset = swapQuote.toAsset;
-
-            if (!(await libsReady())) return;
-
-            let freshQuote;
-            try {
-                const { pTON } = await loadStonfi();
-                const proxyTon = new pTON.v1();
-                const tonAssetAddr = proxyTon.address.toString({ urlSafe: true, bounceable: true, testOnly: false });
-                const offerAddress = fromAsset.type === 'ton' ? tonAssetAddr : fromAsset.masterAddress;
-                const askAddress = toAsset.type === 'ton' ? tonAssetAddr : toAsset.masterAddress;
-                freshQuote = await withRetry(() => fetchSwapQuote(offerAddress, askAddress, swapQuote.offerUnits, swapQuote.slippage), 2);
-            } catch (e) {
-                alert('Could not refresh the quote. Please try again.');
-                return;
-            }
-
-            const received = formatJetton(BigInt(freshQuote.ask_units), toAsset.decimals);
-            const minReceived = formatJetton(BigInt(freshQuote.min_ask_units), toAsset.decimals);
-            const fromAmountShown = formatJetton(BigInt(swapQuote.offerUnits), fromAsset.decimals);
-
-            const okConfirm = confirm('Confirm swap:\n\nSend: ' + fromAmountShown + ' ' + fromAsset.symbol +
-                '\nReceive (est.): ' + received + ' ' + toAsset.symbol +
-                '\nMinimum received: ' + minReceived + ' ' + toAsset.symbol +
-                '\n\nThis goes through STON.fi. Proceed?');
-            if (!okConfirm) return;
-
-            const auth = await authorizeAction('Enter your wallet PIN to confirm this swap');
-            if (!auth) return;
-
-            sending = true;
-            const btn = document.getElementById('btn-swap-confirm');
-            btn.disabled = true;
-            btn.innerText = 'Swapping...';
-            showSendingOverlay('Sending swap...');
-
-            let words = null;
-            let keyPair = null;
-            try {
-                words = auth.result;
-                keyPair = await libs.mnemonicToPrivateKey(words);
-                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
-                if (!wallet.address.equals(currentAddressObj)) {
-                    setSendingResult(false, 'The wallet key does not match the current address. Operation cancelled.');
-                    return;
-                }
-
-                const { DEX, pTON } = await loadStonfi();
-                const stonRouter = tonClient.open(new DEX.v1.Router());
-                const proxyTon = new pTON.v1();
-                const queryId = Math.floor(Date.now() / 1000);
-                const offerAmount = BigInt(swapQuote.offerUnits);
-                const minAskAmount = freshQuote.min_ask_units;
-
-                let txParams;
-                if (fromAsset.type === 'ton' && toAsset.type === 'jetton') {
-                    txParams = await stonRouter.getSwapTonToJettonTxParams({
-                        userWalletAddress: currentAddress,
-                        proxyTon: proxyTon,
-                        offerAmount: offerAmount,
-                        askJettonAddress: toAsset.masterAddress,
-                        minAskAmount: minAskAmount,
-                        queryId: queryId
-                    });
-                } else if (fromAsset.type === 'jetton' && toAsset.type === 'ton') {
-                    txParams = await stonRouter.getSwapJettonToTonTxParams({
-                        userWalletAddress: currentAddress,
-                        offerJettonAddress: fromAsset.masterAddress,
-                        offerAmount: offerAmount,
-                        minAskAmount: minAskAmount,
-                        proxyTon: proxyTon,
-                        queryId: queryId
-                    });
-                } else {
-                    txParams = await stonRouter.getSwapJettonToJettonTxParams({
-                        userWalletAddress: currentAddress,
-                        offerJettonAddress: fromAsset.masterAddress,
-                        offerAmount: offerAmount,
-                        askJettonAddress: toAsset.masterAddress,
-                        minAskAmount: minAskAmount,
-                        queryId: queryId
-                    });
-                }
-
-                if (currentBalanceNano < BigInt(txParams.value) + FEE_RESERVE) {
-                    setSendingResult(false, 'Not enough TON in your wallet to cover this swap\'s network fee.');
-                    return;
-                }
-
-                const contract = tonClient.open(wallet);
-                const seqno = await withRetry(() => contract.getSeqno());
-
-                const msg = libs.internal({
-                    to: txParams.to,
-                    value: txParams.value,
-                    bounce: txParams.bounce !== undefined ? txParams.bounce : true,
-                    body: txParams.body,
-                    init: txParams.init
-                });
-
-                await withRetry(() => contract.sendTransfer({
-                    seqno: seqno,
-                    secretKey: keyPair.secretKey,
-                    sendMode: 3,
-                    messages: [msg]
-                }));
-
-                setSendingResult(true, 'Swap sent to the network ✅\nIt can take a little longer than a regular transfer to settle.');
-                swapQuote = null;
-                showScreen('dashboard-screen');
-                setTimeout(function () { refreshBalance(); refreshJettons(); }, 8000);
-            } catch (e) {
-                console.error(e);
-                setSendingResult(false, 'Swap failed.\n' + (e && e.message ? e.message : ''));
-            } finally {
-                words = null;
-                keyPair = null;
-                sending = false;
-                btn.disabled = false;
-                btn.innerText = 'Confirm Swap';
-            }
-        }
-
         // ================= TonConnect =================
         const TC_BRIDGE = 'https://connect.ton.org/bridge';
         const TC_STORAGE_KEY = 'tc_connections_v1';
@@ -2188,14 +1861,6 @@
             box.innerHTML = '';
             if (list.length === 0) {
                 box.innerHTML = '<div class="text-xs">No connected apps yet.</div>';
-                return;
-            }
-            list.forEach(conn => {
-                const row = document.createElement('div');
-                row.className = 'list-card';
-                row.style.padding = '12px 14px';
-                row.innerHTML = '<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:left;"><span class="text-sm font-bold">' +
-                    escapeHtml(conn.appName || conn.appUrl || 'Unknown app') + '</span><span class="text-xs">No connected apps yet.</div>';
                 return;
             }
             list.forEach(conn => {
@@ -2406,7 +2071,6 @@
             }
         }
 
-        
         function renderTcTxScreen() {
             const connection = tcPendingTx.connection;
             const txRequest = tcPendingTx.txRequest;
@@ -2415,104 +2079,120 @@
             box.innerHTML = '';
             (txRequest.messages || []).forEach(function (m, idx) {
                 const div = document.createElement('div');
-                div.className = 'glass-card';
-                div.style.padding = '10px';
-                div.innerHTML = '<b>Message #' + (idx + 1) + '</b><br>To: ' + escapeHtml(m.address) + '<br>Value: ' + formatTon(BigInt(m.amount || 0)) + ' TON';
+                div.className = 'glass-input';
+                div.style.direction = 'ltr';
+                div.style.textAlign = 'left';
+                div.style.whiteSpace = 'pre-line';
+                let addr = m.address;
+                try { addr = libs.Address.parse(m.address).toString({ urlSafe: true, bounceable: true }); } catch (e) {}
+                div.innerText = '#' + (idx + 1) + '\nTo: ' + addr + '\nAmount: ' + formatTon(m.amount) + ' TON';
                 box.appendChild(div);
             });
         }
 
-        async function approveTcTx() {
-            if (!tcPendingTx || sending) return;
-            const { connection, requestId, txRequest, reqKey } = tcPendingTx;
-            if (!(await libsReady())) return;
-
-            const auth = await authorizeAction('Enter your wallet PIN to approve transaction');
-            if (!auth) return;
-
-            sending = true;
-            const btn = document.getElementById('btn-tc-tx-approve');
-            btn.disabled = true;
-            btn.innerText = 'Approving...';
-            showSendingOverlay('Sending transaction to app...');
-
-            let words = null;
-            try {
-                words = auth.result;
-                const keyPair = await libs.mnemonicToPrivateKey(words);
-                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
-                const contract = tonClient.open(wallet);
-                const seqno = await withRetry(() => contract.getSeqno());
-
-                const messages = (txRequest.messages || []).map(function (m) {
-                    return libs.internal({
-                        to: libs.Address.parse(m.address),
-                        value: BigInt(m.amount || 0),
-                        bounce: true,
-                        body: m.payload ? libs.Cell.fromBoc(b64ToBytes(m.payload))[0] : undefined
-                    });
-                });
-
-                await withRetry(() => contract.sendTransfer({
-                    seqno: seqno,
-                    secretKey: keyPair.secretKey,
-                    sendMode: 3,
-                    messages: messages
-                }));
-
-                markReqResolved(reqKey);
-                await sendTcResponse(connection, requestId, { result: 'success' });
-
-                setSendingResult(true, 'Transaction approved and sent! ✅');
-                tcPendingTx = null;
-                showScreen('dashboard-screen');
-                setTimeout(refreshBalance, 5000);
-            } catch (e) {
-                console.error(e);
-                setSendingResult(false, 'Approval failed:\n' + (e && e.message ? e.message : ''));
-            } finally {
-                sending = false;
-                btn.disabled = false;
-                btn.innerText = 'Approve & Send';
-            }
-        }
-
         async function rejectTcTx() {
             if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
-            const { connection, requestId, reqKey } = tcPendingTx;
-            markReqResolved(reqKey);
-            try {
-                await sendTcResponse(connection, requestId, { error: { code: 300, message: 'User rejected the request' } });
-            } catch (e) {}
+            if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
+            await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
             tcPendingTx = null;
             showScreen('dashboard-screen');
         }
 
-        async function sendTcResponse(conn, requestId, responsePayload) {
-            await loadTcNacl();
-            const ourSec = b64ToBytes(conn.ourSecB64);
-            const ourPub = hexToBytes(conn.ourPubHex);
-            const dappPub = hexToBytes(conn.dappClientIdHex);
+        async function approveTcTx() {
+            if (!tcPendingTx) return;
+            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
+            if (!auth) return;
+            const btn = document.getElementById('btn-tc-tx-approve');
+            btn.disabled = true;
+            showSendingOverlay('Sending transaction...');
+            let words = null;
+            try {
+                if (!(await libsReady())) return;
+                words = auth.result;
+                const keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+                if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
+                    setSendingResult(false, 'Internal error: wallet mismatch.');
+                    return;
+                }
 
-            const responseObj = {
-                id: requestId,
-                result: responsePayload.result,
-                error: responsePayload.error
-            };
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(() => contract.getSeqno());
 
-            const nonce = tcNacl.randomBytes(24);
-            const plain = new TextEncoder().encode(JSON.stringify(responseObj));
-            const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
-            const fullMsg = new Uint8Array(nonce.length + cipher.length);
-            fullMsg.set(nonce, 0);
-            fullMsg.set(cipher, nonce.length);
-            const bodyB64 = bytesToB64(fullMsg);
+                const txRequest = tcPendingTx.txRequest;
+                const outMessages = (txRequest.messages || []).map(function (m) {
+                    let body = undefined;
+                    let init = undefined;
+                    if (m.payload) { body = libs.Cell.fromBase64(m.payload); }
+                    if (m.stateInit) {
+                        const initCell = libs.Cell.fromBase64(m.stateInit);
+                        init = libs.loadStateInit(initCell.beginParse());
+                    }
+                    return libs.internal({
+                        to: libs.Address.parse(m.address),
+                        value: BigInt(m.amount),
+                        bounce: true,
+                        body: body,
+                        init: init
+                    });
+                });
 
-            await fetch(TC_BRIDGE + '/message?client_id=' + bytesToHex(ourPub) + '&to=' + conn.dappClientIdHex + '&ttl=300', {
-                method: 'POST',
-                body: bodyB64
-            });
+                const transferCell = wallet.createTransfer({
+                    seqno: seqno,
+                    secretKey: keyPair.secretKey,
+                    sendMode: 3,
+                    messages: outMessages
+                });
+
+                await withRetry(() => contract.send(transferCell));
+
+                const resultB64 = transferCell.toBoc().toString('base64');
+                await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, resultB64, null);
+                if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
+
+                tcPendingTx = null;
+
+                await loadWallet(words);
+                words = null;
+                setSendingResult(true, 'Transaction sent ✅');
+                setTimeout(refreshBalance, 5000);
+            } catch (e) {
+                console.error(e);
+                setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
+            } finally {
+                words = null;
+                btn.disabled = false;
+            }
         }
+
+        async function sendTcResponse(connection, requestId, resultB64, error) {
+            try {
+                await loadTcNacl();
+                const responseObj = error ? { id: requestId, error: error } : { id: requestId, result: resultB64 };
+                const nonce = tcNacl.randomBytes(24);
+                const plain = new TextEncoder().encode(JSON.stringify(responseObj));
+                const dappPub = hexToBytes(connection.dappClientIdHex);
+                const ourSec = b64ToBytes(connection.ourSecB64);
+                const cipher = tcNacl.box(plain, nonce, dappPub, ourSec);
+                const fullMsg = new Uint8Array(nonce.length + cipher.length);
+                fullMsg.set(nonce, 0);
+                fullMsg.set(cipher, nonce.length);
+                const bodyB64 = bytesToB64(fullMsg);
+                await fetch(TC_BRIDGE + '/message?client_id=' + connection.ourPubHex + '&to=' + connection.dappClientIdHex + '&ttl=300', {
+                    method: 'POST',
+                    body: bodyB64
+                });
+            } catch (e) {
+                console.error('sendTcResponse error', e);
+            }
+        }
+
+        // ---------- Start ----------
+        window.addEventListener('load', function () {
+            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+            loadLibs().catch(function (e) { console.error('preload failed', e); });
+            startTcListener();
+        });
     </script>
 </body>
 </html>
