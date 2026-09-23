@@ -18,7 +18,7 @@
             text-size-adjust: 100%;
             height: 100%;
         }
-        :root {
+        :root, [data-theme="dark"] {
             color-scheme: dark;
             --bg: #050506;
             --bg-elevated: #0c0c0e;
@@ -39,6 +39,11 @@
             --card-border: rgba(255, 255, 255, 0.07);
             --surface: #1a1a1d;
             --surface-2: #222226;
+            --input-border: rgba(255, 255, 255, 0.08);
+            --input-text: #ffffff;
+            --btn-sec-bg: #1a1a1d;
+            --btn-sec-border: rgba(255, 255, 255, 0.1);
+            --nav-bg: rgba(12, 12, 14, 0.92);
             --radius-xl: 24px;
             --radius-lg: 18px;
             --radius-md: 14px;
@@ -48,6 +53,40 @@
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
             --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 4px 24px rgba(0,0,0,0.35);
             --shadow-nav: 0 -4px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
+            --bg-glow-1: rgba(0, 152, 234, 0.08);
+            --bg-glow-2: rgba(0, 152, 234, 0.04);
+        }
+
+        [data-theme="light"] {
+            color-scheme: light;
+            --bg: #f4f6f8;
+            --bg-elevated: #ffffff;
+            --text: #111827;
+            --text-dim: rgba(17, 24, 39, 0.55);
+            --text-muted: rgba(17, 24, 39, 0.38);
+            --accent: #0098ea;
+            --accent-soft: rgba(0, 152, 234, 0.12);
+            --accent-glow: rgba(0, 152, 234, 0.2);
+            --success: #059669;
+            --success-soft: rgba(5, 150, 105, 0.1);
+            --danger: #dc2626;
+            --danger-soft: rgba(220, 38, 38, 0.1);
+            --warn: #d97706;
+            --warn-soft: rgba(217, 119, 6, 0.1);
+            --card: #ffffff;
+            --card-hover: #f9fafb;
+            --card-border: rgba(0, 0, 0, 0.08);
+            --surface: #f3f4f6;
+            --surface-2: #e5e7eb;
+            --input-border: rgba(0, 0, 0, 0.1);
+            --input-text: #111827;
+            --btn-sec-bg: #ffffff;
+            --btn-sec-border: rgba(0, 0, 0, 0.12);
+            --nav-bg: rgba(255, 255, 255, 0.94);
+            --shadow-card: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 20px rgba(0,0,0,0.06);
+            --shadow-nav: 0 -4px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
+            --bg-glow-1: rgba(0, 152, 234, 0.06);
+            --bg-glow-2: rgba(0, 152, 234, 0.03);
         }
 
         body {
@@ -69,8 +108,9 @@
             -webkit-font-smoothing: antialiased;
             background: var(--bg);
             background-image:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0, 152, 234, 0.08), transparent),
-                radial-gradient(ellipse 60% 40% at 100% 0%, rgba(0, 152, 234, 0.04), transparent);
+                radial-gradient(ellipse 80% 50% at 50% -20%, var(--bg-glow-1), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 0%, var(--bg-glow-2), transparent);
+            transition: background 0.25s var(--ease), color 0.25s var(--ease);
         }
 
         /* ─── Cards ─── */
@@ -88,10 +128,10 @@
         .glass-input {
             width: 100%;
             background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--input-border);
             border-radius: var(--radius-sm);
             padding: 13px 14px;
-            color: #fff;
+            color: var(--input-text);
             font-size: 14px;
             outline: none;
             transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
@@ -128,9 +168,9 @@
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            background: var(--surface);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--btn-sec-bg);
+            color: var(--text);
+            border: 1px solid var(--btn-sec-border);
             padding: 15px 18px;
             border-radius: var(--radius-md);
             font-weight: 550;
@@ -188,8 +228,8 @@
             font-size: 11.5px;
             text-align: center;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #fff;
+            border: 1px solid var(--card-border);
+            color: var(--text);
             transition: background 0.12s ease;
         }
         .word-chip:active { background: var(--surface-2); }
@@ -274,14 +314,53 @@
             font-size: 38px;
             font-weight: 750;
             letter-spacing: -1.2px;
-            margin-bottom: 4px;
-            color: #fff;
+            margin-bottom: 2px;
+            color: var(--text);
             line-height: 1.1;
+            font-variant-numeric: tabular-nums;
+        }
+        .balance-usd {
+            font-size: 14px;
+            font-weight: 550;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+            min-height: 20px;
         }
         .balance-updated {
             font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 18px;
+        }
+        .theme-toggle {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background: var(--surface);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.15s ease, transform 0.12s var(--ease);
+            flex-shrink: 0;
+        }
+        .theme-toggle:active { transform: scale(0.94); background: var(--surface-2); }
+        .fee-box {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--text-dim);
+        }
+        .fee-box strong { color: var(--text); font-weight: 600; }
+        .fee-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
         }
         .action-row { display: flex; gap: 10px; }
         .action-btn {
@@ -291,36 +370,36 @@
             align-items: center;
             gap: 8px;
             background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
             padding: 14px 8px;
             cursor: pointer;
-            color: #fff;
+            color: var(--text);
             transition: background 0.12s ease, transform 0.12s var(--ease), border-color 0.12s ease;
         }
         .action-btn:active {
             background: var(--surface-2);
             transform: scale(0.96);
-            border-color: rgba(255,255,255,0.12);
         }
         .action-btn .icon-circle {
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            background: linear-gradient(145deg, #2a2a30 0%, #1e1e22 100%);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            color: #fff;
+            background: var(--surface-2);
+            border: 1px solid var(--card-border);
+            color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 17px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
         }
         .action-btn span {
             font-size: 12px;
             font-weight: 600;
-            color: rgba(255,255,255,0.88);
+            color: var(--text);
             letter-spacing: -0.01em;
+            opacity: 0.9;
         }
 
         /* ─── Tokens ─── */
@@ -356,9 +435,9 @@
             border-radius: 12px;
         }
         .token-meta { display: flex; flex-direction: column; text-align: left; gap: 2px; min-width: 0; }
-        .token-symbol { font-size: 15px; font-weight: 650; color: #fff; letter-spacing: -0.01em; }
+        .token-symbol { font-size: 15px; font-weight: 650; color: var(--text); letter-spacing: -0.01em; }
         .token-name { font-size: 12px; color: var(--text-dim); }
-        .token-bal { font-size: 15px; font-weight: 650; color: #f4f4f5; text-align: right; letter-spacing: -0.02em; }
+        .token-bal { font-size: 15px; font-weight: 650; color: var(--text); text-align: right; letter-spacing: -0.02em; }
         .token-empty {
             text-align: center;
             padding: 20px 8px;
@@ -372,10 +451,10 @@
             border-radius: 13px;
             font-size: 13px;
             font-weight: 600;
-            color: #fff;
+            color: var(--text);
             cursor: pointer;
             background: var(--surface);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
             transition: background 0.12s ease;
         }
         .history-more:active { background: var(--surface-2); }
@@ -402,7 +481,7 @@
         .tx-icon.in { background: var(--success-soft); color: #86efac; }
         .tx-icon.out { background: var(--danger-soft); color: #fca5a5; }
         .tx-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-        .tx-title { font-size: 14px; font-weight: 600; color: #fff; }
+        .tx-title { font-size: 14px; font-weight: 600; color: var(--text); }
         .tx-sub {
             font-size: 12px; color: var(--text-dim);
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;
@@ -461,8 +540,8 @@
             justify-content: space-around;
             padding: 8px 8px;
             border-radius: 22px;
-            background: rgba(12, 12, 14, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--nav-bg);
+            border: 1px solid var(--card-border);
             box-shadow: var(--shadow-nav);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -474,15 +553,15 @@
             gap: 3px;
             font-size: 10.5px;
             font-weight: 600;
-            color: rgba(255, 255, 255, 0.38);
+            color: var(--text-muted);
             cursor: pointer;
             padding: 8px 18px;
             border-radius: 14px;
             transition: color 0.18s var(--ease), background 0.18s var(--ease);
         }
         .nav-item.active {
-            color: #fff;
-            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            background: var(--surface);
         }
         .nav-item .nav-icon { font-size: 18px; line-height: 1; }
 
@@ -687,7 +766,7 @@
         .glass-card h3,
         .glass-card .font-bold,
         .glass-card label,
-        .list-card { color: #fff; }
+        .list-card { color: var(--text); }
         .list-card .text-xs { color: var(--text-dim); }
 
         .screen-enter {
@@ -714,10 +793,13 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em;">Glass Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.3 · Wallet V5 + TonConnect</span>
+                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.4 · Wallet V5 + TonConnect</span>
             </div>
         </div>
-        <div id="connection-status" class="status-badge">Ready</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <div id="connection-status" class="status-badge">Ready</div>
+        </div>
     </div>
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
@@ -769,23 +851,28 @@
             <div class="text-xs" id="withdraw-available">Available balance: ...</div>
 
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label class="text-xs" style="color: #fff; font-weight: 550;">Destination address</label>
+                <label class="text-xs" style="color: var(--text); font-weight: 550;">Destination address</label>
                 <div id="wd-address-book" class="grid-24 hidden" style="max-height: none;"></div>
                 <textarea id="wd-address" rows="2" placeholder="UQ... or EQ..." class="glass-input" style="resize: none; font-family: ui-monospace, monospace; font-size: 13px; direction: ltr; text-align: left;"></textarea>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label class="text-xs" style="color: #fff; font-weight: 550;">Amount (TON)</label>
-                <input type="text" inputmode="decimal" id="wd-amount" placeholder="e.g. 1.5" class="glass-input" style="direction: ltr; text-align: left;">
+                <label class="text-xs" style="color: var(--text); font-weight: 550;">Amount (TON)</label>
+                <input type="text" inputmode="decimal" id="wd-amount" placeholder="e.g. 1.5" class="glass-input" style="direction: ltr; text-align: left;" oninput="onWithdrawAmountChange()">
             </div>
 
-            <label class="text-xs" style="display: flex; gap: 10px; align-items: center; color: #fff;">
+            <label class="text-xs" style="display: flex; gap: 10px; align-items: center; color: var(--text);">
                 <input type="checkbox" id="wd-max" onchange="onMaxToggle()" style="width:16px; height:16px; accent-color: var(--accent);">
                 <span>Send entire balance (network fee is deducted from this amount)</span>
             </label>
 
+            <div id="wd-fee-box" class="fee-box">
+                <div class="fee-row"><span>Estimated network fee</span><strong id="wd-fee-value">~0.005 TON</strong></div>
+                <div class="fee-row" style="margin-top:4px;"><span>Recipient receives</span><strong id="wd-receive-value">—</strong></div>
+            </div>
+
             <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label class="text-xs" style="color: #fff; font-weight: 550;">Memo / Comment (optional, public)</label>
+                <label class="text-xs" style="color: var(--text); font-weight: 550;">Memo / Comment (optional, public)</label>
                 <input type="text" id="wd-comment" placeholder="Optional" class="glass-input" style="direction: ltr; text-align: left;">
             </div>
 
@@ -842,6 +929,7 @@
             <div class="glass-card balance-card">
                 <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()">Loading... 📋</div>
                 <div id="wallet-balance" class="balance-num">Checking...</div>
+                <div id="balance-usd" class="balance-usd"></div>
                 <div id="balance-updated" class="balance-updated"></div>
 
                 <div class="action-row">
@@ -955,7 +1043,7 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        TON Non-Custodial Wallet · v2.3 · V5R1
+        TON Non-Custodial Wallet · v2.4 · V5R1
     </footer>
 
     <!-- PIN overlay -->
@@ -1011,11 +1099,13 @@
         const STORAGE_KEY = 'enc_wallet_v1';
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17';
-        const FEE_RESERVE = 10000000n;
+        const FEE_RESERVE = 7000000n; // ~0.007 TON default fallback for network fee
         const JETTON_TRANSFER_GAS = 60000000n;
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
+        const TONAPI_RATES = 'https://tonapi.io/v2/rates?tokens=ton&currencies=usd';
         const PIN_LENGTH = 4;
         const BALANCE_POLL_MS = 20000;
+        const THEME_KEY = 'glass_theme_v1';
 
         let libs = null;
         let tonClient = null;
@@ -1030,11 +1120,88 @@
         let jettons = [];
         let jettonsRefreshing = false;
         let pendingJetton = null;
+        let tonPriceUsd = null;
+        let displayedBalanceNano = 0n;
+        let balanceAnimRaf = null;
+        let estimatedFeeNano = FEE_RESERVE;
 
         const ADDRESS_BOOK_KEY = 'address_book_v1';
         const ADDRESS_BOOK_MAX = 3;
         const PIN_DISABLED_KEY = 'pin_disabled_v1';
         const NO_PIN_SECRET = 'glass_wallet_no_pin_v1';
+
+        // ─── Theme ───
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const btn = document.getElementById('theme-toggle');
+            if (btn) btn.textContent = theme === 'light' ? '☀️' : '🌙';
+            localStorage.setItem(THEME_KEY, theme);
+        }
+        function toggleTheme() {
+            const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+            applyTheme(cur === 'dark' ? 'light' : 'dark');
+        }
+        (function initTheme() {
+            const saved = localStorage.getItem(THEME_KEY);
+            if (saved === 'light' || saved === 'dark') applyTheme(saved);
+            else applyTheme('dark');
+        })();
+
+        // ─── TON price (TonAPI) ───
+        async function fetchTonPrice() {
+            try {
+                const res = await fetch(TONAPI_RATES);
+                if (!res.ok) throw new Error('rates failed');
+                const data = await res.json();
+                const rate = data && data.rates && data.rates.TON && data.rates.TON.prices && data.rates.TON.prices.USD;
+                if (typeof rate === 'number' && rate > 0) {
+                    tonPriceUsd = rate;
+                    updateUsdDisplay();
+                }
+            } catch (e) {
+                console.error('ton price', e);
+            }
+        }
+        function updateUsdDisplay() {
+            const el = document.getElementById('balance-usd');
+            if (!el) return;
+            if (tonPriceUsd == null || !currentBalanceNano) {
+                el.innerText = '';
+                return;
+            }
+            const usd = (Number(currentBalanceNano) / 1e9) * tonPriceUsd;
+            el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // ─── Balance count-up animation ───
+        function animateBalanceTo(targetNano) {
+            if (balanceAnimRaf) cancelAnimationFrame(balanceAnimRaf);
+            const el = document.getElementById('wallet-balance');
+            if (!el) return;
+            const start = Number(displayedBalanceNano);
+            const end = Number(targetNano);
+            if (Math.abs(end - start) < 1) {
+                displayedBalanceNano = targetNano;
+                el.innerText = formatTon(targetNano) + ' TON';
+                return;
+            }
+            const duration = 650;
+            const t0 = performance.now();
+            function frame(now) {
+                const t = Math.min(1, (now - t0) / duration);
+                const eased = 1 - Math.pow(1 - t, 3);
+                const cur = Math.round(start + (end - start) * eased);
+                el.innerText = formatTon(BigInt(cur)) + ' TON';
+                if (t < 1) {
+                    balanceAnimRaf = requestAnimationFrame(frame);
+                } else {
+                    displayedBalanceNano = targetNano;
+                    el.innerText = formatTon(targetNano) + ' TON';
+                    balanceAnimRaf = null;
+                }
+            }
+            balanceAnimRaf = requestAnimationFrame(frame);
+        }
 
         async function loadLibs() {
             if (libs) return libs;
@@ -1923,7 +2090,8 @@
             try {
                 const balanceNano = await withRetry(() => tonClient.getBalance(currentAddressObj));
                 currentBalanceNano = BigInt(balanceNano);
-                document.getElementById('wallet-balance').innerText = formatTon(currentBalanceNano) + ' TON';
+                animateBalanceTo(currentBalanceNano);
+                updateUsdDisplay();
                 document.getElementById('balance-updated').innerText = 'Updated ' + formatTime(new Date());
                 setStatus('Connected', true);
                 try { renderJettons(); } catch (e) {}
@@ -1934,6 +2102,7 @@
                     if (document.getElementById('wd-max').checked) {
                         document.getElementById('wd-amount').value = formatTon(currentBalanceNano);
                     }
+                    updateFeePreview();
                 }
             } catch (e) {
                 console.error(e);
@@ -2000,6 +2169,54 @@
             }
         }
 
+        async function estimateNetworkFee() {
+            // Practical estimate for a simple external message from V5 wallet.
+            // Real on-chain fee is usually ~0.003–0.008 TON; we use a safe default.
+            estimatedFeeNano = FEE_RESERVE;
+            try {
+                // Optional: refine with toncenter estimateFee when available
+                const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY, 'Content-Type': 'application/json' } : { 'Content-Type': 'application/json' };
+                // Keep fallback; network estimate APIs vary by endpoint version
+            } catch (e) {}
+            return estimatedFeeNano;
+        }
+
+        function updateFeePreview() {
+            const feeEl = document.getElementById('wd-fee-value');
+            const recvEl = document.getElementById('wd-receive-value');
+            if (!feeEl || !recvEl) return;
+            feeEl.innerText = '~' + formatTon(estimatedFeeNano) + ' TON';
+            const isMax = document.getElementById('wd-max').checked;
+            if (isMax) {
+                if (currentBalanceNano > estimatedFeeNano) {
+                    recvEl.innerText = formatTon(currentBalanceNano - estimatedFeeNano) + ' TON';
+                } else {
+                    recvEl.innerText = '0 TON (fee too high)';
+                }
+                return;
+            }
+            const amountStr = normalizeNumber(document.getElementById('wd-amount').value || '');
+            if (!/^\d+(\.\d{1,9})?$/.test(amountStr) || !amountStr) {
+                recvEl.innerText = '—';
+                return;
+            }
+            try {
+                const entered = libs && libs.toNano ? libs.toNano(amountStr) : BigInt(Math.round(parseFloat(amountStr) * 1e9));
+                // Fee is deducted from the amount the user wants to send
+                if (entered > estimatedFeeNano) {
+                    recvEl.innerText = formatTon(entered - estimatedFeeNano) + ' TON';
+                } else {
+                    recvEl.innerText = '0 TON (amount ≤ fee)';
+                }
+            } catch (e) {
+                recvEl.innerText = '—';
+            }
+        }
+
+        function onWithdrawAmountChange() {
+            updateFeePreview();
+        }
+
         async function showWithdraw() {
             if (!currentAddressObj) return;
             document.getElementById('wd-address').value = '';
@@ -2009,6 +2226,8 @@
             document.getElementById('wd-comment').value = '';
             document.getElementById('withdraw-available').innerText = 'Available balance: ' + formatTon(currentBalanceNano) + ' TON';
             renderAddressBook('wd-address-book', 'wd-address');
+            await estimateNetworkFee();
+            updateFeePreview();
             showScreen('withdraw-screen');
         }
 
@@ -2021,6 +2240,7 @@
             const amountEl = document.getElementById('wd-amount');
             amountEl.disabled = on;
             if (on) amountEl.value = formatTon(currentBalanceNano);
+            updateFeePreview();
         }
 
         async function sendWithdraw() {
@@ -2036,29 +2256,47 @@
             const recipient = parseRecipient(addrStr);
             if (!recipient) { alert('The destination address is not valid.'); return; }
 
+            await estimateNetworkFee();
+            const fee = estimatedFeeNano;
+
             let valueNano = 0n;
             let sendMode = 3;
+            let receiveNano = 0n;
+
             if (isMax) {
-                if (currentBalanceNano <= FEE_RESERVE) { alert('Balance is too low to cover the network fee.'); return; }
+                if (currentBalanceNano <= fee) { alert('Balance is too low to cover the network fee (~' + formatTon(fee) + ' TON).'); return; }
+                // Carry-all remaining balance; network takes fee from it
                 sendMode = 128;
+                valueNano = 0n;
+                receiveNano = currentBalanceNano - fee;
             } else {
                 if (!/^\d+(\.\d{1,9})?$/.test(amountStr)) { alert('The amount entered is not valid.'); return; }
-                try { valueNano = libs.toNano(amountStr); } catch (e) { alert('The amount entered is not valid.'); return; }
-                if (valueNano <= 0n) { alert('The amount must be greater than zero.'); return; }
-                if (valueNano + FEE_RESERVE > currentBalanceNano) {
-                    alert('Insufficient balance. At least 0.01 TON must remain for the network fee.');
+                let enteredNano;
+                try { enteredNano = libs.toNano(amountStr); } catch (e) { alert('The amount entered is not valid.'); return; }
+                if (enteredNano <= 0n) { alert('The amount must be greater than zero.'); return; }
+                if (enteredNano <= fee) {
+                    alert('Amount must be greater than the network fee (~' + formatTon(fee) + ' TON).');
                     return;
                 }
+                if (enteredNano > currentBalanceNano) {
+                    alert('Insufficient balance.');
+                    return;
+                }
+                // Fee is deducted from the amount the user entered → recipient gets entered − fee
+                valueNano = enteredNano - fee;
+                receiveNano = valueNano;
+                sendMode = 3;
             }
 
             if (recipient.address.equals(currentAddressObj)) {
                 if (!confirm('The destination address is your own wallet address. Continue?')) return;
             }
 
-            const shownAmount = isMax ? 'entire balance (' + formatTon(currentBalanceNano) + ' TON)' : amountStr + ' TON';
             const shownAddr = recipient.address.toString({ urlSafe: true, bounceable: recipient.bounce, testOnly: false });
-            const okConfirm = confirm('Confirm withdrawal:\n\nAmount: ' + shownAmount + '\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
-            if (!okConfirm) return;
+            const confirmMsg = isMax
+                ? ('Confirm withdrawal:\n\nSend entire balance\nFee (est.): ~' + formatTon(fee) + ' TON\nRecipient receives: ~' + formatTon(receiveNano) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?')
+                : ('Confirm withdrawal:\n\nYou entered: ' + amountStr + ' TON\nFee (est.): ~' + formatTon(fee) + ' TON\nRecipient receives: ' + formatTon(receiveNano) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
+            if (!confirm(confirmMsg)) return;
 
             const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
             if (!auth) return;
@@ -2683,6 +2921,8 @@
             showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             loadLibs().catch(function (e) { console.error('preload failed', e); });
             startTcListener();
+            fetchTonPrice();
+            setInterval(fetchTonPrice, 120000);
         });
     </script>
 </body>
