@@ -6,7 +6,7 @@
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ─── Design System: Soft Glass B&W ─── */
+        /* ─── Design System: Soft Glass (Blue / Purple) ─── */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -20,30 +20,30 @@
         }
         :root, [data-theme="dark"] {
             color-scheme: dark;
-            --bg: #050505;
-            --bg-elevated: #0c0c0c;
+            --bg: #07080f;
+            --bg-elevated: #0c0e18;
             --text: #ffffff;
-            --text-dim: rgba(255, 255, 255, 0.52);
-            --text-muted: rgba(255, 255, 255, 0.32);
-            --accent: #ffffff;
-            --accent-soft: rgba(255, 255, 255, 0.1);
-            --accent-glow: rgba(255, 255, 255, 0.18);
-            --success: #e5e5e5;
-            --success-soft: rgba(255, 255, 255, 0.1);
-            --danger: #f5f5f5;
-            --danger-soft: rgba(255, 255, 255, 0.08);
-            --warn: #d4d4d4;
-            --warn-soft: rgba(255, 255, 255, 0.08);
-            --card: rgba(255, 255, 255, 0.045);
-            --card-hover: rgba(255, 255, 255, 0.08);
+            --text-dim: rgba(255, 255, 255, 0.55);
+            --text-muted: rgba(255, 255, 255, 0.35);
+            --accent: #5b8cff;
+            --accent-soft: rgba(91, 140, 255, 0.18);
+            --accent-glow: rgba(91, 140, 255, 0.35);
+            --success: #34d399;
+            --success-soft: rgba(52, 211, 153, 0.15);
+            --danger: #f87171;
+            --danger-soft: rgba(248, 113, 113, 0.15);
+            --warn: #fbbf24;
+            --warn-soft: rgba(251, 191, 36, 0.12);
+            --card: rgba(255, 255, 255, 0.06);
+            --card-hover: rgba(255, 255, 255, 0.1);
             --card-border: rgba(255, 255, 255, 0.12);
-            --surface: rgba(255, 255, 255, 0.06);
-            --surface-2: rgba(255, 255, 255, 0.1);
+            --surface: rgba(255, 255, 255, 0.07);
+            --surface-2: rgba(255, 255, 255, 0.11);
             --input-border: rgba(255, 255, 255, 0.14);
             --input-text: #ffffff;
-            --btn-sec-bg: rgba(255, 255, 255, 0.06);
-            --btn-sec-border: rgba(255, 255, 255, 0.16);
-            --nav-bg: rgba(12, 12, 12, 0.65);
+            --btn-sec-bg: rgba(255, 255, 255, 0.07);
+            --btn-sec-border: rgba(255, 255, 255, 0.14);
+            --nav-bg: rgba(12, 14, 24, 0.72);
             --radius-xl: 24px;
             --radius-lg: 20px;
             --radius-md: 16px;
@@ -51,42 +51,59 @@
             --radius-full: 999px;
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.07);
-            --shadow-nav: 0 -8px 32px rgba(0, 0, 0, 0.5);
-            --bg-glow-1: rgba(255, 255, 255, 0.045);
-            --bg-glow-2: rgba(255, 255, 255, 0.02);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+            --shadow-nav: 0 -8px 40px rgba(0, 0, 0, 0.45);
+            --bg-glow-1: rgba(91, 140, 255, 0.18);
+            --bg-glow-2: rgba(139, 92, 246, 0.12);
+        }
+
+        /* Purple accent variant */
+        [data-accent="purple"] {
+            --accent: #a78bfa;
+            --accent-soft: rgba(167, 139, 250, 0.2);
+            --accent-glow: rgba(167, 139, 250, 0.38);
+            --bg-glow-1: rgba(167, 139, 250, 0.2);
+            --bg-glow-2: rgba(91, 140, 255, 0.12);
         }
 
         [data-theme="light"] {
             color-scheme: light;
-            --bg: #e8e8e8;
+            --bg: #eef1f8;
             --bg-elevated: #ffffff;
-            --text: #111111;
-            --text-dim: rgba(0, 0, 0, 0.5);
-            --text-muted: rgba(0, 0, 0, 0.35);
-            --accent: #111111;
-            --accent-soft: rgba(0, 0, 0, 0.06);
-            --accent-glow: rgba(0, 0, 0, 0.1);
-            --success: #333333;
-            --success-soft: rgba(0, 0, 0, 0.06);
-            --danger: #222222;
-            --danger-soft: rgba(0, 0, 0, 0.06);
-            --warn: #444444;
-            --warn-soft: rgba(0, 0, 0, 0.06);
-            --card: rgba(255, 255, 255, 0.55);
-            --card-hover: rgba(255, 255, 255, 0.72);
-            --card-border: rgba(0, 0, 0, 0.08);
-            --surface: rgba(255, 255, 255, 0.45);
-            --surface-2: rgba(255, 255, 255, 0.65);
+            --text: #0f1220;
+            --text-dim: rgba(15, 18, 32, 0.55);
+            --text-muted: rgba(15, 18, 32, 0.38);
+            --accent: #3b6ef5;
+            --accent-soft: rgba(59, 110, 245, 0.12);
+            --accent-glow: rgba(59, 110, 245, 0.22);
+            --success: #059669;
+            --success-soft: rgba(5, 150, 105, 0.1);
+            --danger: #dc2626;
+            --danger-soft: rgba(220, 38, 38, 0.1);
+            --warn: #d97706;
+            --warn-soft: rgba(217, 119, 6, 0.1);
+            --card: rgba(255, 255, 255, 0.7);
+            --card-hover: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(0, 0, 0, 0.07);
+            --surface: rgba(255, 255, 255, 0.55);
+            --surface-2: rgba(255, 255, 255, 0.75);
             --input-border: rgba(0, 0, 0, 0.1);
-            --input-text: #111111;
-            --btn-sec-bg: rgba(255, 255, 255, 0.5);
-            --btn-sec-border: rgba(0, 0, 0, 0.12);
-            --nav-bg: rgba(255, 255, 255, 0.7);
-            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.7);
-            --shadow-nav: 0 -8px 24px rgba(0, 0, 0, 0.06);
-            --bg-glow-1: rgba(0, 0, 0, 0.03);
-            --bg-glow-2: rgba(0, 0, 0, 0.015);
+            --input-text: #0f1220;
+            --btn-sec-bg: rgba(255, 255, 255, 0.6);
+            --btn-sec-border: rgba(0, 0, 0, 0.1);
+            --nav-bg: rgba(255, 255, 255, 0.75);
+            --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8);
+            --shadow-nav: 0 -8px 28px rgba(0, 0, 0, 0.08);
+            --bg-glow-1: rgba(91, 140, 255, 0.12);
+            --bg-glow-2: rgba(139, 92, 246, 0.08);
+        }
+
+        [data-theme="light"][data-accent="purple"] {
+            --accent: #7c5cbf;
+            --accent-soft: rgba(124, 92, 191, 0.12);
+            --accent-glow: rgba(124, 92, 191, 0.22);
+            --bg-glow-1: rgba(124, 92, 191, 0.12);
+            --bg-glow-2: rgba(91, 140, 255, 0.08);
         }
 
         body {
@@ -108,11 +125,12 @@
             -webkit-font-smoothing: antialiased;
             background: var(--bg);
             background-image:
-                radial-gradient(ellipse 90% 55% at 50% -15%, var(--bg-glow-1), transparent),
-                radial-gradient(ellipse 70% 45% at 100% 10%, var(--bg-glow-2), transparent),
-                radial-gradient(ellipse 50% 30% at 0% 80%, var(--bg-glow-2), transparent);
-            transition: background 0.25s var(--ease), color 0.25s var(--ease);
+                radial-gradient(ellipse 100% 60% at 50% -20%, var(--bg-glow-1), transparent),
+                radial-gradient(ellipse 70% 50% at 100% 0%, var(--bg-glow-2), transparent),
+                radial-gradient(ellipse 60% 40% at 0% 100%, var(--bg-glow-2), transparent);
+            transition: background 0.3s var(--ease), color 0.25s var(--ease);
         }
+
 
 
 
@@ -125,8 +143,8 @@
             box-shadow: var(--shadow-card);
             padding: 20px;
             overflow: hidden;
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
+            backdrop-filter: blur(28px) saturate(160%);
+            -webkit-backdrop-filter: blur(28px) saturate(160%);
             transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
         }
 
@@ -141,12 +159,13 @@
             outline: none;
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
+            transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
         }
         .glass-input::placeholder { color: var(--text-muted); }
         .glass-input:focus {
-            border-color: rgba(255, 255, 255, 0.28);
+            border-color: var(--accent);
             background: var(--surface-2);
+            box-shadow: 0 0 0 3px var(--accent-soft);
         }
 
         /* ─── Buttons ─── */
@@ -155,19 +174,19 @@
             appearance: none;
             -webkit-appearance: none;
             border: none;
-            color: #000;
+            color: #fff;
             font-weight: 600;
             font-size: 15px;
             letter-spacing: -0.01em;
             padding: 16px 18px;
             border-radius: var(--radius-full);
             cursor: pointer;
-            background: #ffffff;
-            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #8b5cf6) 100%);
+            box-shadow: 0 4px 20px var(--accent-glow);
             transition: opacity 0.15s ease, transform 0.12s var(--ease), box-shadow 0.15s ease;
         }
-        .btn-primary:active { opacity: 0.88; transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.35; pointer-events: none; box-shadow: none; }
+        .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.4; pointer-events: none; box-shadow: none; }
         .btn-blue { /* alias */ }
 
         .btn-secondary {
@@ -193,8 +212,8 @@
             appearance: none;
             -webkit-appearance: none;
             background: var(--danger-soft);
-            color: #e5e5e5;
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #fca5a5;
+            border: 1px solid rgba(248, 113, 113, 0.25);
             padding: 14px 16px;
             border-radius: var(--radius-full);
             font-weight: 500;
@@ -202,7 +221,8 @@
             cursor: pointer;
             transition: background 0.15s ease;
         }
-        .btn-danger:active { background: rgba(255, 255, 255, 0.12); }
+        .btn-danger:active { background: rgba(248, 113, 113, 0.2); }
+
 
 
 
@@ -277,7 +297,7 @@
             width: 38px;
             height: 38px;
             border-radius: 12px;
-            background: var(--surface);
+            background: var(--accent-soft);
             border: 1px solid var(--card-border);
             display: flex;
             align-items: center;
@@ -288,15 +308,16 @@
         }
         .status-badge {
             font-size: 11px;
-            font-weight: 500;
+            font-weight: 550;
             letter-spacing: 0.01em;
-            background: var(--surface);
-            color: var(--text-dim);
+            background: var(--success-soft);
+            color: #6ee7b7;
             padding: 6px 12px;
             border-radius: var(--radius-full);
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(52, 211, 153, 0.25);
             backdrop-filter: blur(10px);
         }
+
 
 
 
@@ -308,8 +329,17 @@
             border: 1px solid var(--card-border);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow-card);
-            backdrop-filter: blur(28px);
-            -webkit-backdrop-filter: blur(28px);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            position: relative;
+            overflow: hidden;
+        }
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-soft) 0%, transparent 50%, rgba(139, 92, 246, 0.08) 100%);
+            pointer-events: none;
         }
         .addr-pill {
             display: inline-flex;
@@ -325,31 +355,39 @@
             cursor: pointer;
             border: 1px solid var(--card-border);
             backdrop-filter: blur(8px);
+            position: relative;
+            z-index: 1;
             transition: background 0.15s ease, border-color 0.15s ease;
         }
-        .addr-pill:active { background: var(--surface-2); border-color: rgba(255,255,255,0.2); }
+        .addr-pill:active { background: var(--surface-2); border-color: var(--accent); }
         .balance-num {
             font-size: 40px;
-            font-weight: 600;
+            font-weight: 650;
             letter-spacing: -1.6px;
             margin-bottom: 4px;
             color: var(--text);
             line-height: 1.1;
             font-variant-numeric: tabular-nums;
+            position: relative;
+            z-index: 1;
         }
         .balance-usd {
             font-size: 15px;
-            font-weight: 400;
+            font-weight: 450;
             color: var(--text-dim);
             margin-bottom: 6px;
             min-height: 22px;
+            position: relative;
+            z-index: 1;
         }
         .balance-updated {
             font-size: 11px;
             color: var(--text-muted);
             margin-bottom: 22px;
+            position: relative;
+            z-index: 1;
         }
-        .theme-toggle {
+        .theme-toggle, .accent-toggle {
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -365,7 +403,7 @@
             transition: background 0.15s ease, transform 0.12s var(--ease);
             flex-shrink: 0;
         }
-        .theme-toggle:active { transform: scale(0.94); background: var(--surface-2); }
+        .theme-toggle:active, .accent-toggle:active { transform: scale(0.94); background: var(--surface-2); }
         .fee-box {
             background: var(--surface);
             border: 1px solid var(--card-border);
@@ -382,7 +420,7 @@
             justify-content: space-between;
             gap: 12px;
         }
-        .action-row { display: flex; gap: 12px; justify-content: center; }
+        .action-row { display: flex; gap: 12px; justify-content: center; position: relative; z-index: 1; }
         .action-btn {
             flex: 1;
             display: flex;
@@ -395,19 +433,20 @@
             padding: 14px 8px;
             cursor: pointer;
             color: var(--text);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: background 0.12s ease, transform 0.12s var(--ease);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            transition: background 0.12s ease, transform 0.12s var(--ease), border-color 0.12s ease;
         }
         .action-btn:active {
             background: var(--surface-2);
             transform: scale(0.97);
+            border-color: var(--accent);
         }
         .action-btn .icon-circle {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.06);
+            background: var(--accent-soft);
             border: 1px solid var(--card-border);
             color: var(--text);
             display: flex;
@@ -423,6 +462,7 @@
             letter-spacing: -0.01em;
             opacity: 1;
         }
+
 
 
 
@@ -639,12 +679,12 @@
             display: flex;
             justify-content: space-around;
             padding: 10px 8px;
-            border-radius: 22px;
+            border-radius: 24px;
             background: var(--nav-bg);
             border: 1px solid var(--card-border);
             box-shadow: var(--shadow-nav);
-            backdrop-filter: blur(28px) saturate(140%);
-            -webkit-backdrop-filter: blur(28px) saturate(140%);
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
         }
         .nav-item {
             display: flex;
@@ -656,14 +696,15 @@
             color: var(--text-muted);
             cursor: pointer;
             padding: 8px 16px;
-            border-radius: 14px;
+            border-radius: 16px;
             transition: color 0.18s var(--ease), background 0.18s var(--ease);
         }
         .nav-item.active {
             color: var(--text);
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--accent-soft);
         }
         .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+
 
 
 
@@ -831,13 +872,13 @@
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, 0.08);
-            border-top-color: #ffffff;
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
             animation: sending-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
         .send-ring.done {
-            border-color: rgba(255, 255, 255, 0.2);
-            border-top-color: #ffffff;
+            border-color: rgba(52, 211, 153, 0.3);
+            border-top-color: #34d399;
             animation: none;
             transition: border-color 0.3s ease;
         }
@@ -855,18 +896,19 @@
             transition: all 0.3s var(--ease);
         }
         .send-core.success {
-            background: transparent;
-            border-color: rgba(255, 255, 255, 0.35);
+            background: var(--success-soft);
+            border-color: rgba(52, 211, 153, 0.4);
             font-size: 26px;
-            color: #ffffff;
+            color: #34d399;
             animation: successPop 0.4s var(--ease-out);
         }
         .send-core.fail {
-            background: transparent;
-            border-color: rgba(255, 255, 255, 0.25);
-            color: #d4d4d4;
+            background: var(--danger-soft);
+            border-color: rgba(248, 113, 113, 0.4);
+            color: #f87171;
             animation: successPop 0.4s var(--ease-out);
         }
+
 
         @keyframes sending-spin { to { transform: rotate(360deg); } }
         @keyframes successPop {
@@ -929,18 +971,16 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em; font-weight:550;">Glass Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Soft Glass · B&W</span>
-
-
-
-
+                <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Soft Glass</span>
             </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="accent-toggle" id="accent-toggle" onclick="toggleAccent()" aria-label="Toggle accent color" title="Blue / Purple">🎨</button>
             <button type="button" class="theme-toggle" id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
             <div id="connection-status" class="status-badge">Ready</div>
         </div>
     </div>
+
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
 
@@ -1245,7 +1285,8 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        Non-Custodial · Soft Glass B&W
+        Non-Custodial · Soft Glass
+
 
 
 
@@ -1313,8 +1354,10 @@
         const PIN_LENGTH = 4;
         const BALANCE_POLL_MS = 20000;
         const THEME_KEY = 'glass_theme_v1';
+        const ACCENT_KEY = 'glass_accent_v1';
 
         let libs = null;
+
         let tonClient = null;
         let pendingWords = null;
         let currentAddress = '';
@@ -1357,7 +1400,29 @@
             else applyTheme('dark');
         })();
 
+        // ─── Accent (Blue / Purple) ───
+        function applyAccent(accent) {
+            if (accent === 'purple') {
+                document.documentElement.setAttribute('data-accent', 'purple');
+            } else {
+                document.documentElement.removeAttribute('data-accent');
+                accent = 'blue';
+            }
+            const btn = document.getElementById('accent-toggle');
+            if (btn) btn.textContent = accent === 'purple' ? '💜' : '💙';
+            localStorage.setItem(ACCENT_KEY, accent);
+        }
+        function toggleAccent() {
+            const cur = document.documentElement.getAttribute('data-accent') || 'blue';
+            applyAccent(cur === 'purple' ? 'blue' : 'purple');
+        }
+        (function initAccent() {
+            const saved = localStorage.getItem(ACCENT_KEY);
+            applyAccent(saved === 'purple' ? 'purple' : 'blue');
+        })();
+
         // ─── TON price (TonAPI) ───
+
         async function fetchTonPrice() {
             try {
                 const res = await fetch(TONAPI_RATES);
