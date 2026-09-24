@@ -444,6 +444,69 @@
             color: var(--text-dim);
             font-size: 13px;
         }
+        /* ─── NFTs ─── */
+        .nft-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .nft-card {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.12s var(--ease), border-color 0.12s ease, background 0.12s ease;
+        }
+        .nft-card:active {
+            transform: scale(0.97);
+            background: var(--surface-2);
+        }
+        .nft-img-wrap {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: var(--surface-2);
+            overflow: hidden;
+        }
+        .nft-img-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .nft-img-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--text-muted);
+        }
+        .nft-info {
+            padding: 10px 11px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        .nft-name {
+            font-size: 13px;
+            font-weight: 650;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            letter-spacing: -0.01em;
+        }
+        .nft-collection {
+            font-size: 11px;
+            color: var(--text-dim);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
         .history-more {
             text-align: center;
             padding: 12px 10px;
@@ -458,6 +521,7 @@
             transition: background 0.12s ease;
         }
         .history-more:active { background: var(--surface-2); }
+
 
         /* ─── History ─── */
         .tx-row {
@@ -793,7 +857,8 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em;">Glass Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.4 · Wallet V5 + TonConnect</span>
+                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.5 · Wallet V5 + TonConnect + NFTs</span>
+
             </div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -958,6 +1023,16 @@
                 </div>
             </div>
 
+            <div id="nfts-card" class="glass-card flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm font-bold" style="letter-spacing:-0.01em;">NFTs</div>
+                    <span class="text-xs" id="nfts-count">—</span>
+                </div>
+                <div id="nfts-list">
+                    <div class="token-empty">Loading NFTs...</div>
+                </div>
+            </div>
+
             <div id="history-card" class="glass-card flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <div class="text-sm font-bold" style="letter-spacing:-0.01em;">History</div>
@@ -967,6 +1042,7 @@
                     <div class="token-empty">Loading transactions...</div>
                 </div>
             </div>
+
 
             <div class="glass-card list-card" onclick="showTonConnectScreen()">
                 <div class="left">
@@ -1043,7 +1119,8 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        TON Non-Custodial Wallet · v2.4 · V5R1
+        TON Non-Custodial Wallet · v2.5 · V5R1 + NFTs
+
     </footer>
 
     <!-- PIN overlay -->
@@ -1119,7 +1196,10 @@
         let balancePollTimer = null;
         let jettons = [];
         let jettonsRefreshing = false;
+        let nfts = [];
+        let nftsRefreshing = false;
         let pendingJetton = null;
+
         let tonPriceUsd = null;
         let displayedBalanceNano = 0n;
         let balanceAnimRaf = null;
@@ -1732,11 +1812,13 @@
             currentAddressObj = null;
             currentBalanceNano = 0n;
             jettons = [];
+            nfts = [];
             document.getElementById('wallet-address-display').innerText = 'Loading...';
             document.getElementById('wallet-balance').innerText = 'Checking...';
             document.getElementById('balance-updated').innerText = '';
             showScreen('unlock-screen');
         }
+
 
         function resetWallet() {
             const ok = confirm('The wallet will be removed from this device. If you do not have the recovery phrase, your funds will be lost permanently. Continue?');
@@ -1784,10 +1866,11 @@
                     document.getElementById('wallet-balance').innerText = 'Error';
                     setStatus('Network error', false);
                 }
-                refreshJettons(); refreshHistory();
+                refreshJettons(); refreshNfts(); refreshHistory();
 
                 startBalancePolling();
                 startTcListener();
+
             } catch (error) {
                 console.error('Error loading wallet:', error);
                 alert('Failed to load the wallet. Please try again.');
@@ -1924,8 +2007,121 @@
             });
         }
 
+        // ================= NFTs =================
+        async function fetchAccountNfts(ownerRaw) {
+            const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(ownerRaw) + '/nfts?limit=48&indirect_ownership=false';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('nft fetch failed ' + res.status);
+            const data = await res.json();
+            return data.nft_items || data.nftItems || [];
+        }
+
+        function pickNftPreview(item) {
+            const previews = item.previews || [];
+            // Prefer 500x500 then 100x100 then any
+            const preferred = previews.find(p => p.resolution === '500x500')
+                || previews.find(p => p.resolution === '100x100')
+                || previews[0];
+            if (preferred && preferred.url) return preferred.url;
+            const meta = item.metadata || {};
+            return meta.image || meta.image_url || '';
+        }
+
+        async function refreshNfts() {
+            if (!currentAddressObj || nftsRefreshing) return;
+            nftsRefreshing = true;
+            try {
+                const ownerRaw = currentAddressObj.toRawString();
+                const items = await withRetry(() => fetchAccountNfts(ownerRaw), 2);
+                nfts = (items || []).map(function (item) {
+                    const meta = item.metadata || {};
+                    const col = item.collection || {};
+                    return {
+                        address: item.address || '',
+                        name: meta.name || 'Unnamed NFT',
+                        description: meta.description || '',
+                        image: pickNftPreview(item),
+                        collectionName: col.name || (col.address ? shortAddr(col.address) : 'Standalone'),
+                        collectionAddress: col.address || '',
+                        verified: !!item.verified,
+                        trust: item.trust || ''
+                    };
+                });
+                renderNfts();
+            } catch (e) {
+                console.error('refreshNfts failed', e);
+                const list = document.getElementById('nfts-list');
+                if (list) list.innerHTML = '<div class="token-empty">Failed to load NFTs</div>';
+            } finally {
+                nftsRefreshing = false;
+            }
+        }
+
+        function renderNfts() {
+            const list = document.getElementById('nfts-list');
+            const countEl = document.getElementById('nfts-count');
+            if (!list) return;
+            list.innerHTML = '';
+
+            if (!nfts || nfts.length === 0) {
+                list.innerHTML = '<div class="token-empty">No NFTs found</div>';
+                if (countEl) countEl.innerText = '0';
+                return;
+            }
+
+            if (countEl) countEl.innerText = nfts.length + (nfts.length === 1 ? ' item' : ' items');
+
+            const grid = document.createElement('div');
+            grid.className = 'nft-grid';
+
+            nfts.forEach(function (nft) {
+                const card = document.createElement('div');
+                card.className = 'nft-card';
+                card.onclick = function () {
+                    if (nft.address) {
+                        // Open on Tonviewer
+                        let addr = nft.address;
+                        try {
+                            if (libs && libs.Address) {
+                                addr = libs.Address.parse(nft.address).toString({ urlSafe: true, bounceable: true });
+                            }
+                        } catch (e) {}
+                        window.open('https://tonviewer.com/' + addr, '_blank', 'noopener');
+                    }
+                };
+
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'nft-img-wrap';
+                if (nft.image) {
+                    const img = document.createElement('img');
+                    img.src = nft.image;
+                    img.alt = nft.name;
+                    img.loading = 'lazy';
+                    img.onerror = function () {
+                        imgWrap.innerHTML = '<div class="nft-img-fallback">🖼️</div>';
+                    };
+                    imgWrap.appendChild(img);
+                } else {
+                    imgWrap.innerHTML = '<div class="nft-img-fallback">🖼️</div>';
+                }
+
+                const info = document.createElement('div');
+                info.className = 'nft-info';
+                info.innerHTML =
+                    '<div class="nft-name">' + escapeHtml(nft.name) + '</div>' +
+                    '<div class="nft-collection">' + escapeHtml(nft.collectionName) + '</div>';
+
+                card.appendChild(imgWrap);
+                card.appendChild(info);
+                grid.appendChild(card);
+            });
+
+            list.appendChild(grid);
+        }
+
         let txHistory = [];
         let historyRefreshing = false;
+
 
         async function fetchTransactions(addressStr) {
             const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
@@ -2119,6 +2315,7 @@
                 if (document.visibilityState === 'hidden') return;
                 refreshBalance();
                 refreshJettons();
+                refreshNfts();
             }, BALANCE_POLL_MS);
         }
         function stopBalancePolling() {
@@ -2131,8 +2328,10 @@
             if (document.visibilityState === 'visible' && currentAddressObj) {
                 refreshBalance();
                 refreshJettons();
+                refreshNfts();
             }
         });
+
 
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
@@ -2467,7 +2666,8 @@
                 saveAddressToBook(shownAddr);
                 pendingJetton = null;
                 showScreen('dashboard-screen');
-                setTimeout(function () { refreshBalance(); refreshJettons(); }, 5000);
+                setTimeout(function () { refreshBalance(); refreshJettons(); refreshNfts(); }, 5000);
+
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
