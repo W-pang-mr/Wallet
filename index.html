@@ -6,7 +6,7 @@
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        /* ─── Design System: Matte Black + Soft Accent ─── */
+        /* ─── Design System: Pure Minimal Dark ─── */
         *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
@@ -20,53 +20,53 @@
         }
         :root, [data-theme="dark"] {
             color-scheme: dark;
-            --bg: #050506;
-            --bg-elevated: #0c0c0e;
-            --text: #f4f4f5;
-            --text-dim: rgba(244, 244, 245, 0.48);
-            --text-muted: rgba(244, 244, 245, 0.32);
-            --accent: #0098ea;
-            --accent-soft: rgba(0, 152, 234, 0.14);
-            --accent-glow: rgba(0, 152, 234, 0.25);
+            --bg: #000000;
+            --bg-elevated: #0a0a0a;
+            --text: #ffffff;
+            --text-dim: rgba(255, 255, 255, 0.45);
+            --text-muted: rgba(255, 255, 255, 0.28);
+            --accent: #ffffff;
+            --accent-soft: rgba(255, 255, 255, 0.08);
+            --accent-glow: rgba(255, 255, 255, 0.12);
             --success: #34d399;
             --success-soft: rgba(52, 211, 153, 0.12);
             --danger: #f87171;
             --danger-soft: rgba(248, 113, 113, 0.12);
             --warn: #fbbf24;
             --warn-soft: rgba(251, 191, 36, 0.12);
-            --card: #121214;
-            --card-hover: #18181b;
-            --card-border: rgba(255, 255, 255, 0.07);
-            --surface: #1a1a1d;
-            --surface-2: #222226;
-            --input-border: rgba(255, 255, 255, 0.08);
+            --card: #0a0a0a;
+            --card-hover: #111111;
+            --card-border: rgba(255, 255, 255, 0.08);
+            --surface: #111111;
+            --surface-2: #1a1a1a;
+            --input-border: rgba(255, 255, 255, 0.1);
             --input-text: #ffffff;
-            --btn-sec-bg: #1a1a1d;
-            --btn-sec-border: rgba(255, 255, 255, 0.1);
-            --nav-bg: rgba(12, 12, 14, 0.92);
-            --radius-xl: 24px;
-            --radius-lg: 18px;
-            --radius-md: 14px;
-            --radius-sm: 11px;
+            --btn-sec-bg: #111111;
+            --btn-sec-border: rgba(255, 255, 255, 0.12);
+            --nav-bg: rgba(0, 0, 0, 0.92);
+            --radius-xl: 20px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 10px;
             --radius-full: 999px;
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow-card: 0 1px 0 rgba(255,255,255,0.04) inset, 0 4px 24px rgba(0,0,0,0.35);
-            --shadow-nav: 0 -4px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06);
-            --bg-glow-1: rgba(0, 152, 234, 0.08);
-            --bg-glow-2: rgba(0, 152, 234, 0.04);
+            --shadow-card: none;
+            --shadow-nav: 0 -1px 0 rgba(255,255,255,0.06);
+            --bg-glow-1: transparent;
+            --bg-glow-2: transparent;
         }
 
         [data-theme="light"] {
             color-scheme: light;
-            --bg: #f4f6f8;
+            --bg: #fafafa;
             --bg-elevated: #ffffff;
-            --text: #111827;
-            --text-dim: rgba(17, 24, 39, 0.55);
-            --text-muted: rgba(17, 24, 39, 0.38);
-            --accent: #0098ea;
-            --accent-soft: rgba(0, 152, 234, 0.12);
-            --accent-glow: rgba(0, 152, 234, 0.2);
+            --text: #111111;
+            --text-dim: rgba(0, 0, 0, 0.5);
+            --text-muted: rgba(0, 0, 0, 0.35);
+            --accent: #111111;
+            --accent-soft: rgba(0, 0, 0, 0.06);
+            --accent-glow: rgba(0, 0, 0, 0.08);
             --success: #059669;
             --success-soft: rgba(5, 150, 105, 0.1);
             --danger: #dc2626;
@@ -74,19 +74,19 @@
             --warn: #d97706;
             --warn-soft: rgba(217, 119, 6, 0.1);
             --card: #ffffff;
-            --card-hover: #f9fafb;
+            --card-hover: #f5f5f5;
             --card-border: rgba(0, 0, 0, 0.08);
-            --surface: #f3f4f6;
-            --surface-2: #e5e7eb;
+            --surface: #f5f5f5;
+            --surface-2: #eeeeee;
             --input-border: rgba(0, 0, 0, 0.1);
-            --input-text: #111827;
+            --input-text: #111111;
             --btn-sec-bg: #ffffff;
             --btn-sec-border: rgba(0, 0, 0, 0.12);
             --nav-bg: rgba(255, 255, 255, 0.94);
-            --shadow-card: 0 1px 0 rgba(255,255,255,0.8) inset, 0 4px 20px rgba(0,0,0,0.06);
-            --shadow-nav: 0 -4px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.06);
-            --bg-glow-1: rgba(0, 152, 234, 0.06);
-            --bg-glow-2: rgba(0, 152, 234, 0.03);
+            --shadow-card: none;
+            --shadow-nav: 0 -1px 0 rgba(0,0,0,0.06);
+            --bg-glow-1: transparent;
+            --bg-glow-2: transparent;
         }
 
         body {
@@ -97,30 +97,28 @@
             display: flex;
             flex-direction: column;
             padding:
-                max(14px, env(safe-area-inset-top, 0px))
-                16px
-                calc(100px + env(safe-area-inset-bottom, 0px))
-                16px;
+                max(20px, env(safe-area-inset-top, 0px))
+                20px
+                calc(110px + env(safe-area-inset-bottom, 0px))
+                20px;
             max-width: 480px;
             margin: 0 auto;
             position: relative;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             background: var(--bg);
-            background-image:
-                radial-gradient(ellipse 80% 50% at 50% -20%, var(--bg-glow-1), transparent),
-                radial-gradient(ellipse 60% 40% at 100% 0%, var(--bg-glow-2), transparent);
             transition: background 0.25s var(--ease), color 0.25s var(--ease);
         }
+
 
         /* ─── Cards ─── */
         .glass-card {
             position: relative;
-            background: var(--card);
+            background: transparent;
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-card);
-            padding: 18px;
+            box-shadow: none;
+            padding: 20px;
             overflow: hidden;
             transition: border-color 0.2s var(--ease);
         }
@@ -130,17 +128,16 @@
             background: var(--surface);
             border: 1px solid var(--input-border);
             border-radius: var(--radius-sm);
-            padding: 13px 14px;
+            padding: 14px 16px;
             color: var(--input-text);
-            font-size: 14px;
+            font-size: 15px;
             outline: none;
-            transition: border-color 0.18s var(--ease), background 0.18s var(--ease), box-shadow 0.18s var(--ease);
+            transition: border-color 0.18s var(--ease), background 0.18s var(--ease);
         }
         .glass-input::placeholder { color: var(--text-muted); }
         .glass-input:focus {
-            border-color: rgba(0, 152, 234, 0.45);
+            border-color: rgba(255, 255, 255, 0.25);
             background: var(--surface-2);
-            box-shadow: 0 0 0 3px rgba(0, 152, 234, 0.12);
         }
 
         /* ─── Buttons ─── */
@@ -149,52 +146,53 @@
             appearance: none;
             -webkit-appearance: none;
             border: none;
-            color: #fff;
-            font-weight: 650;
+            color: #000;
+            font-weight: 600;
             font-size: 15px;
             letter-spacing: -0.01em;
-            padding: 15px 18px;
-            border-radius: var(--radius-md);
+            padding: 16px 18px;
+            border-radius: var(--radius-full);
             cursor: pointer;
-            background: linear-gradient(180deg, #1a9fea 0%, #0088d4 100%);
-            box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 4px 16px rgba(0, 152, 234, 0.35);
-            transition: opacity 0.15s ease, transform 0.12s var(--ease), box-shadow 0.15s ease;
+            background: #ffffff;
+            box-shadow: none;
+            transition: opacity 0.15s ease, transform 0.12s var(--ease);
         }
-        .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
-        .btn-primary:disabled { opacity: 0.4; pointer-events: none; box-shadow: none; }
+        .btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.35; pointer-events: none; }
         .btn-blue { /* alias */ }
 
         .btn-secondary {
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            background: var(--btn-sec-bg);
+            background: transparent;
             color: var(--text);
             border: 1px solid var(--btn-sec-border);
-            padding: 15px 18px;
-            border-radius: var(--radius-md);
-            font-weight: 550;
+            padding: 16px 18px;
+            border-radius: var(--radius-full);
+            font-weight: 500;
             font-size: 15px;
             cursor: pointer;
             transition: background 0.15s ease, transform 0.12s var(--ease), border-color 0.15s ease;
         }
-        .btn-secondary:active { background: var(--surface-2); transform: scale(0.98); }
+        .btn-secondary:active { background: var(--surface); transform: scale(0.98); }
 
         .btn-danger {
             width: 100%;
             appearance: none;
             -webkit-appearance: none;
-            background: var(--danger-soft);
-            color: #fca5a5;
-            border: 1px solid rgba(248, 113, 113, 0.22);
-            padding: 13px 16px;
-            border-radius: var(--radius-md);
-            font-weight: 550;
+            background: transparent;
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.25);
+            padding: 14px 16px;
+            border-radius: var(--radius-full);
+            font-weight: 500;
             font-size: 14px;
             cursor: pointer;
             transition: background 0.15s ease;
         }
-        .btn-danger:active { background: rgba(248, 113, 113, 0.2); }
+        .btn-danger:active { background: rgba(248, 113, 113, 0.1); }
+
 
         /* ─── Utilities ─── */
         .hidden { display: none !important; }
@@ -259,100 +257,100 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             padding: 4px 0 0;
         }
-        .brand { display: flex; align-items: center; gap: 11px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
         .brand-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(145deg, #1a1a1f 0%, #0e0e12 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            font-size: 16px;
+            box-shadow: none;
         }
         .status-badge {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             letter-spacing: 0.01em;
-            background: var(--success-soft);
-            color: #6ee7b7;
-            padding: 6px 12px;
+            background: transparent;
+            color: var(--text-dim);
+            padding: 5px 10px;
             border-radius: var(--radius-full);
-            border: 1px solid rgba(52, 211, 153, 0.2);
+            border: 1px solid var(--card-border);
         }
+
 
         /* ─── Balance card ─── */
         .balance-card {
             text-align: center;
-            padding: 24px 18px 20px;
-            background:
-                linear-gradient(180deg, rgba(0, 152, 234, 0.06) 0%, transparent 55%),
-                var(--card);
+            padding: 32px 16px 28px;
+            background: transparent;
+            border: none;
         }
         .addr-pill {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 11.5px;
+            font-size: 12px;
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-            background: var(--surface);
-            padding: 7px 14px;
+            background: transparent;
+            padding: 6px 12px;
             border-radius: var(--radius-full);
             color: var(--text-dim);
-            margin-bottom: 14px;
+            margin-bottom: 20px;
             cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
             transition: background 0.15s ease, border-color 0.15s ease;
         }
-        .addr-pill:active { background: var(--surface-2); border-color: rgba(255,255,255,0.14); }
+        .addr-pill:active { background: var(--surface); border-color: rgba(255,255,255,0.15); }
         .balance-num {
-            font-size: 38px;
-            font-weight: 750;
-            letter-spacing: -1.2px;
-            margin-bottom: 2px;
+            font-size: 42px;
+            font-weight: 600;
+            letter-spacing: -1.8px;
+            margin-bottom: 4px;
             color: var(--text);
             line-height: 1.1;
             font-variant-numeric: tabular-nums;
         }
         .balance-usd {
-            font-size: 14px;
-            font-weight: 550;
+            font-size: 15px;
+            font-weight: 400;
             color: var(--text-dim);
-            margin-bottom: 4px;
-            min-height: 20px;
+            margin-bottom: 6px;
+            min-height: 22px;
         }
         .balance-updated {
             font-size: 11px;
             color: var(--text-muted);
-            margin-bottom: 18px;
+            margin-bottom: 28px;
         }
         .theme-toggle {
             width: 36px;
             height: 36px;
-            border-radius: 10px;
+            border-radius: 50%;
             border: 1px solid var(--card-border);
-            background: var(--surface);
+            background: transparent;
             color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             transition: background 0.15s ease, transform 0.12s var(--ease);
             flex-shrink: 0;
         }
-        .theme-toggle:active { transform: scale(0.94); background: var(--surface-2); }
+        .theme-toggle:active { transform: scale(0.94); background: var(--surface); }
         .fee-box {
             background: var(--surface);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-sm);
-            padding: 12px 14px;
-            font-size: 12px;
+            padding: 14px 16px;
+            font-size: 13px;
             line-height: 1.6;
             color: var(--text-dim);
         }
@@ -362,69 +360,72 @@
             justify-content: space-between;
             gap: 12px;
         }
-        .action-row { display: flex; gap: 10px; }
+        .action-row { display: flex; gap: 24px; justify-content: center; }
         .action-btn {
-            flex: 1;
+            flex: 0 0 auto;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
-            background: var(--surface);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 14px 8px;
+            gap: 10px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 8px 12px;
             cursor: pointer;
             color: var(--text);
-            transition: background 0.12s ease, transform 0.12s var(--ease), border-color 0.12s ease;
+            transition: opacity 0.12s ease, transform 0.12s var(--ease);
         }
         .action-btn:active {
-            background: var(--surface-2);
+            opacity: 0.7;
             transform: scale(0.96);
         }
         .action-btn .icon-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--surface-2);
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: transparent;
             border: 1px solid var(--card-border);
             color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 17px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+            font-size: 18px;
+            box-shadow: none;
         }
         .action-btn span {
             font-size: 12px;
-            font-weight: 600;
-            color: var(--text);
+            font-weight: 500;
+            color: var(--text-dim);
             letter-spacing: -0.01em;
-            opacity: 0.9;
+            opacity: 1;
         }
+
 
         /* ─── Tokens ─── */
         .token-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 8px;
-            border-radius: 13px;
+            padding: 14px 4px;
+            border-radius: 0;
             cursor: pointer;
-            transition: background 0.12s ease;
-            margin: 0 -4px;
+            transition: opacity 0.12s ease;
+            margin: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
         }
-        .token-row:active { background: rgba(255, 255, 255, 0.05); }
-        .token-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .token-row:last-child { border-bottom: none; }
+        .token-row:active { opacity: 0.7; }
+        .token-left { display: flex; align-items: center; gap: 14px; min-width: 0; }
         .token-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
             background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.06);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 15px;
             flex-shrink: 0;
             overflow: hidden;
         }
@@ -432,41 +433,42 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 50%;
         }
         .token-meta { display: flex; flex-direction: column; text-align: left; gap: 2px; min-width: 0; }
-        .token-symbol { font-size: 15px; font-weight: 650; color: var(--text); letter-spacing: -0.01em; }
+        .token-symbol { font-size: 15px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; }
         .token-name { font-size: 12px; color: var(--text-dim); }
-        .token-bal { font-size: 15px; font-weight: 650; color: var(--text); text-align: right; letter-spacing: -0.02em; }
+        .token-bal { font-size: 15px; font-weight: 500; color: var(--text); text-align: right; letter-spacing: -0.02em; }
         .token-empty {
             text-align: center;
-            padding: 20px 8px;
+            padding: 28px 8px;
             color: var(--text-dim);
             font-size: 13px;
         }
+
         /* ─── NFTs ─── */
         .nft-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
         }
         .nft-card {
-            background: var(--surface);
+            background: transparent;
             border: 1px solid var(--card-border);
             border-radius: 14px;
             overflow: hidden;
             cursor: pointer;
-            transition: transform 0.12s var(--ease), border-color 0.12s ease, background 0.12s ease;
+            transition: opacity 0.12s var(--ease), transform 0.12s var(--ease);
         }
         .nft-card:active {
             transform: scale(0.97);
-            background: var(--surface-2);
+            opacity: 0.85;
         }
         .nft-img-wrap {
             position: relative;
             width: 100%;
             aspect-ratio: 1;
-            background: var(--surface-2);
+            background: var(--surface);
             overflow: hidden;
         }
         .nft-img-wrap img {
@@ -485,7 +487,7 @@
             color: var(--text-muted);
         }
         .nft-info {
-            padding: 10px 11px 12px;
+            padding: 10px 12px 6px;
             display: flex;
             flex-direction: column;
             gap: 2px;
@@ -493,7 +495,7 @@
         }
         .nft-name {
             font-size: 13px;
-            font-weight: 650;
+            font-weight: 500;
             color: var(--text);
             white-space: nowrap;
             overflow: hidden;
@@ -507,6 +509,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
         .history-more {
             text-align: center;
             padding: 12px 10px;
@@ -571,24 +574,26 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 18px;
+            padding: 16px 4px;
             cursor: pointer;
-            border-radius: var(--radius-lg);
-            transition: background 0.12s ease;
+            border-radius: 0;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: opacity 0.12s ease;
         }
-        .list-card:active { background: rgba(255, 255, 255, 0.04); }
-        .list-card .left { display: flex; align-items: center; gap: 12px; }
+        .list-card:active { opacity: 0.7; }
+        .list-card .left { display: flex; align-items: center; gap: 14px; }
         .list-card .emoji-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 11px;
-            background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.08);
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: transparent;
+            border: 1px solid var(--card-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
         }
+
 
         /* ─── Bottom nav ─── */
         .bottom-nav {
@@ -596,49 +601,52 @@
             left: 50%;
             bottom: 0;
             transform: translateX(-50%);
-            width: calc(100% - 24px);
-            max-width: 448px;
-            margin-bottom: max(10px, env(safe-area-inset-bottom, 10px));
+            width: 100%;
+            max-width: 480px;
+            margin-bottom: 0;
             z-index: 50;
             display: flex;
             justify-content: space-around;
-            padding: 8px 8px;
-            border-radius: 22px;
+            padding: 12px 8px max(16px, env(safe-area-inset-bottom, 16px));
+            border-radius: 0;
             background: var(--nav-bg);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow-nav);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            border: none;
+            border-top: 1px solid var(--card-border);
+            box-shadow: none;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
-            font-size: 10.5px;
-            font-weight: 600;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 500;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 8px 18px;
-            border-radius: 14px;
-            transition: color 0.18s var(--ease), background 0.18s var(--ease);
+            padding: 6px 16px;
+            border-radius: 0;
+            transition: color 0.18s var(--ease);
         }
         .nav-item.active {
             color: var(--text);
-            background: var(--surface);
+            background: transparent;
         }
-        .nav-item .nav-icon { font-size: 18px; line-height: 1; }
+        .nav-item .nav-icon { font-size: 20px; line-height: 1; }
+
 
         /* ─── PIN overlay ─── */
         .pin-overlay {
             position: fixed;
             inset: 0;
             z-index: 1000;
-            background: rgba(5, 5, 6, 0.96);
+            background: #000000;
             display: flex;
             justify-content: center;
             overflow-y: auto;
         }
+
         .pin-inner {
             width: 100%;
             max-width: 480px;
@@ -696,11 +704,11 @@
             margin-top: 10px;
         }
         .pin-key {
-            width: min(20vw, 78px);
-            height: min(20vw, 78px);
+            width: min(20vw, 76px);
+            height: min(20vw, 76px);
             border-radius: 50%;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: transparent;
             color: #fff;
             display: flex;
             flex-direction: column;
@@ -711,7 +719,8 @@
             user-select: none;
             transition: background 0.1s ease, transform 0.1s var(--ease);
         }
-        .pin-key:active { background: var(--surface-2); transform: scale(0.92); }
+        .pin-key:active { background: rgba(255,255,255,0.08); transform: scale(0.92); }
+
         .pin-key b { font-size: 28px; font-weight: 400; line-height: 1; }
         .pin-key small {
             font-size: 10px;
@@ -743,35 +752,45 @@
             40%, 60% { transform: translateX(6px); }
         }
 
-        /* ─── Sending overlay ─── */
+        /* ─── Sending overlay (Pure Minimal) ─── */
         .sending-overlay {
             position: fixed;
             inset: 0;
             z-index: 1200;
-            background: rgba(5, 5, 6, 0.9);
+            background: rgba(0, 0, 0, 0.92);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
+            animation: fadeIn 0.25s var(--ease-out);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
         .sending-card {
             width: 100%;
-            max-width: 300px;
-            padding: 32px 24px 24px;
+            max-width: 280px;
+            padding: 40px 28px 28px;
             border-radius: 24px;
             text-align: center;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 14px;
-            background: var(--card);
-            border: 1px solid rgba(255, 255, 255, 0.09);
-            box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55);
+            gap: 18px;
+            background: #0a0a0a;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: none;
+            animation: scaleIn 0.35s var(--ease-out);
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.92); }
+            to { opacity: 1; transform: scale(1); }
         }
         .send-anim {
             position: relative;
-            width: 76px;
-            height: 76px;
+            width: 72px;
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -780,51 +799,70 @@
             position: absolute;
             inset: 0;
             border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent);
-            animation: sending-spin 0.75s linear infinite;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-top-color: #ffffff;
+            animation: sending-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
         .send-ring.done {
-            border-color: rgba(52, 211, 153, 0.25);
+            border-color: rgba(52, 211, 153, 0.3);
             border-top-color: #34d399;
             animation: none;
+            transition: border-color 0.3s ease;
         }
         .send-core {
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
-            background: var(--surface);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.12);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
+            transition: all 0.3s var(--ease);
         }
-        .send-core.success { background: var(--success-soft); font-size: 24px; }
-        .send-core.fail { background: var(--danger-soft); }
+        .send-core.success {
+            background: transparent;
+            border-color: rgba(52, 211, 153, 0.4);
+            font-size: 26px;
+            color: #34d399;
+            animation: successPop 0.4s var(--ease-out);
+        }
+        .send-core.fail {
+            background: transparent;
+            border-color: rgba(248, 113, 113, 0.4);
+            color: #f87171;
+            animation: successPop 0.4s var(--ease-out);
+        }
         @keyframes sending-spin { to { transform: rotate(360deg); } }
+        @keyframes successPop {
+            0% { transform: scale(0.6); opacity: 0; }
+            60% { transform: scale(1.12); }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
         .sending-spinner {
-            width: 40px; height: 40px;
+            width: 36px; height: 36px;
             border-radius: 50%;
-            border: 3px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent);
-            animation: sending-spin 0.75s linear infinite;
+            border: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-top-color: #fff;
+            animation: sending-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
         }
-        .sending-icon { font-size: 36px; }
+        .sending-icon { font-size: 32px; }
         .sending-text {
             font-size: 15px;
-            font-weight: 600;
+            font-weight: 500;
             color: #fff;
             white-space: pre-line;
             line-height: 1.5;
-            letter-spacing: -0.01em;
+            letter-spacing: -0.02em;
         }
         .sending-sub {
             font-size: 12px;
             color: var(--text-dim);
-            margin-top: -6px;
+            margin-top: -8px;
         }
+
 
         .glass-card h2,
         .glass-card h3,
@@ -856,8 +894,10 @@
         <div class="brand">
             <div class="brand-icon">💎</div>
             <div>
-                <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em;">Glass Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.6 · Wallet V5 + NFTs + Send</span>
+                <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.03em; font-weight:500;">Wallet</span>
+
+                <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Minimal · V5</span>
+
 
 
             </div>
@@ -1171,7 +1211,8 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        TON Non-Custodial Wallet · v2.6 · V5R1 + NFTs
+        Non-Custodial · Pure Minimal
+
 
 
     </footer>
