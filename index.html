@@ -476,6 +476,11 @@
             font-size: 18px;
             box-shadow: none;
         }
+        .action-btn .icon-circle svg {
+            display: block;
+            opacity: 0.95;
+        }
+
         .action-btn span {
             font-size: 12px;
             font-weight: 550;
@@ -1163,18 +1168,25 @@
 
             <div class="action-row">
                 <div class="action-btn" onclick="showWithdraw()">
-                    <div class="icon-circle">↗</div>
+                    <div class="icon-circle">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                    </div>
                     <span>Send</span>
                 </div>
                 <div class="action-btn" onclick="copyAddress()">
-                    <div class="icon-circle">↓</div>
+                    <div class="icon-circle">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                    </div>
                     <span>Receive</span>
                 </div>
-                <div class="action-btn" onclick="alert('Swap is coming soon')">
-                    <div class="icon-circle">⇄</div>
+                <div class="action-btn" onclick="openSwap()">
+                    <div class="icon-circle">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg>
+                    </div>
                     <span>Swap</span>
                 </div>
             </div>
+
 
             <div id="jettons-card" class="glass-card flex flex-col gap-3">
                 <div class="flex justify-between items-center">
@@ -1233,7 +1245,7 @@
                 <div class="nav-item nav-center active" onclick="showScreen('dashboard-screen')">
                     <span class="nav-icon nav-center-icon">💎</span>
                 </div>
-                <div class="nav-item" onclick="alert('Swap is coming soon')">
+                <div class="nav-item" onclick="openSwap()">
                     <span class="nav-icon">⇄</span>
                     <span>Swap</span>
                 </div>
@@ -1268,8 +1280,9 @@
                 <div class="nav-item nav-center" onclick="showScreen('dashboard-screen')">
                     <span class="nav-icon nav-center-icon">💎</span>
                 </div>
-                <div class="nav-item" onclick="alert('Swap is coming soon')">
+                <div class="nav-item" onclick="openSwap()">
                     <span class="nav-icon">⇄</span>
+
                     <span>Swap</span>
                 </div>
                 <div class="nav-item" onclick="showTonConnectScreen()">
@@ -2089,7 +2102,22 @@
             }
         }
 
+        function openSwap() {
+            // Open STON.fi — user can connect via TonConnect
+            const url = 'https://app.ston.fi/';
+            try {
+                if (tg && tg.openLink) {
+                    tg.openLink(url);
+                } else {
+                    window.open(url, '_blank', 'noopener');
+                }
+            } catch (e) {
+                window.open(url, '_blank', 'noopener');
+            }
+        }
+
         async function loadWallet(words) {
+
             if (!(await libsReady())) {
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
                 return;
