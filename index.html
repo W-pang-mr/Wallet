@@ -857,7 +857,8 @@
             <div class="brand-icon">💎</div>
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em;">Glass Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.5 · Wallet V5 + TonConnect + NFTs</span>
+                <span style="font-size:10px; color:var(--text-dim); font-weight:500;">v2.6 · Wallet V5 + NFTs + Send</span>
+
 
             </div>
         </div>
@@ -1023,17 +1024,8 @@
                 </div>
             </div>
 
-            <div id="nfts-card" class="glass-card flex flex-col gap-3">
-                <div class="flex justify-between items-center">
-                    <div class="text-sm font-bold" style="letter-spacing:-0.01em;">NFTs</div>
-                    <span class="text-xs" id="nfts-count">—</span>
-                </div>
-                <div id="nfts-list">
-                    <div class="token-empty">Loading NFTs...</div>
-                </div>
-            </div>
-
             <div id="history-card" class="glass-card flex flex-col gap-3">
+
                 <div class="flex justify-between items-center">
                     <div class="text-sm font-bold" style="letter-spacing:-0.01em;">History</div>
                     <span class="text-xs" id="history-refresh" style="cursor:pointer;color:var(--accent); font-weight:600;" onclick="refreshHistory()">Refresh</span>
@@ -1070,9 +1062,13 @@
             <button onclick="resetWallet()" class="btn-danger">Remove Wallet From This Device</button>
 
             <div class="bottom-nav">
-                <div class="nav-item active">
+                <div class="nav-item active" onclick="showScreen('dashboard-screen')">
                     <span class="nav-icon">💎</span>
                     <span>Wallet</span>
+                </div>
+                <div class="nav-item" onclick="showNftsScreen()">
+                    <span class="nav-icon">🖼️</span>
+                    <span>NFTs</span>
                 </div>
                 <div class="nav-item" onclick="alert('Swap is coming soon')">
                     <span class="nav-icon">⇄</span>
@@ -1085,9 +1081,65 @@
             </div>
         </div>
 
+        <!-- NFTs Screen -->
+        <div id="nfts-screen" class="hidden flex flex-col gap-3">
+            <div class="glass-card flex flex-col gap-3">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm font-bold" style="font-size:16px; letter-spacing:-0.01em;">My NFTs</div>
+                    <span class="text-xs" id="nfts-count" style="cursor:pointer;color:var(--accent);font-weight:600;" onclick="refreshNfts()">Refresh</span>
+                </div>
+                <div id="nfts-list">
+                    <div class="token-empty">Loading NFTs...</div>
+                </div>
+            </div>
+            <div class="bottom-nav">
+                <div class="nav-item" onclick="showScreen('dashboard-screen')">
+                    <span class="nav-icon">💎</span>
+                    <span>Wallet</span>
+                </div>
+                <div class="nav-item active" onclick="showNftsScreen()">
+                    <span class="nav-icon">🖼️</span>
+                    <span>NFTs</span>
+                </div>
+                <div class="nav-item" onclick="alert('Swap is coming soon')">
+                    <span class="nav-icon">⇄</span>
+                    <span>Swap</span>
+                </div>
+                <div class="nav-item" onclick="showTonConnectScreen()">
+                    <span class="nav-icon">🧩</span>
+                    <span>Apps</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Send NFT -->
+        <div id="send-nft-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Send NFT</h3>
+            <div class="warn-box">Blockchain transactions cannot be reversed. Double-check the destination address.</div>
+            <div id="sn-preview" style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--surface);border-radius:12px;border:1px solid var(--card-border);">
+                <div id="sn-img" style="width:56px;height:56px;border-radius:10px;overflow:hidden;background:var(--surface-2);flex-shrink:0;"></div>
+                <div style="min-width:0;">
+                    <div id="sn-name" class="text-sm font-bold" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                    <div id="sn-collection" class="text-xs" style="color:var(--text-dim);"></div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 550;">Destination address</label>
+                <div id="sn-address-book" class="grid-24 hidden" style="max-height: none;"></div>
+                <textarea id="sn-address" rows="2" placeholder="UQ... or EQ..." class="glass-input" style="resize: none; font-family: ui-monospace, monospace; font-size: 13px; direction: ltr; text-align: left;"></textarea>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label class="text-xs" style="color: var(--text); font-weight: 550;">Comment (optional, public)</label>
+                <input type="text" id="sn-comment" placeholder="Optional" class="glass-input" style="direction: ltr; text-align: left;">
+            </div>
+            <button id="btn-send-nft" onclick="sendNftTransfer()" class="btn-primary btn-blue">Send NFT</button>
+            <button onclick="cancelSendNft()" class="btn-secondary">Back</button>
+        </div>
+
         <!-- TonConnect -->
         <div id="tonconnect-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Connect to Mini Apps</h3>
+
             <div id="tc-connections-list" class="flex flex-col gap-3"></div>
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label class="text-xs" style="color: #fff; font-weight: 550;">Paste the connect link</label>
@@ -1119,7 +1171,8 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        TON Non-Custodial Wallet · v2.5 · V5R1 + NFTs
+        TON Non-Custodial Wallet · v2.6 · V5R1 + NFTs
+
 
     </footer>
 
@@ -1174,7 +1227,8 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17';
         const FEE_RESERVE = 700000n; // ~0.0007 TON default fallback for network fee
         const JETTON_TRANSFER_GAS = 60000000n;
@@ -1880,44 +1934,27 @@
 
         // ================= Jettons =================
         function formatJetton(raw, decimals) {
-            const big = BigInt(raw);
-            const div = 10n ** BigInt(decimals);
-            const whole = big / div;
-            const showDecimals = Math.min(4, decimals);
-            if (showDecimals === 0) return whole.toString();
-            const frac = (big % div).toString().padStart(decimals, '0').slice(0, showDecimals);
-            return whole.toString() + '.' + frac;
-        }
-
-        async function fetchJettonWallets(ownerRaw) {
-            const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
-            const url = 'https://toncenter.com/api/v3/jetton/wallets?owner_address=' + encodeURIComponent(ownerRaw) + '&limit=50';
-            const res = await fetch(url, { headers: headers });
-            if (!res.ok) throw new Error('jetton wallets fetch failed');
-            const data = await res.json();
-            return data.jetton_wallets || [];
-        }
-
-        async function fetchJettonMaster(masterAddress) {
             try {
-                const headers = TONCENTER_API_KEY ? { 'X-Api-Key': TONCENTER_API_KEY } : {};
-                const url = 'https://toncenter.com/api/v3/jetton/masters?address=' + encodeURIComponent(masterAddress) + '&limit=1';
-                const res = await fetch(url, { headers: headers });
-                if (!res.ok) return null;
-                const data = await res.json();
-                const item = (data.jetton_masters && data.jetton_masters[0]) || null;
-                if (!item) return null;
-                const c = item.jetton_content || {};
-                return {
-                    symbol: c.symbol || '???',
-                    name: c.name || 'Unknown Token',
-                    decimals: c.decimals !== undefined && c.decimals !== null ? parseInt(c.decimals) : 9,
-                    image: c.image || c.image_data || ''
-                };
+                const big = BigInt(raw);
+                const d = Math.max(0, Math.min(18, parseInt(decimals) || 9));
+                const div = 10n ** BigInt(d);
+                const whole = big / div;
+                const showDecimals = Math.min(4, d);
+                if (showDecimals === 0) return whole.toString();
+                const frac = (big % div).toString().padStart(d, '0').slice(0, showDecimals);
+                return whole.toString() + '.' + frac;
             } catch (e) {
-                console.error('jetton master fetch failed', e);
-                return null;
+                return '0';
             }
+        }
+
+        // Clean TonAPI-based jetton fetch (accurate name / symbol / image)
+        async function fetchAccountJettons(ownerRaw) {
+            const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(ownerRaw) + '/jettons?currencies=usd&limit=50';
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('jettons fetch failed ' + res.status);
+            const data = await res.json();
+            return data.balances || [];
         }
 
         async function refreshJettons() {
@@ -1925,31 +1962,46 @@
             jettonsRefreshing = true;
             try {
                 const ownerRaw = currentAddressObj.toRawString();
-                const wallets = await withRetry(() => fetchJettonWallets(ownerRaw), 2);
-                const nonZero = wallets.filter(w => { try { return BigInt(w.balance) > 0n; } catch (e) { return false; } });
+                const balances = await withRetry(() => fetchAccountJettons(ownerRaw), 2);
 
-                const masterCache = {};
-                await Promise.all(nonZero.map(async function (w) {
-                    if (!masterCache[w.jetton]) {
-                        masterCache[w.jetton] = (await fetchJettonMaster(w.jetton)) || { symbol: '???', name: 'Unknown Token', decimals: 9 };
+                jettons = (balances || []).map(function (b) {
+                    const j = b.jetton || {};
+                    const meta = j || {};
+                    let bal = 0n;
+                    try { bal = BigInt(b.balance || '0'); } catch (e) {}
+                    if (bal <= 0n) return null;
+
+                    let decimals = 9;
+                    if (meta.decimals !== undefined && meta.decimals !== null) {
+                        decimals = parseInt(meta.decimals);
+                        if (isNaN(decimals)) decimals = 9;
                     }
-                }));
 
-                jettons = nonZero.map(function (w) {
-                    const meta = masterCache[w.jetton];
+                    // Prefer high-quality image from TonAPI
+                    let image = meta.image || '';
+                    if (!image && meta.preview) image = meta.preview;
+                    // Fix common IPFS / relative issues
+                    if (image && image.startsWith('ipfs://')) {
+                        image = 'https://ipfs.io/ipfs/' + image.slice(7);
+                    }
+
                     return {
-                        walletAddress: w.address,
-                        masterAddress: w.jetton,
-                        balance: BigInt(w.balance),
-                        decimals: meta.decimals,
-                        symbol: meta.symbol,
-                        name: meta.name,
-                        image: meta.image || ''
+                        walletAddress: b.wallet_address && b.wallet_address.address ? b.wallet_address.address : (b.wallet_address || ''),
+                        masterAddress: meta.address || '',
+                        balance: bal,
+                        decimals: decimals,
+                        symbol: meta.symbol || '???',
+                        name: meta.name || 'Unknown Token',
+                        image: image,
+                        verification: meta.verification || ''
                     };
-                });
+                }).filter(Boolean);
+
                 renderJettons();
             } catch (e) {
                 console.error('refreshJettons failed', e);
+                const list = document.getElementById('jettons-list');
+                if (list) list.innerHTML = '<div class="token-empty">Failed to load tokens</div>';
             } finally {
                 jettonsRefreshing = false;
             }
@@ -1959,18 +2011,20 @@
             const card = document.getElementById('jettons-card');
             const list = document.getElementById('jettons-list');
             const countEl = document.getElementById('jettons-count');
+            if (!list) return;
             list.innerHTML = '';
-            card.classList.remove('hidden');
+            if (card) card.classList.remove('hidden');
 
             const TON_IMG = 'https://assets.coingecko.com/coins/images/17980/small/ton_symbol.png';
 
             function tokenIconHtml(imageUrl, fallback) {
                 if (imageUrl) {
-                    return '<img src="' + escapeHtml(imageUrl) + '" alt="" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + escapeHtml(fallback) + '\';" />';
+                    return '<img src="' + escapeHtml(imageUrl) + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.parentNode.textContent=\'' + escapeHtml(fallback) + '\';" />';
                 }
                 return escapeHtml(fallback);
             }
 
+            // Always show native TON first
             const tonBal = (typeof currentBalanceNano !== 'undefined' && currentBalanceNano != null)
                 ? currentBalanceNano : 0n;
             const tonRow = document.createElement('div');
@@ -1989,7 +2043,8 @@
 
             const extra = jettons || [];
             if (countEl) countEl.innerText = (1 + extra.length) + ' token' + ((1 + extra.length) > 1 ? 's' : '');
-            extra.forEach(function (j, idx) {
+
+            extra.forEach(function (j) {
                 const row = document.createElement('div');
                 row.className = 'token-row';
                 row.onclick = function () { showSendJetton(j); };
@@ -2007,7 +2062,11 @@
             });
         }
 
+
         // ================= NFTs =================
+        const NFT_TRANSFER_GAS = 50000000n; // ~0.05 TON
+        let pendingNft = null;
+
         async function fetchAccountNfts(ownerRaw) {
             const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(ownerRaw) + '/nfts?limit=48&indirect_ownership=false';
             const res = await fetch(url);
@@ -2018,18 +2077,23 @@
 
         function pickNftPreview(item) {
             const previews = item.previews || [];
-            // Prefer 500x500 then 100x100 then any
             const preferred = previews.find(p => p.resolution === '500x500')
                 || previews.find(p => p.resolution === '100x100')
                 || previews[0];
             if (preferred && preferred.url) return preferred.url;
             const meta = item.metadata || {};
-            return meta.image || meta.image_url || '';
+            let img = meta.image || meta.image_url || '';
+            if (img && img.startsWith('ipfs://')) img = 'https://ipfs.io/ipfs/' + img.slice(7);
+            return img;
         }
 
         async function refreshNfts() {
             if (!currentAddressObj || nftsRefreshing) return;
             nftsRefreshing = true;
+            const list = document.getElementById('nfts-list');
+            if (list && (!nfts || nfts.length === 0)) {
+                list.innerHTML = '<div class="token-empty">Loading NFTs...</div>';
+            }
             try {
                 const ownerRaw = currentAddressObj.toRawString();
                 const items = await withRetry(() => fetchAccountNfts(ownerRaw), 2);
@@ -2050,11 +2114,15 @@
                 renderNfts();
             } catch (e) {
                 console.error('refreshNfts failed', e);
-                const list = document.getElementById('nfts-list');
                 if (list) list.innerHTML = '<div class="token-empty">Failed to load NFTs</div>';
             } finally {
                 nftsRefreshing = false;
             }
+        }
+
+        function showNftsScreen() {
+            showScreen('nfts-screen');
+            if (currentAddressObj) refreshNfts();
         }
 
         function renderNfts() {
@@ -2065,11 +2133,11 @@
 
             if (!nfts || nfts.length === 0) {
                 list.innerHTML = '<div class="token-empty">No NFTs found</div>';
-                if (countEl) countEl.innerText = '0';
+                if (countEl) countEl.innerText = 'Refresh';
                 return;
             }
 
-            if (countEl) countEl.innerText = nfts.length + (nfts.length === 1 ? ' item' : ' items');
+            if (countEl) countEl.innerText = nfts.length + (nfts.length === 1 ? ' item · Refresh' : ' items · Refresh');
 
             const grid = document.createElement('div');
             grid.className = 'nft-grid';
@@ -2077,18 +2145,6 @@
             nfts.forEach(function (nft) {
                 const card = document.createElement('div');
                 card.className = 'nft-card';
-                card.onclick = function () {
-                    if (nft.address) {
-                        // Open on Tonviewer
-                        let addr = nft.address;
-                        try {
-                            if (libs && libs.Address) {
-                                addr = libs.Address.parse(nft.address).toString({ urlSafe: true, bounceable: true });
-                            }
-                        } catch (e) {}
-                        window.open('https://tonviewer.com/' + addr, '_blank', 'noopener');
-                    }
-                };
 
                 const imgWrap = document.createElement('div');
                 imgWrap.className = 'nft-img-wrap';
@@ -2111,13 +2167,171 @@
                     '<div class="nft-name">' + escapeHtml(nft.name) + '</div>' +
                     '<div class="nft-collection">' + escapeHtml(nft.collectionName) + '</div>';
 
+                // Action row under each NFT
+                const actions = document.createElement('div');
+                actions.style.cssText = 'display:flex;gap:6px;padding:0 10px 10px;';
+                const btnSend = document.createElement('button');
+                btnSend.className = 'btn-primary';
+                btnSend.style.cssText = 'flex:1;padding:8px 6px;font-size:12px;border-radius:10px;';
+                btnSend.innerText = 'Send';
+                btnSend.onclick = function (e) {
+                    e.stopPropagation();
+                    showSendNft(nft);
+                };
+                const btnView = document.createElement('button');
+                btnView.className = 'btn-secondary';
+                btnView.style.cssText = 'flex:1;padding:8px 6px;font-size:12px;border-radius:10px;';
+                btnView.innerText = 'View';
+                btnView.onclick = function (e) {
+                    e.stopPropagation();
+                    if (nft.address) {
+                        let addr = nft.address;
+                        try {
+                            if (libs && libs.Address) {
+                                addr = libs.Address.parse(nft.address).toString({ urlSafe: true, bounceable: true });
+                            }
+                        } catch (err) {}
+                        window.open('https://tonviewer.com/' + addr, '_blank', 'noopener');
+                    }
+                };
+                actions.appendChild(btnSend);
+                actions.appendChild(btnView);
+
                 card.appendChild(imgWrap);
                 card.appendChild(info);
+                card.appendChild(actions);
                 grid.appendChild(card);
             });
 
             list.appendChild(grid);
         }
+
+        function showSendNft(nft) {
+            pendingNft = nft;
+            document.getElementById('sn-name').innerText = nft.name || 'NFT';
+            document.getElementById('sn-collection').innerText = nft.collectionName || '';
+            const imgBox = document.getElementById('sn-img');
+            imgBox.innerHTML = '';
+            if (nft.image) {
+                const img = document.createElement('img');
+                img.src = nft.image;
+                img.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+                img.onerror = function () { imgBox.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">🖼️</div>'; };
+                imgBox.appendChild(img);
+            } else {
+                imgBox.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px;">🖼️</div>';
+            }
+            document.getElementById('sn-address').value = '';
+            document.getElementById('sn-comment').value = '';
+            renderAddressBook('sn-address-book', 'sn-address');
+            showScreen('send-nft-screen');
+        }
+
+        function cancelSendNft() {
+            pendingNft = null;
+            showNftsScreen();
+        }
+
+        async function sendNftTransfer() {
+            if (sending || !pendingNft) return;
+            const nft = pendingNft;
+
+            const addrStr = document.getElementById('sn-address').value;
+            const comment = document.getElementById('sn-comment').value.trim();
+
+            if (!(await libsReady())) return;
+
+            const recipient = parseRecipient(addrStr);
+            if (!recipient) { alert('The destination address is not valid.'); return; }
+
+            if (currentBalanceNano < NFT_TRANSFER_GAS) {
+                alert('You need a little TON in your wallet (~0.05 TON) to pay the network fee for this transfer.');
+                return;
+            }
+
+            if (recipient.address.equals(currentAddressObj)) {
+                if (!confirm('The destination address is your own wallet address. Continue?')) return;
+            }
+
+            const shownAddr = recipient.address.toString({ urlSafe: true, bounceable: recipient.bounce, testOnly: false });
+            const okConfirm = confirm('Confirm NFT transfer:\n\nNFT: ' + (nft.name || 'Unnamed') + '\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
+            if (!okConfirm) return;
+
+            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
+            if (!auth) return;
+
+            sending = true;
+            const btn = document.getElementById('btn-send-nft');
+            btn.disabled = true;
+            btn.innerText = 'Sending...';
+            showSendingOverlay('Sending NFT...');
+
+            let words = null;
+            let keyPair = null;
+            try {
+                words = auth.result;
+                keyPair = await libs.mnemonicToPrivateKey(words);
+                const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
+
+                if (!wallet.address.equals(currentAddressObj)) {
+                    setSendingResult(false, 'The wallet key does not match the current address. Operation cancelled.');
+                    return;
+                }
+
+                const contract = tonClient.open(wallet);
+                const seqno = await withRetry(() => contract.getSeqno());
+
+                // NFT transfer body (TEP-62)
+                const forwardCell = comment
+                    ? libs.beginCell().storeUint(0, 32).storeStringTail(comment).endCell()
+                    : null;
+
+                const bodyBuilder = libs.beginCell()
+                    .storeUint(0x5fcc3d14, 32) // NFT transfer opcode
+                    .storeUint(BigInt(Date.now()), 64) // query_id
+                    .storeAddress(recipient.address) // new_owner
+                    .storeAddress(currentAddressObj) // response_destination
+                    .storeBit(0); // no custom_payload
+
+                if (forwardCell) {
+                    bodyBuilder.storeCoins(libs.toNano('0.01')).storeBit(1).storeRef(forwardCell);
+                } else {
+                    bodyBuilder.storeCoins(1n).storeBit(0);
+                }
+                const body = bodyBuilder.endCell();
+
+                const nftAddr = libs.Address.parse(nft.address);
+                const msg = libs.internal({
+                    to: nftAddr,
+                    value: NFT_TRANSFER_GAS,
+                    bounce: true,
+                    body: body
+                });
+
+                await withRetry(() => contract.sendTransfer({
+                    seqno: seqno,
+                    secretKey: keyPair.secretKey,
+                    sendMode: 3,
+                    messages: [msg]
+                }));
+
+                setSendingResult(true, 'NFT transfer broadcast ✅\nConfirmation takes a few seconds.');
+                saveAddressToBook(shownAddr);
+                pendingNft = null;
+                showNftsScreen();
+                setTimeout(function () { refreshBalance(); refreshNfts(); }, 5000);
+            } catch (e) {
+                console.error(e);
+                setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
+            } finally {
+                words = null;
+                keyPair = null;
+                sending = false;
+                btn.disabled = false;
+                btn.innerText = 'Send NFT';
+            }
+        }
+
 
         let txHistory = [];
         let historyRefreshing = false;
