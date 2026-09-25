@@ -961,12 +961,100 @@
         .list-card .text-xs { color: var(--text-dim); }
 
         .screen-enter {
-            animation: screen-in 0.28s var(--ease-out);
+            animation: screen-in 0.38s var(--ease-out);
         }
         @keyframes screen-in {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { opacity: 0; transform: translateY(14px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
+
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.06) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s ease-in-out infinite;
+            border-radius: 10px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-line { height: 14px; margin: 6px 0; }
+        .skeleton-line.lg { height: 28px; width: 55%; }
+        .skeleton-line.md { height: 14px; width: 40%; }
+        .skeleton-line.sm { height: 12px; width: 30%; }
+        .skeleton-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 4px;
+        }
+        .skeleton-avatar {
+            width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+        }
+        .skeleton-col { flex: 1; min-width: 0; }
+
+        /* Swap screen */
+        .swap-box {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .swap-side {
+            background: var(--surface);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 14px;
+        }
+        .swap-side-label {
+            font-size: 12px; color: var(--text-dim); margin-bottom: 8px;
+            display: flex; justify-content: space-between;
+        }
+        .swap-side-row {
+            display: flex; align-items: center; gap: 10px;
+        }
+        .swap-amount {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text); font-size: 22px; font-weight: 650;
+            letter-spacing: -0.03em; min-width: 0;
+        }
+        .swap-token-btn {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--surface-2); border: 1px solid var(--card-border);
+            border-radius: 999px; padding: 8px 12px; cursor: pointer;
+            color: var(--text); font-weight: 600; font-size: 14px;
+            white-space: nowrap;
+        }
+        .swap-flip {
+            align-self: center;
+            width: 40px; height: 40px; border-radius: 50%;
+            border: 1px solid var(--card-border); background: var(--card);
+            color: var(--text); font-size: 18px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            margin: -4px 0;
+        }
+        .swap-quote {
+            font-size: 13px; color: var(--text-dim); line-height: 1.7;
+            padding: 12px 14px; border-radius: var(--radius-sm);
+            background: var(--surface); border: 1px solid var(--card-border);
+        }
+        .swap-quote strong { color: var(--text); font-weight: 600; }
+        .slippage-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .slip-chip {
+            padding: 8px 14px; border-radius: 999px; font-size: 13px; font-weight: 550;
+            border: 1px solid var(--card-border); background: var(--surface);
+            color: var(--text-dim); cursor: pointer;
+        }
+        .slip-chip.active {
+            background: var(--accent-soft); color: var(--text);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .token-picker {
+            max-height: 240px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 4px;
+        }
+        .token-pick-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px; border-radius: 14px; cursor: pointer;
+        }
+        .token-pick-row:active { background: var(--surface); }
+
 
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
@@ -1168,7 +1256,9 @@
                     <span class="text-xs" id="jettons-count" style="color:var(--text-dim);">—</span>
                 </div>
                 <div id="jettons-list" class="flex flex-col gap-1">
-                    <div class="token-empty">Loading tokens...</div>
+                    <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
+                    <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
+
                 </div>
             </div>
 
@@ -1178,7 +1268,9 @@
                     <span class="text-xs" id="history-refresh" style="cursor:pointer;color:var(--accent); font-weight:600;" onclick="refreshHistory()">Refresh</span>
                 </div>
                 <div id="history-list" class="flex flex-col gap-1">
-                    <div class="token-empty">Loading transactions...</div>
+                    <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
+                    <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
+
                 </div>
             </div>
 
@@ -1297,8 +1389,62 @@
             <button onclick="cancelSendNft()" class="btn-secondary">Back</button>
         </div>
 
+        <!-- Swap -->
+        <div id="swap-screen" class="glass-card hidden flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold" style="font-size:16px;letter-spacing:-0.01em;">Swap</h3>
+                <button type="button" class="btn-secondary" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showScreen('dashboard-screen')">Back</button>
+            </div>
+            <div class="swap-box">
+                <div class="swap-side">
+                    <div class="swap-side-label">
+                        <span>You pay</span>
+                        <span id="swap-from-bal" style="cursor:pointer;" onclick="setSwapMax()">Balance: —</span>
+                    </div>
+                    <div class="swap-side-row">
+                        <input id="swap-amount" class="swap-amount" type="text" inputmode="decimal" placeholder="0" oninput="onSwapAmountChange()" />
+                        <button type="button" class="swap-token-btn" id="swap-from-btn" onclick="openTokenPicker('from')">TON ▾</button>
+                    </div>
+                </div>
+                <button type="button" class="swap-flip" onclick="flipSwapTokens()" aria-label="Flip">⇅</button>
+                <div class="swap-side">
+                    <div class="swap-side-label">
+                        <span>You receive</span>
+                        <span id="swap-to-bal">Balance: —</span>
+                    </div>
+                    <div class="swap-side-row">
+                        <input id="swap-out" class="swap-amount" type="text" readonly placeholder="0" style="opacity:0.9;" />
+                        <button type="button" class="swap-token-btn" id="swap-to-btn" onclick="openTokenPicker('to')">USDT ▾</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="text-xs" style="margin-bottom:6px;color:var(--text-dim);">Slippage</div>
+                <div class="slippage-row">
+                    <button type="button" class="slip-chip active" data-slip="0.005" onclick="setSlippage(0.005,this)">0.5%</button>
+                    <button type="button" class="slip-chip" data-slip="0.01" onclick="setSlippage(0.01,this)">1%</button>
+                    <button type="button" class="slip-chip" data-slip="0.03" onclick="setSlippage(0.03,this)">3%</button>
+                </div>
+            </div>
+            <div id="swap-quote" class="swap-quote hidden">Getting quote…</div>
+            <button id="btn-swap-review" class="btn-primary" onclick="reviewSwap()" disabled>Enter amount</button>
+            <p class="text-xs" style="text-align:center;color:var(--text-muted);">Quotes via STON.fi · Review before signing</p>
+            <div id="token-picker-panel" class="hidden">
+                <div class="text-sm font-bold" style="margin-bottom:8px;">Select token</div>
+                <div id="token-picker-list" class="token-picker"></div>
+            </div>
+        </div>
+
+        <div id="swap-confirm-screen" class="glass-card hidden flex flex-col gap-3">
+            <h3 class="text-sm font-bold" style="font-size:16px;letter-spacing:-0.01em;text-align:center;">Confirm Swap</h3>
+            <div id="swap-confirm-summary" class="swap-quote"></div>
+            <button id="btn-swap-confirm" class="btn-primary" onclick="executeSwap()">Confirm</button>
+            <button class="btn-secondary" onclick="showScreen('swap-screen')">Cancel</button>
+        </div>
+
         <!-- TonConnect -->
         <div id="tonconnect-screen" class="glass-card hidden flex flex-col gap-3">
+
             <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Connect to Mini Apps</h3>
 
             <div id="tc-connections-list" class="flex flex-col gap-3"></div>
@@ -1396,7 +1542,8 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'swap-screen', 'swap-confirm-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+
 
         const TONCENTER_API_KEY = '75edde77b11825ea1c0f65415992c0b992889172eec7281af2490610561c9c17';
         const FEE_RESERVE = 700000n; // ~0.0007 TON default fallback for network fee
@@ -2106,19 +2253,258 @@
             }
         }
 
+        // ─── Swap (STON.fi simulate + confirm) ───
+        const STON_API = 'https://api.ston.fi';
+        const STON_TON = 'EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c';
+        const STON_USDT = 'EQCxE6m7GQdrKWsZaRKV2yjn_Vix_9ZTv_Ku6LkqHWB7dqtV';
+        let swapFrom = { symbol: 'TON', address: STON_TON, decimals: 9, isTon: true, balance: 0n };
+        let swapTo = { symbol: 'USDT', address: STON_USDT, decimals: 6, isTon: false, balance: 0n };
+        let swapSlippage = 0.005;
+        let swapQuote = null;
+        let swapQuoteTimer = null;
+        let tokenPickerSide = 'from';
+
         function openSwap() {
-            // Open STON.fi — user can connect via TonConnect
-            const url = 'https://app.ston.fi/';
+            if (!currentAddressObj) {
+                alert('Open your wallet first.');
+                return;
+            }
+            document.getElementById('token-picker-panel').classList.add('hidden');
+            document.getElementById('swap-amount').value = '';
+            document.getElementById('swap-out').value = '';
+            document.getElementById('swap-quote').classList.add('hidden');
+            document.getElementById('btn-swap-review').disabled = true;
+            document.getElementById('btn-swap-review').innerText = 'Enter amount';
+            swapQuote = null;
+            syncSwapTokenButtons();
+            updateSwapBalances();
+            showScreen('swap-screen');
+        }
+
+        function syncSwapTokenButtons() {
+            const fb = document.getElementById('swap-from-btn');
+            const tb = document.getElementById('swap-to-btn');
+            if (fb) fb.innerText = (swapFrom.symbol || '?') + ' ▾';
+            if (tb) tb.innerText = (swapTo.symbol || '?') + ' ▾';
+        }
+
+        function updateSwapBalances() {
+            // Refresh from current wallet state
+            if (swapFrom.isTon) swapFrom.balance = currentBalanceNano || 0n;
+            else {
+                const j = (jettons || []).find(function (x) {
+                    return (x.masterAddress || '').toLowerCase() === (swapFrom.address || '').toLowerCase()
+                        || (x.symbol || '').toUpperCase() === (swapFrom.symbol || '').toUpperCase();
+                });
+                swapFrom.balance = j ? j.balance : 0n;
+                if (j) { swapFrom.decimals = j.decimals; swapFrom.address = j.masterAddress || swapFrom.address; }
+            }
+            if (swapTo.isTon) swapTo.balance = currentBalanceNano || 0n;
+            else {
+                const j2 = (jettons || []).find(function (x) {
+                    return (x.masterAddress || '').toLowerCase() === (swapTo.address || '').toLowerCase()
+                        || (x.symbol || '').toUpperCase() === (swapTo.symbol || '').toUpperCase();
+                });
+                swapTo.balance = j2 ? j2.balance : 0n;
+                if (j2) { swapTo.decimals = j2.decimals; swapTo.address = j2.masterAddress || swapTo.address; }
+            }
+            const fb = document.getElementById('swap-from-bal');
+            const tb = document.getElementById('swap-to-bal');
+            if (fb) fb.innerText = 'Balance: ' + (swapFrom.isTon ? formatTon(swapFrom.balance) : formatJetton(swapFrom.balance, swapFrom.decimals));
+            if (tb) tb.innerText = 'Balance: ' + (swapTo.isTon ? formatTon(swapTo.balance) : formatJetton(swapTo.balance, swapTo.decimals));
+        }
+
+        function setSwapMax() {
+            const el = document.getElementById('swap-amount');
+            if (!el) return;
+            if (swapFrom.isTon) {
+                // leave a little for gas
+                const max = swapFrom.balance > 200000000n ? swapFrom.balance - 200000000n : 0n;
+                el.value = formatTon(max);
+            } else {
+                el.value = formatJetton(swapFrom.balance, swapFrom.decimals);
+            }
+            onSwapAmountChange();
+        }
+
+        function setSlippage(v, btn) {
+            swapSlippage = v;
+            document.querySelectorAll('.slip-chip').forEach(function (c) { c.classList.remove('active'); });
+            if (btn) btn.classList.add('active');
+            onSwapAmountChange();
+        }
+
+        function flipSwapTokens() {
+            const tmp = swapFrom; swapFrom = swapTo; swapTo = tmp;
+            document.getElementById('swap-amount').value = '';
+            document.getElementById('swap-out').value = '';
+            swapQuote = null;
+            syncSwapTokenButtons();
+            updateSwapBalances();
+            document.getElementById('btn-swap-review').disabled = true;
+            document.getElementById('btn-swap-review').innerText = 'Enter amount';
+            document.getElementById('swap-quote').classList.add('hidden');
+        }
+
+        function openTokenPicker(side) {
+            tokenPickerSide = side;
+            const panel = document.getElementById('token-picker-panel');
+            const list = document.getElementById('token-picker-list');
+            panel.classList.remove('hidden');
+            list.innerHTML = '';
+            const opts = [{ symbol: 'TON', address: STON_TON, decimals: 9, isTon: true, balance: currentBalanceNano || 0n }];
+            (jettons || []).forEach(function (j) {
+                opts.push({
+                    symbol: j.symbol,
+                    address: j.masterAddress,
+                    decimals: j.decimals,
+                    isTon: false,
+                    balance: j.balance,
+                    image: j.image
+                });
+            });
+            // Always offer USDT even if zero balance
+            if (!opts.some(function (o) { return (o.address || '').toLowerCase() === STON_USDT.toLowerCase(); })) {
+                opts.push({ symbol: 'USDT', address: STON_USDT, decimals: 6, isTon: false, balance: 0n });
+            }
+            opts.forEach(function (o) {
+                const row = document.createElement('div');
+                row.className = 'token-pick-row';
+                const balStr = o.isTon ? formatTon(o.balance) : formatJetton(o.balance, o.decimals);
+                row.innerHTML = '<div class="token-icon">' + (o.symbol === 'TON' ? '💎' : (o.symbol || '?').slice(0, 2)) + '</div>'
+                    + '<div style="flex:1;min-width:0;"><div class="token-symbol">' + escapeHtml(o.symbol) + '</div>'
+                    + '<div class="token-name">' + balStr + '</div></div>';
+                row.onclick = function () {
+                    if (side === 'from') swapFrom = o; else swapTo = o;
+                    if (swapFrom.address === swapTo.address && swapFrom.isTon === swapTo.isTon) {
+                        // prevent same token both sides
+                        if (side === 'from') swapTo = { symbol: 'USDT', address: STON_USDT, decimals: 6, isTon: false, balance: 0n };
+                        else swapFrom = { symbol: 'TON', address: STON_TON, decimals: 9, isTon: true, balance: currentBalanceNano || 0n };
+                    }
+                    panel.classList.add('hidden');
+                    syncSwapTokenButtons();
+                    updateSwapBalances();
+                    onSwapAmountChange();
+                };
+                list.appendChild(row);
+            });
+        }
+
+        function onSwapAmountChange() {
+            if (swapQuoteTimer) clearTimeout(swapQuoteTimer);
+            const raw = normalizeNumber(document.getElementById('swap-amount').value || '');
+            document.getElementById('swap-out').value = '';
+            swapQuote = null;
+            const btn = document.getElementById('btn-swap-review');
+            if (!raw || !/^\d+(\.\d+)?$/.test(raw) || parseFloat(raw) <= 0) {
+                btn.disabled = true;
+                btn.innerText = 'Enter amount';
+                document.getElementById('swap-quote').classList.add('hidden');
+                return;
+            }
+            btn.disabled = true;
+            btn.innerText = 'Fetching quote…';
+            document.getElementById('swap-quote').classList.remove('hidden');
+            document.getElementById('swap-quote').innerText = 'Fetching quote…';
+            swapQuoteTimer = setTimeout(function () { fetchSwapQuote(raw); }, 400);
+        }
+
+        function amountToUnits(amountStr, decimals) {
+            const parts = amountStr.split('.');
+            const whole = parts[0] || '0';
+            let frac = (parts[1] || '').slice(0, decimals);
+            while (frac.length < decimals) frac += '0';
+            return BigInt(whole + frac);
+        }
+
+        function unitsToDisplay(unitsStr, decimals) {
             try {
-                if (tg && tg.openLink) {
-                    tg.openLink(url);
-                } else {
-                    window.open(url, '_blank', 'noopener');
+                const big = BigInt(unitsStr || '0');
+                return formatJetton(big, decimals);
+            } catch (e) { return '0'; }
+        }
+
+        async function fetchSwapQuote(amountStr) {
+            try {
+                const offerUnits = amountToUnits(amountStr, swapFrom.decimals).toString();
+                if (offerUnits === '0') throw new Error('Amount too small');
+                const url = STON_API + '/v1/swap/simulate'
+                    + '?offer_address=' + encodeURIComponent(swapFrom.address)
+                    + '&ask_address=' + encodeURIComponent(swapTo.address)
+                    + '&units=' + encodeURIComponent(offerUnits)
+                    + '&slippage_tolerance=' + encodeURIComponent(String(swapSlippage));
+                const res = await fetch(url, { method: 'POST' });
+                if (!res.ok) {
+                    const t = await res.text();
+                    throw new Error(t.slice(0, 120) || ('HTTP ' + res.status));
                 }
+                const data = await res.json();
+                if (!data.ask_units) throw new Error('No route');
+                swapQuote = data;
+                const outDisp = unitsToDisplay(data.ask_units, swapTo.decimals);
+                const minDisp = unitsToDisplay(data.min_ask_units, swapTo.decimals);
+                document.getElementById('swap-out').value = outDisp;
+                const impact = data.price_impact ? (parseFloat(data.price_impact) * 100).toFixed(3) : '—';
+                const rate = data.swap_rate || '—';
+                document.getElementById('swap-quote').innerHTML =
+                    '<div class="fee-row"><span>Rate</span><strong>1 ' + escapeHtml(swapFrom.symbol) + ' ≈ ' + escapeHtml(String(rate).slice(0, 12)) + ' ' + escapeHtml(swapTo.symbol) + '</strong></div>'
+                    + '<div class="fee-row"><span>Min received</span><strong>' + escapeHtml(minDisp) + ' ' + escapeHtml(swapTo.symbol) + '</strong></div>'
+                    + '<div class="fee-row"><span>Price impact</span><strong>' + escapeHtml(impact) + '%</strong></div>'
+                    + '<div class="fee-row"><span>Slippage</span><strong>' + (swapSlippage * 100) + '%</strong></div>';
+                const btn = document.getElementById('btn-swap-review');
+                btn.disabled = false;
+                btn.innerText = 'Review swap';
             } catch (e) {
-                window.open(url, '_blank', 'noopener');
+                console.error('swap quote', e);
+                swapQuote = null;
+                document.getElementById('swap-quote').innerText = 'Quote failed. Try another pair or amount.';
+                document.getElementById('btn-swap-review').disabled = true;
+                document.getElementById('btn-swap-review').innerText = 'No route';
             }
         }
+
+        function reviewSwap() {
+            if (!swapQuote) return;
+            updateSwapBalances();
+            const amountStr = normalizeNumber(document.getElementById('swap-amount').value || '');
+            const outDisp = unitsToDisplay(swapQuote.ask_units, swapTo.decimals);
+            const minDisp = unitsToDisplay(swapQuote.min_ask_units, swapTo.decimals);
+            document.getElementById('swap-confirm-summary').innerHTML =
+                '<div style="text-align:center;font-size:18px;font-weight:650;margin-bottom:12px;">'
+                + escapeHtml(amountStr) + ' ' + escapeHtml(swapFrom.symbol)
+                + ' → ~' + escapeHtml(outDisp) + ' ' + escapeHtml(swapTo.symbol) + '</div>'
+                + '<div class="fee-row"><span>You pay</span><strong>' + escapeHtml(amountStr) + ' ' + escapeHtml(swapFrom.symbol) + '</strong></div>'
+                + '<div class="fee-row"><span>You receive</span><strong>~' + escapeHtml(outDisp) + ' ' + escapeHtml(swapTo.symbol) + '</strong></div>'
+                + '<div class="fee-row"><span>Minimum</span><strong>' + escapeHtml(minDisp) + ' ' + escapeHtml(swapTo.symbol) + '</strong></div>'
+                + '<div class="fee-row"><span>Slippage</span><strong>' + (swapSlippage * 100) + '%</strong></div>'
+                + '<div class="fee-row"><span>Router</span><strong>STON.fi</strong></div>'
+                + '<p style="margin-top:10px;font-size:12px;color:var(--text-muted);">You will sign the swap in the next step via STON.fi router.</p>';
+            showScreen('swap-confirm-screen');
+        }
+
+        async function executeSwap() {
+            if (!swapQuote || !currentAddress) {
+                alert('Missing quote or wallet.');
+                return;
+            }
+            const amountStr = normalizeNumber(document.getElementById('swap-amount').value || '');
+            // Open STON.fi with prefilled pair — reliable execution path
+            const ft = swapFrom.isTon ? 'TON' : (swapFrom.address || '');
+            const tt = swapTo.isTon ? 'TON' : (swapTo.address || '');
+            const url = 'https://app.ston.fi/swap?chartVisible=false&ft=' + encodeURIComponent(ft)
+                + '&tt=' + encodeURIComponent(tt)
+                + '&ff=' + encodeURIComponent(amountStr);
+            showSendingOverlay('Opening STON.fi…', amountStr + ' ' + swapFrom.symbol);
+            try {
+                if (tg && tg.openLink) tg.openLink(url);
+                else window.open(url, '_blank', 'noopener');
+                setSendingResult(true, 'Continue in STON.fi\nComplete the swap there');
+            } catch (e) {
+                setSendingResult(false, 'Could not open STON.fi');
+            }
+            showScreen('dashboard-screen');
+        }
+
 
         async function loadWallet(words) {
 
@@ -2152,6 +2538,7 @@
 
                 startBalancePolling();
                 startTcListener();
+                setTimeout(processPendingTcLink, 400);
 
             } catch (error) {
                 console.error('Error loading wallet:', error);
@@ -2159,6 +2546,7 @@
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             }
         }
+
 
         // ================= Jettons =================
         function formatJetton(raw, decimals) {
@@ -3610,20 +3998,75 @@
             }
         }
 
+        // ---------- Deep link / start_param (TonConnect auto-open) ----------
+        function handleDeepLinks() {
+            try {
+                let startParam = null;
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) {
+                    startParam = tg.initDataUnsafe.start_param;
+                }
+                const urlParams = new URLSearchParams(window.location.search || '');
+                const qTc = urlParams.get('tc') || urlParams.get('tonconnect') || urlParams.get('startapp');
+                if (!startParam && qTc) startParam = qTc;
+                if (!startParam) return;
+
+                // start_param may be base64url-encoded tonconnect link or raw link
+                let decoded = startParam;
+                try {
+                    // Telegram startapp often uses base64url without padding
+                    const pad = decoded.length % 4 === 0 ? '' : '='.repeat(4 - (decoded.length % 4));
+                    const b64 = decoded.replace(/-/g, '+').replace(/_/g, '/') + pad;
+                    const trial = atob(b64);
+                    if (trial.indexOf('tonconnect') !== -1 || trial.indexOf('v=') !== -1) decoded = trial;
+                } catch (e) {}
+
+                // Store for after unlock
+                sessionStorage.setItem('pending_tc_link', decoded);
+                // If already unlocked and on dashboard, process now
+                if (currentAddressObj && document.getElementById('dashboard-screen') && !document.getElementById('dashboard-screen').classList.contains('hidden')) {
+                    processPendingTcLink();
+                }
+            } catch (e) {
+                console.warn('deep link', e);
+            }
+        }
+        function processPendingTcLink() {
+            try {
+                const link = sessionStorage.getItem('pending_tc_link');
+                if (!link) return;
+                sessionStorage.removeItem('pending_tc_link');
+                const input = document.getElementById('tc-link-input');
+                if (input) input.value = link;
+                // Try parse — if valid tonconnect link, go confirm flow
+                const parsed = parseTcLink(link);
+                if (parsed) {
+                    handleTcLinkPaste();
+                } else if (link.indexOf('http') === 0 || link.indexOf('ton') === 0) {
+                    showTonConnectScreen();
+                    if (input) input.value = link;
+                }
+            } catch (e) {
+                console.warn('processPendingTcLink', e);
+            }
+        }
+
         // ---------- Start ----------
         window.addEventListener('load', function () {
             showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             loadLibs().catch(function (e) { console.error('preload failed', e); });
-            startTcListener();
             fetchTonPrice();
             setInterval(fetchTonPrice, 120000);
-            // TonConnect: catch pending deposit requests after app was closed
             startTcListener();
+            handleDeepLinks();
             document.addEventListener('visibilitychange', function () {
-                if (document.visibilityState === 'visible') startTcListener();
+                if (document.visibilityState === 'visible') {
+                    startTcListener();
+                    handleDeepLinks();
+                }
             });
             window.addEventListener('focus', function () { startTcListener(); });
         });
+
 
 
     </script>
