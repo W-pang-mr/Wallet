@@ -2245,6 +2245,9 @@
                 startBalancePolling();
                 wakeTonConnect();
                 setTimeout(processPendingTcLink, 400);
+                setTimeout(flushPendingTcTx, 600);
+                setTimeout(flushPendingTcTx, 2000);
+
 
 
             } catch (error) {
@@ -3243,6 +3246,8 @@
         const TC_RESOLVED_KEY = 'tc_resolved_reqs_v1';
         const TC_RESOLVED_MAX = 200;
         const TC_RESOLVED_TTL_MS = 24 * 60 * 60 * 1000;
+        const TC_PENDING_KEY = 'tc_pending_tx_v1';
+        const TC_PENDING_TTL_MS = 2 * 60 * 1000; // keep approve requests ~2 minutes
         let tcNacl = null;
         let tcEventSource = null;
         let tcPendingConnect = null;
@@ -3268,7 +3273,77 @@
                 list.push({ key: reqKey, ts: Date.now() });
                 saveResolvedReqs(list);
             }
+            // drop from pending queue too
+            removePendingTx(reqKey);
         }
+
+        function loadPendingTxQueue() {
+            try {
+                const arr = JSON.parse(localStorage.getItem(TC_PENDING_KEY) || '[]');
+                const now = Date.now();
+                const alive = arr.filter(function (it) {
+                    return it && it.reqKey && (now - (it.ts || 0)) < TC_PENDING_TTL_MS && !isReqResolved(it.reqKey);
+                });
+                if (alive.length !== arr.length) {
+                    localStorage.setItem(TC_PENDING_KEY, JSON.stringify(alive));
+                }
+                return alive;
+            } catch (e) { return []; }
+        }
+        function savePendingTxQueue(list) {
+            localStorage.setItem(TC_PENDING_KEY, JSON.stringify(list || []));
+        }
+        function enqueuePendingTx(item) {
+            const list = loadPendingTxQueue().filter(function (it) { return it.reqKey !== item.reqKey; });
+            list.push({
+                reqKey: item.reqKey,
+                dappClientIdHex: item.dappClientIdHex,
+                requestId: item.requestId,
+                txRequest: item.txRequest,
+                ts: Date.now()
+            });
+            savePendingTxQueue(list);
+        }
+        function removePendingTx(reqKey) {
+            savePendingTxQueue(loadPendingTxQueue().filter(function (it) { return it.reqKey !== reqKey; }));
+        }
+
+        /** Show next queued deposit/approve if wallet is unlocked */
+        async function flushPendingTcTx() {
+            if (!currentAddressObj) return;
+            if (tcPendingTx) return; // already showing one
+            const queue = loadPendingTxQueue();
+            if (!queue.length) return;
+            const item = queue[0];
+            const list = loadTcConnections();
+            const conn = list.find(function (c) { return c.dappClientIdHex === item.dappClientIdHex; });
+            if (!conn) {
+                removePendingTx(item.reqKey);
+                return flushPendingTcTx();
+            }
+            if (isReqResolved(item.reqKey)) {
+                removePendingTx(item.reqKey);
+                return flushPendingTcTx();
+            }
+            tcPendingTx = {
+                connection: conn,
+                requestId: item.requestId,
+                txRequest: item.txRequest,
+                reqKey: item.reqKey
+            };
+            if (!(await libsReady())) return;
+            try {
+                if (tg) {
+                    if (tg.expand) tg.expand();
+                    if (tg.HapticFeedback && tg.HapticFeedback.notificationOccurred) {
+                        tg.HapticFeedback.notificationOccurred('warning');
+                    }
+                }
+            } catch (e) {}
+            renderTcTxScreen();
+            showScreen('tc-tx-screen');
+        }
+
 
         async function loadTcNacl() {
             if (tcNacl) return tcNacl;
@@ -3548,7 +3623,10 @@
             // second pass after SSE settles (catches late bridge replay)
             setTimeout(function () { startTcListener(); }, 800);
             setTimeout(function () { startTcListener(); }, 2500);
+            setTimeout(function () { flushPendingTcTx(); }, 1000);
+            setTimeout(function () { flushPendingTcTx(); }, 3000);
         }
+
 
 
 
@@ -3587,20 +3665,19 @@
                         return;
                     }
                     const txRequest = JSON.parse(payload.params[0]);
-                    tcPendingTx = { connection: conn, requestId: payload.id, txRequest: txRequest, reqKey: reqKey };
-                    if (!(await libsReady())) return;
-                    // Bring wallet to front when deposit request arrives
-                    try {
-                        if (tg) {
-                            if (tg.expand) tg.expand();
-                            if (tg.HapticFeedback && tg.HapticFeedback.notificationOccurred) {
-                                tg.HapticFeedback.notificationOccurred('warning');
-                            }
-                        }
-                    } catch (e) {}
-                    renderTcTxScreen();
-                    showScreen('tc-tx-screen');
+                    // Queue for up to 2 minutes — works even if user unlocks later
+                    enqueuePendingTx({
+                        reqKey: reqKey,
+                        dappClientIdHex: fromHex,
+                        requestId: payload.id,
+                        txRequest: txRequest
+                    });
+                    if (currentAddressObj) {
+                        await flushPendingTcTx();
+                    }
+                    // if still locked, stays in queue until unlock + flushPendingTcTx
                 }
+
 
             } catch (e) {
                 console.error('handleTcBridgeMessage error', e);
@@ -3631,8 +3708,15 @@
             if (tcPendingTx.reqKey) markReqResolved(tcPendingTx.reqKey);
             await sendTcResponse(tcPendingTx.connection, tcPendingTx.requestId, null, { code: 300, message: 'User rejected' });
             tcPendingTx = null;
-            showScreen('dashboard-screen');
+            // show next queued request if any
+            const left = loadPendingTxQueue();
+            if (left.length) {
+                await flushPendingTcTx();
+            } else {
+                showScreen('dashboard-screen');
+            }
         }
+
 
         async function approveTcTx() {
             if (!tcPendingTx) return;
