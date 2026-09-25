@@ -1148,8 +1148,9 @@
                     </div>
                     <div class="mainnet-badge">✨ Mainnet</div>
                 </div>
-                <div id="wallet-balance" class="balance-num">Checking...</div>
-                <div id="balance-usd" class="balance-usd"></div>
+                <div id="wallet-balance" class="balance-num" onclick="toggleFiatDisplay()" style="cursor:pointer;" title="تغییر تومان / دلار">Checking...</div>
+                <div id="balance-usd" class="balance-usd" onclick="toggleFiatDisplay()" style="cursor:pointer;" title="تغییر تومان / دلار"></div>
+
                 <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()" style="display:none;">Loading...</div>
                 <div id="balance-updated" class="balance-updated"></div>
             </div>
@@ -1408,8 +1409,9 @@
         const JETTON_TRANSFER_GAS = 60000000n;
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
         const TONAPI_RATES = 'https://tonapi.io/v2/rates?tokens=ton&currencies=usd';
+        const NOBITEX_STATS = 'https://api.nobitex.ir/market/stats';
         const PIN_LENGTH = 4;
-        const BALANCE_POLL_MS = 20000;
+        const BALANCE_POLL_MS = 2000;
         const THEME_KEY = 'glass_theme_v1';
         const ACCENT_KEY = 'glass_accent_v1';
 
@@ -1431,9 +1433,12 @@
         let pendingJetton = null;
 
         let tonPriceUsd = null;
+        let usdtIrt = null;
         let displayedBalanceNano = 0n;
         let balanceAnimRaf = null;
         let estimatedFeeNano = FEE_RESERVE;
+        let showToman = true;
+
 
         const ADDRESS_BOOK_KEY = 'address_book_v1';
         const ADDRESS_BOOK_MAX = 3;
@@ -1478,7 +1483,7 @@
             applyAccent(saved === 'purple' ? 'purple' : 'blue');
         })();
 
-        // ─── TON price (TonAPI) ───
+        // ─── TON price (TonAPI) + IRT (Nobitex) ───
 
         async function fetchTonPrice() {
             try {
@@ -1488,22 +1493,89 @@
                 const rate = data && data.rates && data.rates.TON && data.rates.TON.prices && data.rates.TON.prices.USD;
                 if (typeof rate === 'number' && rate > 0) {
                     tonPriceUsd = rate;
-                    updateUsdDisplay();
+                    updateFiatDisplay();
                 }
             } catch (e) {
                 console.error('ton price', e);
             }
         }
-        function updateUsdDisplay() {
+        async function fetchUsdtIrt() {
+            // Try several sources (CORS / region friendly)
+            const tryParseNobitex = function (data) {
+                const stats = data && data.stats;
+                if (!stats) return null;
+                if (stats.USDTIRT && stats.USDTIRT.latest) return parseFloat(stats.USDTIRT.latest);
+                if (stats['USDT-IRT'] && stats['USDT-IRT'].latest) return parseFloat(stats['USDT-IRT'].latest);
+                if (stats.usdtirt && stats.usdtirt.latest) return parseFloat(stats.usdtirt.latest);
+                return null;
+            };
+            const sources = [
+                async function () {
+                    const res = await fetch(NOBITEX_STATS, { mode: 'cors' });
+                    if (!res.ok) throw new Error('nobitex ' + res.status);
+                    return tryParseNobitex(await res.json());
+                },
+                async function () {
+                    // Official IRR (often lower than free market) — better than nothing
+                    const res = await fetch('https://open.er-api.com/v6/latest/USD');
+                    if (!res.ok) throw new Error('er-api');
+                    const data = await res.json();
+                    const irr = data && data.rates && data.rates.IRR;
+                    return typeof irr === 'number' && irr > 0 ? irr : null;
+                }
+            ];
+            for (let i = 0; i < sources.length; i++) {
+                try {
+                    const price = await sources[i]();
+                    if (typeof price === 'number' && price > 1000) {
+                        usdtIrt = price;
+                        updateFiatDisplay();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('irt source', i, e);
+                }
+            }
+        }
+
+        function formatToman(n) {
+            const v = Math.round(n);
+            return v.toLocaleString('en-US') + ' تومان';
+        }
+        function updateFiatDisplay() {
             const el = document.getElementById('balance-usd');
             if (!el) return;
-            if (tonPriceUsd == null || !currentBalanceNano) {
+            if (!currentBalanceNano || currentBalanceNano <= 0n) {
                 el.innerText = '';
                 return;
             }
-            const usd = (Number(currentBalanceNano) / 1e9) * tonPriceUsd;
-            el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const ton = Number(currentBalanceNano) / 1e9;
+            if (showToman) {
+                if (tonPriceUsd != null && usdtIrt != null) {
+                    const toman = ton * tonPriceUsd * usdtIrt;
+                    el.innerText = '≈ ' + formatToman(toman);
+                } else if (tonPriceUsd != null) {
+                    const usd = ton * tonPriceUsd;
+                    el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else {
+                    el.innerText = '';
+                }
+            } else {
+                if (tonPriceUsd != null) {
+                    const usd = ton * tonPriceUsd;
+                    el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                } else {
+                    el.innerText = '';
+                }
+            }
         }
+        function toggleFiatDisplay() {
+            showToman = !showToman;
+            updateFiatDisplay();
+        }
+        // keep old name as alias for any callers
+        function updateUsdDisplay() { updateFiatDisplay(); }
+
 
         // ─── Balance count-up animation ───
         function animateBalanceTo(targetNano) {
@@ -2162,8 +2234,8 @@
         }
 
         // Clean TonAPI-based jetton fetch (accurate name / symbol / image)
-        async function fetchAccountJettons(ownerRaw) {
-            const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(ownerRaw) + '/jettons?currencies=usd&limit=50';
+        async function fetchAccountJettons(ownerId) {
+            const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(ownerId) + '/jettons?currencies=usd&limit=50';
             const res = await fetch(url);
             if (!res.ok) throw new Error('jettons fetch failed ' + res.status);
             const data = await res.json();
@@ -2174,8 +2246,9 @@
             if (!currentAddressObj || jettonsRefreshing) return;
             jettonsRefreshing = true;
             try {
-                const ownerRaw = currentAddressObj.toRawString();
-                const balances = await withRetry(() => fetchAccountJettons(ownerRaw), 2);
+                // Prefer user-friendly address for TonAPI (more reliable)
+                const ownerId = currentAddress || currentAddressObj.toString({ urlSafe: true, bounceable: false }) || currentAddressObj.toRawString();
+                const balances = await withRetry(() => fetchAccountJettons(ownerId), 2);
 
                 jettons = (balances || []).map(function (b) {
                     const j = b.jetton || {};
@@ -2190,10 +2263,8 @@
                         if (isNaN(decimals)) decimals = 9;
                     }
 
-                    // Prefer high-quality image from TonAPI
                     let image = meta.image || '';
                     if (!image && meta.preview) image = meta.preview;
-                    // Fix common IPFS / relative issues
                     if (image && image.startsWith('ipfs://')) {
                         image = 'https://ipfs.io/ipfs/' + image.slice(7);
                     }
@@ -2213,12 +2284,16 @@
                 renderJettons();
             } catch (e) {
                 console.error('refreshJettons failed', e);
-                const list = document.getElementById('jettons-list');
-                if (list) list.innerHTML = '<div class="token-empty">Failed to load tokens</div>';
+                // Still show native TON row even if jettons fail
+                try { renderJettons(); } catch (e2) {
+                    const list = document.getElementById('jettons-list');
+                    if (list) list.innerHTML = '<div class="token-empty">Failed to load tokens</div>';
+                }
             } finally {
                 jettonsRefreshing = false;
             }
         }
+
 
         function renderJettons() {
             const card = document.getElementById('jettons-card');
@@ -2736,19 +2811,31 @@
             }
         }
 
+        let jettonPollTimer = null;
+        const JETTON_POLL_MS = 45000;
+
         function startBalancePolling() {
             stopBalancePolling();
+            // Balance only — every 2s (lightweight)
             balancePollTimer = setInterval(function () {
                 if (document.visibilityState === 'hidden') return;
                 refreshBalance();
+            }, BALANCE_POLL_MS);
+            // Jettons + NFTs less often to avoid TonAPI rate limits
+            jettonPollTimer = setInterval(function () {
+                if (document.visibilityState === 'hidden') return;
                 refreshJettons();
                 refreshNfts();
-            }, BALANCE_POLL_MS);
+            }, JETTON_POLL_MS);
         }
         function stopBalancePolling() {
             if (balancePollTimer) {
                 clearInterval(balancePollTimer);
                 balancePollTimer = null;
+            }
+            if (jettonPollTimer) {
+                clearInterval(jettonPollTimer);
+                jettonPollTimer = null;
             }
         }
         document.addEventListener('visibilitychange', function () {
@@ -2758,6 +2845,7 @@
                 refreshNfts();
             }
         });
+
 
 
         function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -3549,8 +3637,11 @@
             loadLibs().catch(function (e) { console.error('preload failed', e); });
             startTcListener();
             fetchTonPrice();
+            fetchUsdtIrt();
             setInterval(fetchTonPrice, 120000);
+            setInterval(fetchUsdtIrt, 120000);
         });
+
     </script>
 </body>
-    </html>
+</html>
