@@ -1148,9 +1148,8 @@
                     </div>
                     <div class="mainnet-badge">✨ Mainnet</div>
                 </div>
-                <div id="wallet-balance" class="balance-num" onclick="toggleFiatDisplay()" style="cursor:pointer;" title="تغییر تومان / دلار">Checking...</div>
-                <div id="balance-usd" class="balance-usd" onclick="toggleFiatDisplay()" style="cursor:pointer;" title="تغییر تومان / دلار"></div>
-
+                <div id="wallet-balance" class="balance-num">Checking...</div>
+                <div id="balance-usd" class="balance-usd"></div>
                 <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()" style="display:none;">Loading...</div>
                 <div id="balance-updated" class="balance-updated"></div>
             </div>
@@ -1409,9 +1408,8 @@
         const JETTON_TRANSFER_GAS = 60000000n;
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
         const TONAPI_RATES = 'https://tonapi.io/v2/rates?tokens=ton&currencies=usd';
-        const NOBITEX_STATS = 'https://api.nobitex.ir/market/stats';
         const PIN_LENGTH = 4;
-        const BALANCE_POLL_MS = 2000;
+        const BALANCE_POLL_MS = 20000;
         const THEME_KEY = 'glass_theme_v1';
         const ACCENT_KEY = 'glass_accent_v1';
 
@@ -1433,12 +1431,9 @@
         let pendingJetton = null;
 
         let tonPriceUsd = null;
-        let usdtIrt = null;
         let displayedBalanceNano = 0n;
         let balanceAnimRaf = null;
         let estimatedFeeNano = FEE_RESERVE;
-        let showToman = true;
-
 
         const ADDRESS_BOOK_KEY = 'address_book_v1';
         const ADDRESS_BOOK_MAX = 3;
@@ -1483,7 +1478,7 @@
             applyAccent(saved === 'purple' ? 'purple' : 'blue');
         })();
 
-        // ─── TON price (TonAPI) + IRT (Nobitex) ───
+        // ─── TON price (TonAPI) ───
 
         async function fetchTonPrice() {
             try {
@@ -1493,71 +1488,22 @@
                 const rate = data && data.rates && data.rates.TON && data.rates.TON.prices && data.rates.TON.prices.USD;
                 if (typeof rate === 'number' && rate > 0) {
                     tonPriceUsd = rate;
-                    updateFiatDisplay();
+                    updateUsdDisplay();
                 }
             } catch (e) {
                 console.error('ton price', e);
             }
         }
-        async function fetchUsdtIrt() {
-            try {
-                const res = await fetch(NOBITEX_STATS);
-                if (!res.ok) throw new Error('nobitex failed');
-                const data = await res.json();
-                // Prefer USDTIRT latest, fallback USDT-IRT style keys
-                const stats = data && data.stats;
-                let price = null;
-                if (stats) {
-                    if (stats.USDTIRT && stats.USDTIRT.latest) price = parseFloat(stats.USDTIRT.latest);
-                    else if (stats['USDT-IRT'] && stats['USDT-IRT'].latest) price = parseFloat(stats['USDT-IRT'].latest);
-                    else if (stats.usdtirt && stats.usdtirt.latest) price = parseFloat(stats.usdtirt.latest);
-                }
-                if (typeof price === 'number' && price > 0) {
-                    usdtIrt = price;
-                    updateFiatDisplay();
-                }
-            } catch (e) {
-                console.error('usdt irt', e);
-            }
-        }
-        function formatToman(n) {
-            const v = Math.round(n);
-            return v.toLocaleString('en-US') + ' تومان';
-        }
-        function updateFiatDisplay() {
+        function updateUsdDisplay() {
             const el = document.getElementById('balance-usd');
             if (!el) return;
-            if (!currentBalanceNano || currentBalanceNano <= 0n) {
+            if (tonPriceUsd == null || !currentBalanceNano) {
                 el.innerText = '';
                 return;
             }
-            const ton = Number(currentBalanceNano) / 1e9;
-            if (showToman) {
-                if (tonPriceUsd != null && usdtIrt != null) {
-                    const toman = ton * tonPriceUsd * usdtIrt;
-                    el.innerText = '≈ ' + formatToman(toman);
-                } else if (tonPriceUsd != null) {
-                    const usd = ton * tonPriceUsd;
-                    el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                } else {
-                    el.innerText = '';
-                }
-            } else {
-                if (tonPriceUsd != null) {
-                    const usd = ton * tonPriceUsd;
-                    el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                } else {
-                    el.innerText = '';
-                }
-            }
+            const usd = (Number(currentBalanceNano) / 1e9) * tonPriceUsd;
+            el.innerText = '≈ $' + usd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
-        function toggleFiatDisplay() {
-            showToman = !showToman;
-            updateFiatDisplay();
-        }
-        // keep old name as alias for any callers
-        function updateUsdDisplay() { updateFiatDisplay(); }
-
 
         // ─── Balance count-up animation ───
         function animateBalanceTo(targetNano) {
@@ -3603,11 +3549,8 @@
             loadLibs().catch(function (e) { console.error('preload failed', e); });
             startTcListener();
             fetchTonPrice();
-            fetchUsdtIrt();
             setInterval(fetchTonPrice, 120000);
-            setInterval(fetchUsdtIrt, 120000);
         });
-
     </script>
 </body>
-</html>
+    </html>
