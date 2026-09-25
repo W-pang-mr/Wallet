@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Preload heavy TON libs early (faster unlock / send) -->
+    <link rel="modulepreload" href="https://esm.sh/@ton/crypto@3">
+    <link rel="modulepreload" href="https://esm.sh/@ton/ton@15">
+    <link rel="modulepreload" href="https://esm.sh/tweetnacl@1.0.3">
+    <link rel="preconnect" href="https://esm.sh" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="dns-prefetch" href="https://toncenter.com">
+    <link rel="dns-prefetch" href="https://tonapi.io">
+    <link rel="dns-prefetch" href="https://connect.ton.org">
     <style>
+
         /* ─── Design System: Soft Glass (Blue / Purple) ─── */
         *, *::before, *::after {
             box-sizing: border-box;
@@ -1630,31 +1640,50 @@
             balanceAnimRaf = requestAnimationFrame(frame);
         }
 
+        let libsPromise = null;
+        let naclPromise = null;
+
         async function loadLibs() {
             if (libs) return libs;
-            const [cryptoMod, tonMod] = await Promise.all([
-                import('https://esm.sh/@ton/crypto@3'),
-                import('https://esm.sh/@ton/ton@15')
-            ]);
-            libs = {
-                mnemonicNew: cryptoMod.mnemonicNew,
-                mnemonicValidate: cryptoMod.mnemonicValidate,
-                mnemonicToPrivateKey: cryptoMod.mnemonicToPrivateKey,
-                WalletContractV5R1: tonMod.WalletContractV5R1,
-                TonClient: tonMod.TonClient,
-                Address: tonMod.Address,
-                internal: tonMod.internal,
-                toNano: tonMod.toNano,
-                beginCell: tonMod.beginCell,
-                storeStateInit: tonMod.storeStateInit,
-                loadStateInit: tonMod.loadStateInit,
-                Cell: tonMod.Cell
-            };
-            if (!libs.WalletContractV5R1) throw new Error('V5R1 not available in this @ton/ton build');
-            if (!libs.Address || !libs.internal || !libs.toNano) throw new Error('@ton/core exports missing');
-            if (!libs.beginCell || !libs.storeStateInit || !libs.loadStateInit || !libs.Cell) throw new Error('@ton/core state-init exports missing (needed for TonConnect)');
-            tonClient = new libs.TonClient(TONCENTER_API_KEY ? { endpoint: TON_ENDPOINT, apiKey: TONCENTER_API_KEY } : { endpoint: TON_ENDPOINT });
-            return libs;
+            if (libsPromise) return libsPromise;
+            libsPromise = (async function () {
+                const [cryptoMod, tonMod] = await Promise.all([
+                    import('https://esm.sh/@ton/crypto@3'),
+                    import('https://esm.sh/@ton/ton@15')
+                ]);
+                const next = {
+                    mnemonicNew: cryptoMod.mnemonicNew,
+                    mnemonicValidate: cryptoMod.mnemonicValidate,
+                    mnemonicToPrivateKey: cryptoMod.mnemonicToPrivateKey,
+                    WalletContractV5R1: tonMod.WalletContractV5R1,
+                    TonClient: tonMod.TonClient,
+                    Address: tonMod.Address,
+                    internal: tonMod.internal,
+                    toNano: tonMod.toNano,
+                    beginCell: tonMod.beginCell,
+                    storeStateInit: tonMod.storeStateInit,
+                    loadStateInit: tonMod.loadStateInit,
+                    Cell: tonMod.Cell
+                };
+                if (!next.WalletContractV5R1) throw new Error('V5R1 not available in this @ton/ton build');
+                if (!next.Address || !next.internal || !next.toNano) throw new Error('@ton/core exports missing');
+                if (!next.beginCell || !next.storeStateInit || !next.loadStateInit || !next.Cell) {
+                    throw new Error('@ton/core state-init exports missing (needed for TonConnect)');
+                }
+                tonClient = new next.TonClient(
+                    TONCENTER_API_KEY
+                        ? { endpoint: TON_ENDPOINT, apiKey: TONCENTER_API_KEY }
+                        : { endpoint: TON_ENDPOINT }
+                );
+                libs = next;
+                return libs;
+            })();
+            try {
+                return await libsPromise;
+            } catch (e) {
+                libsPromise = null; // allow retry
+                throw e;
+            }
         }
 
         async function libsReady() {
@@ -1663,8 +1692,10 @@
                 return false;
             }
             try {
-                setStatus('Loading libraries...', true);
+                if (!libs) setStatus('Loading libraries...', true);
                 await loadLibs();
+                // warm TonConnect crypto in parallel background
+                loadTcNacl().catch(function () {});
                 setStatus('Ready', true);
                 return true;
             } catch (e) {
@@ -1674,6 +1705,7 @@
                 return false;
             }
         }
+
 
         function showScreen(id) {
             SCREENS.forEach(s => document.getElementById(s).classList.add('hidden'));
@@ -3347,10 +3379,20 @@
 
         async function loadTcNacl() {
             if (tcNacl) return tcNacl;
-            const mod = await import('https://esm.sh/tweetnacl@1.0.3');
-            tcNacl = mod.default || mod;
-            return tcNacl;
+            if (naclPromise) return naclPromise;
+            naclPromise = (async function () {
+                const mod = await import('https://esm.sh/tweetnacl@1.0.3');
+                tcNacl = mod.default || mod;
+                return tcNacl;
+            })();
+            try {
+                return await naclPromise;
+            } catch (e) {
+                naclPromise = null;
+                throw e;
+            }
         }
+
 
         function hexToBytes(hex) {
             const out = new Uint8Array(hex.length / 2);
@@ -3860,13 +3902,22 @@
         }
 
         // ---------- Start ----------
+        // Kick off lib download immediately (before unlock / first send)
+        try {
+            loadLibs().catch(function (e) { console.error('early preload failed', e); });
+            loadTcNacl().catch(function () {});
+        } catch (e) {}
+
         window.addEventListener('load', function () {
             showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             loadLibs().catch(function (e) { console.error('preload failed', e); });
+            loadTcNacl().catch(function () {});
             fetchTonPrice();
             setInterval(fetchTonPrice, 120000);
             wakeTonConnect();
+
             handleDeepLinks();
+
             document.addEventListener('visibilitychange', function () {
                 if (document.visibilityState === 'visible') {
                     wakeTonConnect();
