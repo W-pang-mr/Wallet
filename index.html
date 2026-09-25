@@ -2962,7 +2962,8 @@
             const btn = document.getElementById('btn-withdraw');
             btn.disabled = true;
             btn.innerText = 'Sending...';
-            showSendingOverlay('Sending...', (sendAll ? formatTon(currentBalanceNano) : amountStr) + ' TON');
+            showSendingOverlay('Sending...', (isMax ? formatTon(currentBalanceNano) : amountStr) + ' TON');
+
 
             let words = null;
             let keyPair = null;
