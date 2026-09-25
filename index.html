@@ -857,120 +857,100 @@
             40%, 60% { transform: translateX(6px); }
         }
 
-        /* ─── Sending overlay (Soft Glass B&W) ─── */
-
+        /* ─── Sending banner (top pill) ─── */
         .sending-overlay {
             position: fixed;
-            inset: 0;
+            top: 0; left: 0; right: 0;
             z-index: 1200;
-            background: rgba(0, 0, 0, 0.92);
+            background: transparent;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
-            padding: 24px;
-            animation: fadeIn 0.25s var(--ease-out);
+            padding: max(12px, env(safe-area-inset-top, 12px)) 16px 0;
+            pointer-events: none;
+            animation: bannerIn 0.35s var(--ease-out);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+        .sending-overlay.blocking {
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            pointer-events: auto;
+            align-items: center;
+            padding: 24px;
+        }
+        @keyframes bannerIn {
+            from { opacity: 0; transform: translateY(-14px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .sending-card {
-            width: 100%;
-            max-width: 280px;
-            padding: 40px 28px 28px;
-            border-radius: 24px;
-            text-align: center;
+            pointer-events: auto;
             display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 210px;
+            max-width: 340px;
+            padding: 10px 14px 10px 10px;
+            border-radius: 999px;
+            background: rgba(20, 20, 22, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 10px 36px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .sending-overlay.blocking .sending-card {
             flex-direction: column;
-            align-items: center;
-            gap: 18px;
-            background: #0a0a0a;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: none;
-            animation: scaleIn 0.35s var(--ease-out);
+            border-radius: 24px;
+            padding: 28px 22px 18px;
+            max-width: 300px;
+            gap: 12px;
+            text-align: center;
         }
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.92); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        .send-anim {
-            position: relative;
-            width: 72px;
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .send-ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, 0.1);
-            border-top-color: var(--accent);
-            animation: sending-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-        }
-        .send-ring.done {
-            border-color: rgba(52, 211, 153, 0.3);
-            border-top-color: #34d399;
-            animation: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .send-core {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.12);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            transition: all 0.3s var(--ease);
-        }
-        .send-core.success {
-            background: var(--success-soft);
-            border-color: rgba(52, 211, 153, 0.4);
-            font-size: 26px;
-            color: #34d399;
-            animation: successPop 0.4s var(--ease-out);
-        }
-        .send-core.fail {
-            background: var(--danger-soft);
-            border-color: rgba(248, 113, 113, 0.4);
-            color: #f87171;
-            animation: successPop 0.4s var(--ease-out);
-        }
-
-
-        @keyframes sending-spin { to { transform: rotate(360deg); } }
-        @keyframes successPop {
-            0% { transform: scale(0.6); opacity: 0; }
-            60% { transform: scale(1.12); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        .sending-spinner {
+        .send-logo {
             width: 36px; height: 36px;
             border-radius: 50%;
-            border: 1.5px solid rgba(255, 255, 255, 0.08);
-            border-top-color: #fff;
-            animation: sending-spin 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            background: linear-gradient(145deg, #2d9cdb, #0098ea 55%, #0077b6);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(0, 152, 234, 0.4);
         }
-        .sending-icon { font-size: 32px; }
+        .send-logo svg { width: 18px; height: 18px; display: block; }
+        .send-logo.spin::after {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 50%;
+            border: 2px solid transparent;
+            border-top-color: rgba(255,255,255,0.75);
+            animation: sending-spin 0.75s linear infinite;
+        }
+        .send-logo.success {
+            background: linear-gradient(145deg, #34d399, #10b981);
+            box-shadow: 0 2px 10px rgba(52, 211, 153, 0.4);
+        }
+        .send-logo.fail {
+            background: linear-gradient(145deg, #f87171, #ef4444);
+            box-shadow: 0 2px 10px rgba(248, 113, 113, 0.4);
+        }
+        .send-meta {
+            display: flex; flex-direction: column; gap: 2px;
+            min-width: 0; flex: 1; text-align: left;
+        }
+        .sending-overlay.blocking .send-meta { text-align: center; align-items: center; }
         .sending-text {
-            font-size: 15px;
-            font-weight: 500;
-            color: #fff;
-            white-space: pre-line;
-            line-height: 1.5;
-            letter-spacing: -0.02em;
+            font-size: 14px; font-weight: 650; color: #fff;
+            letter-spacing: -0.01em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
         .sending-sub {
-            font-size: 12px;
-            color: var(--text-dim);
-            margin-top: -8px;
+            font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
         }
+        .sending-chevron { color: rgba(255,255,255,0.35); font-size: 15px; flex-shrink: 0; }
+        .sending-overlay.blocking .sending-chevron { display: none; }
+        @keyframes sending-spin { to { transform: rotate(360deg); } }
+        .send-anim, .send-ring, .send-core, .sending-spinner, .sending-icon { display: none !important; }
+
 
 
         .glass-card h2,
@@ -1001,7 +981,10 @@
 
     <div class="top-bar">
         <div class="brand">
-            <div class="brand-icon">💎</div>
+            <div class="brand-icon" style="background:linear-gradient(145deg,#2d9cdb,#0098ea 55%,#0077b6);border:none;">
+                <svg width="18" height="18" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="white" fill-opacity="0.95"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="#0098EA"/></svg>
+            </div>
+
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em; font-weight:550;">My TON Wallet</span>
                 <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Soft Glass</span>
@@ -1234,8 +1217,11 @@
                     <span>NFTs</span>
                 </div>
                 <div class="nav-item nav-center active" onclick="showScreen('dashboard-screen')">
-                    <span class="nav-icon nav-center-icon">💎</span>
+                    <span class="nav-icon nav-center-icon" style="display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 56 56" fill="none"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="#0098EA"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="white"/></svg>
+                    </span>
                 </div>
+
                 <div class="nav-item" onclick="openSwap()">
                     <span class="nav-icon">⇄</span>
                     <span>Swap</span>
@@ -1269,8 +1255,11 @@
                     <span>NFTs</span>
                 </div>
                 <div class="nav-item nav-center" onclick="showScreen('dashboard-screen')">
-                    <span class="nav-icon nav-center-icon">💎</span>
+                    <span class="nav-icon nav-center-icon" style="display:flex;align-items:center;justify-content:center;">
+                        <svg width="22" height="22" viewBox="0 0 56 56" fill="none"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="#0098EA"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="white"/></svg>
+                    </span>
                 </div>
+
                 <div class="nav-item" onclick="openSwap()">
                     <span class="nav-icon">⇄</span>
 
@@ -1383,20 +1372,24 @@
         </div>
     </div>
 
-    <!-- Sending overlay -->
+    <!-- Sending banner (top pill) -->
     <div id="sending-overlay" class="sending-overlay hidden">
         <div class="sending-card">
-            <div class="send-anim">
-                <div id="send-ring" class="send-ring"></div>
-                <div id="send-core" class="send-core">↑</div>
+            <div id="send-logo" class="send-logo spin">
+                <svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                    <path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="white" fill-opacity="0.95"/>
+                    <path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="#0098EA"/>
+                </svg>
             </div>
-            <div id="sending-spinner" class="sending-spinner hidden"></div>
-            <div id="sending-icon" class="sending-icon hidden"></div>
-            <div id="sending-text" class="sending-text">Sending...</div>
-            <div id="sending-sub" class="sending-sub">Please wait</div>
-            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()" style="margin-top:6px;">OK</button>
+            <div class="send-meta">
+                <div id="sending-text" class="sending-text">Sending...</div>
+                <div id="sending-sub" class="sending-sub"></div>
+            </div>
+            <span class="sending-chevron">›</span>
+            <button id="sending-close" class="btn-secondary hidden" onclick="hideSendingOverlay()" style="margin-top:4px;width:100%;border-radius:999px;">OK</button>
         </div>
     </div>
+
 
     <script>
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
@@ -1788,40 +1781,56 @@
             playTapSound();
         }, true);
 
-        // ================= status overlay =================
-        function showSendingOverlay(text) {
-            const ring = document.getElementById('send-ring');
-            const core = document.getElementById('send-core');
+        // ================= status overlay (top pill banner) =================
+        const TON_LOGO_SVG = '<svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="white" fill-opacity="0.95"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="#0098EA"/></svg>';
+
+        function showSendingOverlay(text, amountText) {
+            const overlay = document.getElementById('sending-overlay');
+            const logo = document.getElementById('send-logo');
             const sub = document.getElementById('sending-sub');
-            if (ring) { ring.classList.remove('done', 'hidden'); }
-            if (core) { core.className = 'send-core'; core.innerText = '↑'; }
-            document.getElementById('sending-spinner').classList.add('hidden');
-            document.getElementById('sending-icon').classList.add('hidden');
-            document.getElementById('sending-close').classList.add('hidden');
+            const closeBtn = document.getElementById('sending-close');
+            overlay.classList.remove('blocking', 'hidden');
+            if (logo) {
+                logo.className = 'send-logo spin';
+                logo.innerHTML = TON_LOGO_SVG;
+            }
             document.getElementById('sending-text').innerText = text || 'Sending...';
-            if (sub) { sub.classList.remove('hidden'); sub.innerText = 'Confirming on network'; }
-            document.getElementById('sending-overlay').classList.remove('hidden');
+            if (sub) sub.innerText = amountText || '';
+            if (closeBtn) closeBtn.classList.add('hidden');
         }
         function setSendingResult(success, text) {
-            const ring = document.getElementById('send-ring');
-            const core = document.getElementById('send-core');
+            const overlay = document.getElementById('sending-overlay');
+            const logo = document.getElementById('send-logo');
             const sub = document.getElementById('sending-sub');
-            document.getElementById('sending-spinner').classList.add('hidden');
-            document.getElementById('sending-icon').classList.add('hidden');
-            if (ring) ring.classList.add('done');
-            if (core) {
-                core.className = 'send-core ' + (success ? 'success' : 'fail');
-                core.innerText = success ? '✓' : '!';
+            const closeBtn = document.getElementById('sending-close');
+            // Longer messages → full modal style
+            const longMsg = text && (text.indexOf('\n') !== -1 || text.length > 42);
+            if (longMsg) overlay.classList.add('blocking');
+            else overlay.classList.remove('blocking');
+            if (logo) {
+                logo.className = 'send-logo ' + (success ? 'success' : 'fail');
+                logo.innerHTML = success
+                    ? '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>'
+                    : '<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>';
             }
-            document.getElementById('sending-text').innerText = text;
-            if (sub) {
-                sub.innerText = success ? 'Transaction broadcast' : 'Something went wrong';
+            const lines = (text || '').split('\n');
+            document.getElementById('sending-text').innerText = lines[0] || (success ? 'Sent' : 'Failed');
+            if (sub) sub.innerText = lines.slice(1).join(' ') || (success ? 'Broadcast to network' : 'Something went wrong');
+            if (closeBtn) closeBtn.classList.remove('hidden');
+            // Auto-hide success banner after a moment
+            if (success && !longMsg) {
+                setTimeout(function () {
+                    if (!closeBtn || closeBtn.classList.contains('hidden')) return;
+                    hideSendingOverlay();
+                }, 2800);
             }
-            document.getElementById('sending-close').classList.remove('hidden');
         }
         function hideSendingOverlay() {
-            document.getElementById('sending-overlay').classList.add('hidden');
+            const overlay = document.getElementById('sending-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('blocking');
         }
+
 
         async function decryptWithPin(pin) {
             try {
@@ -2953,7 +2962,7 @@
             const btn = document.getElementById('btn-withdraw');
             btn.disabled = true;
             btn.innerText = 'Sending...';
-            showSendingOverlay('Sending transaction...');
+            showSendingOverlay('Sending...', (sendAll ? formatTon(currentBalanceNano) : amountStr) + ' TON');
 
             let words = null;
             let keyPair = null;
@@ -2972,6 +2981,7 @@
                 const seqno = await withRetry(() => contract.getSeqno());
 
                 const msg = libs.internal({
+
                     to: recipient.address,
                     value: valueNano,
                     bounce: recipient.bounce,
@@ -3063,7 +3073,7 @@
             const btn = document.getElementById('btn-send-jetton');
             btn.disabled = true;
             btn.innerText = 'Sending...';
-            showSendingOverlay('Sending token transfer...');
+            showSendingOverlay('Sending...', shownAmount);
 
             let words = null;
             let keyPair = null;
@@ -3076,6 +3086,7 @@
                 if (!wallet.address.equals(currentAddressObj)) {
                     setSendingResult(false, 'The wallet key does not match the current address. Operation cancelled.');
                     return;
+
                 }
 
                 const contract = tonClient.open(wallet);
