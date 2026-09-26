@@ -318,42 +318,62 @@
 
 
 
-        /* ─── Balance card (neutral glass) ─── */
+        /* ─── Balance card (Soft Glass mockup) ─── */
         .balance-card {
             text-align: left;
-            padding: 22px 20px 20px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-card);
-            backdrop-filter: blur(40px) saturate(160%);
-            -webkit-backdrop-filter: blur(40px) saturate(160%);
+            padding: 20px 18px 18px;
+            background: linear-gradient(160deg, rgba(255,255,255,0.11) 0%, rgba(255,255,255,0.05) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 28px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.1);
+            backdrop-filter: blur(48px) saturate(180%);
+            -webkit-backdrop-filter: blur(48px) saturate(180%);
             position: relative;
             overflow: hidden;
         }
         .balance-card::after {
             content: '';
             position: absolute;
-            right: -15%;
-            top: -40%;
-            width: 65%;
-            height: 150%;
-            background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 40%, transparent 70%);
+            right: -8%;
+            top: -30%;
+            width: 55%;
+            height: 140%;
+            background: radial-gradient(ellipse at center, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.03) 45%, transparent 70%);
             pointer-events: none;
-            filter: blur(10px);
+            filter: blur(8px);
         }
+        .balance-body {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        .balance-main { flex: 1; min-width: 0; }
+        .balance-crystal {
+            width: 88px;
+            height: 88px;
+            flex-shrink: 0;
+            opacity: 0.85;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35));
+        }
+        .balance-crystal svg { width: 72px; height: 72px; }
 
         .balance-top-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             position: relative;
             z-index: 1;
         }
         .balance-label {
             font-size: 13px;
-            color: var(--text-dim);
+            color: rgba(255,255,255,0.55);
             font-weight: 500;
             display: flex;
             align-items: center;
@@ -361,42 +381,34 @@
         }
         .mainnet-badge {
             font-size: 11px;
-            font-weight: 550;
-            background: rgba(255,255,255,0.12);
-            border: 1px solid rgba(255,255,255,0.14);
-            padding: 5px 10px;
-            border-radius: var(--radius-full);
-            color: var(--text);
+            font-weight: 600;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.12);
+            padding: 6px 12px;
+            border-radius: 999px;
+            color: rgba(255,255,255,0.85);
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        .addr-pill {
-            display: none;
-        }
+        .addr-pill { display: none; }
         .balance-num {
-            font-size: 36px;
+            font-size: 34px;
             font-weight: 700;
-            letter-spacing: -1.4px;
-            margin-bottom: 2px;
-            color: var(--text);
-            line-height: 1.15;
+            letter-spacing: -1.5px;
+            margin-bottom: 4px;
+            color: #fff;
+            line-height: 1.1;
             font-variant-numeric: tabular-nums;
-            position: relative;
-            z-index: 1;
         }
         .balance-usd {
             font-size: 14px;
             font-weight: 450;
-            color: var(--text-dim);
-            margin-bottom: 0;
-            min-height: 20px;
-            position: relative;
-            z-index: 1;
+            color: rgba(255,255,255,0.5);
+            min-height: 18px;
         }
-        .balance-updated {
-            display: none;
-        }
+        .balance-updated { display: none; }
+
         .theme-toggle, .accent-toggle {
             width: 36px;
             height: 36px;
@@ -434,73 +446,89 @@
             display: flex;
             gap: 10px;
             justify-content: space-between;
-            margin-top: 14px;
+            margin-top: 4px;
             position: relative;
             z-index: 1;
         }
         .action-btn {
             flex: 1;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.14);
-            border-radius: 18px;
-            padding: 14px 6px 12px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 999px;
+            padding: 14px 10px;
             cursor: pointer;
-            color: var(--text);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            color: #fff;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             transition: background 0.12s ease, transform 0.12s var(--ease);
             box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+            min-height: 48px;
         }
         .action-btn:active {
             background: rgba(255, 255, 255, 0.16);
-            transform: scale(0.96);
+            transform: scale(0.97);
         }
         .action-btn .icon-circle {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            border-radius: 0;
             background: transparent;
             border: none;
-            color: var(--text);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
             box-shadow: none;
+            flex-shrink: 0;
         }
         .action-btn .icon-circle svg {
             display: block;
+            width: 18px;
+            height: 18px;
             opacity: 0.95;
         }
-
         .action-btn span {
-            font-size: 12px;
-            font-weight: 550;
-            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
             letter-spacing: -0.01em;
-            opacity: 0.9;
         }
+
 
 
 
 
 
         /* ─── Tokens ─── */
+        #jettons-card, #history-card {
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 24px !important;
+            padding: 16px !important;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
         .token-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 13px 8px;
-            border-radius: 14px;
+            padding: 12px 12px;
+            border-radius: 16px;
             cursor: pointer;
             transition: background 0.12s ease;
-            margin: 0 -4px;
+            margin: 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            margin-bottom: 8px;
         }
-        .token-row:active { background: rgba(255, 255, 255, 0.05); }
+        .token-row:last-child { margin-bottom: 0; }
+        .token-row:active { background: rgba(255, 255, 255, 0.08); }
+
         .token-left { display: flex; align-items: center; gap: 13px; min-width: 0; }
         .token-icon {
             width: 40px;
@@ -961,6 +989,83 @@
         @keyframes sending-spin { to { transform: rotate(360deg); } }
         .send-anim, .send-ring, .send-core, .sending-spinner, .sending-icon { display: none !important; }
 
+        /* Toast */
+        .toast-host {
+            position: fixed;
+            left: 50%;
+            bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 72px));
+            transform: translateX(-50%);
+            z-index: 1400;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+            width: min(92vw, 360px);
+        }
+        .toast {
+            pointer-events: none;
+            padding: 12px 18px;
+            border-radius: 999px;
+            background: rgba(28, 28, 30, 0.94);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 550;
+            box-shadow: 0 10px 32px rgba(0,0,0,0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            animation: toastIn 0.3s var(--ease-out);
+            text-align: center;
+            max-width: 100%;
+        }
+        .toast.ok { border-color: rgba(52,211,153,0.35); }
+        .toast.err { border-color: rgba(248,113,113,0.4); }
+        .toast.out { animation: toastOut 0.25s ease forwards; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastOut {
+            to { opacity: 0; transform: translateY(8px) scale(0.96); }
+        }
+
+        /* Receive QR */
+        .receive-qr-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            padding: 8px 0 4px;
+        }
+        .receive-qr-box {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            background: #fff;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+        }
+        .receive-qr-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .receive-addr {
+            font-size: 12px;
+            color: var(--text-dim);
+            word-break: break-all;
+            text-align: center;
+            line-height: 1.45;
+            padding: 0 8px;
+            font-variant-numeric: tabular-nums;
+        }
+
+
 
 
         .glass-card h2,
@@ -1139,7 +1244,23 @@
         </div>
 
         <!-- Withdraw -->
+        <div id="receive-screen" class="glass-card hidden flex flex-col gap-3">
+            <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold" style="font-size:16px;letter-spacing:-0.01em;">Receive</h3>
+                <button type="button" class="btn-secondary" style="width:auto;padding:8px 14px;font-size:13px;" onclick="showScreen('dashboard-screen')">Back</button>
+            </div>
+            <div class="receive-qr-wrap">
+                <div class="receive-qr-box">
+                    <img id="receive-qr-img" alt="QR code" width="176" height="176" />
+                </div>
+                <div id="receive-addr-text" class="receive-addr">—</div>
+            </div>
+            <button type="button" class="btn-primary" onclick="copyAddress()">Copy address</button>
+            <p class="text-xs" style="text-align:center;color:var(--text-muted);">Only send TON and TON assets to this address</p>
+        </div>
+
         <div id="withdraw-screen" class="glass-card hidden flex flex-col gap-3">
+
             <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Send TON</h3>
             <div class="warn-box">Blockchain transactions cannot be reversed. Double-check the destination address. If sending to an exchange, make sure to include the Memo/Comment if one is required.</div>
 
@@ -1225,15 +1346,31 @@
                 <div class="balance-top-row">
                     <div class="balance-label">
                         <span>Total Balance</span>
-                        <span style="opacity:0.7;cursor:pointer;" onclick="copyAddress()" title="Copy address">👁</span>
+                        <span style="opacity:0.65;cursor:pointer;font-size:14px;" onclick="showReceive()" title="Receive">👁</span>
                     </div>
                     <div class="mainnet-badge" onclick="openSwap()" style="cursor:pointer;" title="Open STON.fi">STON.fi</div>
-
                 </div>
-                <div id="wallet-balance" class="balance-num">Checking...</div>
-                <div id="balance-usd" class="balance-usd"></div>
-
-
+                <div class="balance-body">
+                    <div class="balance-main">
+                        <div id="wallet-balance" class="balance-num">Checking...</div>
+                        <div id="balance-usd" class="balance-usd"></div>
+                    </div>
+                    <div class="balance-crystal" aria-hidden="true">
+                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <linearGradient id="cry" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#ffffff" stop-opacity="0.55"/>
+                                    <stop offset="0.45" stop-color="#c8d0dc" stop-opacity="0.35"/>
+                                    <stop offset="1" stop-color="#8899aa" stop-opacity="0.2"/>
+                                </linearGradient>
+                            </defs>
+                            <path d="M60 8L98 38L80 102H40L22 38L60 8Z" fill="url(#cry)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+                            <path d="M60 8L98 38H22L60 8Z" fill="rgba(255,255,255,0.2)"/>
+                            <path d="M22 38L60 55L98 38" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
+                            <path d="M60 55V102" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+                        </svg>
+                    </div>
+                </div>
                 <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()" style="display:none;">Loading...</div>
                 <div id="balance-updated" class="balance-updated"></div>
             </div>
@@ -1241,31 +1378,30 @@
             <div class="action-row">
                 <div class="action-btn" onclick="showWithdraw()">
                     <div class="icon-circle">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2L15 22l-4-9-9-4 20-7z"/></svg>
                     </div>
                     <span>Send</span>
                 </div>
-                <div class="action-btn" onclick="copyAddress()">
+                <div class="action-btn" onclick="showReceive()">
                     <div class="icon-circle">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
                     </div>
                     <span>Receive</span>
                 </div>
                 <div class="action-btn" onclick="openSwap()">
                     <div class="icon-circle">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l4 4-4 4M20 7H4M8 21l-4-4 4-4M4 17h16"/></svg>
                     </div>
                     <span>Swap</span>
                 </div>
-
             </div>
-
 
             <div id="jettons-card" class="glass-card flex flex-col gap-3">
                 <div class="flex justify-between items-center">
                     <div class="text-sm font-bold" style="letter-spacing:-0.01em;">Tokens</div>
-                    <span class="text-xs" id="jettons-count" style="color:var(--text-dim);">—</span>
+                    <span class="text-xs" id="jettons-count" style="color:var(--text-dim);">Hide Small Balances 👁</span>
                 </div>
+
                 <div id="jettons-list" class="flex flex-col gap-1">
                     <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
                     <div class="skeleton-row"><div class="skeleton skeleton-avatar"></div><div class="skeleton-col"><div class="skeleton skeleton-line md"></div><div class="skeleton skeleton-line sm"></div></div></div>
@@ -1500,7 +1636,8 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
-        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+        const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'receive-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
+
 
 
 
@@ -2224,15 +2361,65 @@
             backToWelcome();
         }
 
+        function showToast(message, type) {
+            type = type || 'ok';
+            let host = document.getElementById('toast-host');
+            if (!host) {
+                host = document.createElement('div');
+                host.id = 'toast-host';
+                host.className = 'toast-host';
+                document.body.appendChild(host);
+            }
+            const el = document.createElement('div');
+            el.className = 'toast ' + (type === 'err' ? 'err' : 'ok');
+            el.textContent = message || '';
+            host.appendChild(el);
+            setTimeout(function () {
+                el.classList.add('out');
+                setTimeout(function () { try { el.remove(); } catch (e) {} }, 280);
+            }, 2200);
+        }
+
+        function showReceive() {
+            if (!currentAddress) {
+                showToast('Wallet not ready', 'err');
+                return;
+            }
+            const textEl = document.getElementById('receive-addr-text');
+            const img = document.getElementById('receive-qr-img');
+            if (textEl) textEl.textContent = currentAddress;
+            if (img) {
+                img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=8&data=' + encodeURIComponent(currentAddress);
+                img.alt = 'QR ' + currentAddress;
+            }
+            showScreen('receive-screen');
+        }
+
         async function copyAddress() {
-            if (!currentAddress) return;
+            if (!currentAddress) {
+                showToast('No address', 'err');
+                return;
+            }
             try {
                 await navigator.clipboard.writeText(currentAddress);
-                alert('Address copied.');
+                showToast('Address copied');
             } catch (e) {
-                alert('Copy failed. Please select the address manually.');
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = currentAddress;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    showToast('Address copied');
+                } catch (e2) {
+                    showToast('Copy failed', 'err');
+                }
             }
         }
+
 
         function openSwap() {
             const url = 'https://app.ston.fi/';
@@ -2403,7 +2590,8 @@
             list.appendChild(tonRow);
 
             const extra = jettons || [];
-            if (countEl) countEl.innerText = (1 + extra.length) + ' token' + ((1 + extra.length) > 1 ? 's' : '');
+            if (countEl) countEl.innerText = (1 + extra.length) + ' token' + ((1 + extra.length) > 1 ? 's' : '') + ' · 👁';
+
 
             extra.forEach(function (j) {
                 const row = document.createElement('div');
