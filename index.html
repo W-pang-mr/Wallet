@@ -1673,6 +1673,8 @@
         let currentBalanceNano = 0n;
         let sending = false;
         let unlockActive = false;
+        let sessionWords = null; // kept only while unlocked — for trusted auto-approve
+
         let balanceRefreshing = false;
         let balancePollTimer = null;
         let jettons = [];
@@ -2353,6 +2355,8 @@
 
         function lockWallet() {
             stopBalancePolling();
+            sessionWords = null;
+            tcPendingTx = null;
             currentAddress = '';
             currentAddressObj = null;
             currentBalanceNano = 0n;
@@ -2369,10 +2373,12 @@
             const ok = confirm('The wallet will be removed from this device. If you do not have the recovery phrase, your funds will be lost permanently. Continue?');
             if (!ok) return;
             stopBalancePolling();
+            sessionWords = null;
             localStorage.removeItem(STORAGE_KEY);
             currentAddress = '';
             backToWelcome();
         }
+
 
         function showToast(message, type) {
             type = type || 'ok';
@@ -2463,6 +2469,8 @@
 
                 currentAddressObj = wallet.address;
                 currentAddress = wallet.address.toString({ urlSafe: true, bounceable: false, testOnly: false });
+                // Keep words in memory only while unlocked (trusted dApp auto-approve)
+                sessionWords = Array.isArray(words) ? words.slice() : words;
                 document.getElementById('wallet-address-display').innerHTML = currentAddress + ' 📋';
 
                 try {
@@ -2479,6 +2487,7 @@
                 setTimeout(processPendingTcLink, 400);
                 setTimeout(flushPendingTcTx, 600);
                 setTimeout(flushPendingTcTx, 2000);
+
 
 
 
@@ -3618,6 +3627,21 @@
                 reqKey: item.reqKey
             };
             if (!(await libsReady())) return;
+
+            // Trusted dApps: auto-approve when wallet is unlocked
+            if (isTrustedDapp(conn.dappClientIdHex) && sessionWords) {
+                try {
+                    if (tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred) {
+                        tg.HapticFeedback.notificationOccurred('success');
+                    }
+                } catch (e) {}
+                if (typeof showToast === 'function') {
+                    showToast('Trusted app — auto approving…');
+                }
+                await approveTcTx(true);
+                return;
+            }
+
             try {
                 if (tg) {
                     if (tg.expand) tg.expand();
@@ -3629,6 +3653,7 @@
             renderTcTxScreen();
             showScreen('tc-tx-screen');
         }
+
 
 
         async function loadTcNacl() {
@@ -4047,17 +4072,21 @@
         }
 
 
-        async function approveTcTx() {
+        async function approveTcTx(autoTrusted) {
             if (!tcPendingTx) return;
-            const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
-            if (!auth) return;
-            const btn = document.getElementById('btn-tc-tx-approve');
-            btn.disabled = true;
-            showSendingOverlay('Sending transaction...');
             let words = null;
+            if (autoTrusted && sessionWords) {
+                words = sessionWords;
+            } else {
+                const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
+                if (!auth) return;
+                words = auth.result;
+            }
+            const btn = document.getElementById('btn-tc-tx-approve');
+            if (btn) btn.disabled = true;
+            showSendingOverlay(autoTrusted ? 'Auto-approving trusted app…' : 'Sending transaction...');
             try {
                 if (!(await libsReady())) return;
-                words = auth.result;
                 const keyPair = await libs.mnemonicToPrivateKey(words);
                 const wallet = libs.WalletContractV5R1.create({ workchain: 0, publicKey: keyPair.publicKey });
                 if (currentAddressObj && !wallet.address.equals(currentAddressObj)) {
@@ -4101,18 +4130,34 @@
 
                 tcPendingTx = null;
 
-                await loadWallet(words);
+                if (!autoTrusted) {
+                    await loadWallet(words);
+                } else {
+                    sessionWords = Array.isArray(words) ? words.slice() : words;
+                    setTimeout(refreshBalance, 3000);
+                    setTimeout(function () { flushPendingTcTx(); }, 500);
+                }
                 words = null;
-                setSendingResult(true, 'Transaction sent ✅');
+                setSendingResult(true, autoTrusted ? 'Trusted app — sent ✅' : 'Transaction sent ✅');
+                if (autoTrusted) {
+                    showScreen('dashboard-screen');
+                    if (typeof showToast === 'function') showToast('Deposit approved automatically');
+                }
                 setTimeout(refreshBalance, 5000);
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'Send failed.\n' + (e && e.message ? e.message : ''));
+                // if auto failed, fall back to manual screen
+                if (autoTrusted && tcPendingTx) {
+                    renderTcTxScreen();
+                    showScreen('tc-tx-screen');
+                }
             } finally {
                 words = null;
-                btn.disabled = false;
+                if (btn) btn.disabled = false;
             }
         }
+
 
         async function sendTcResponse(connection, requestId, resultB64, error) {
             try {
