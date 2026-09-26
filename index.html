@@ -1279,13 +1279,19 @@
 
             <label class="text-xs" style="display: flex; gap: 10px; align-items: center; color: var(--text);">
                 <input type="checkbox" id="wd-max" onchange="onMaxToggle()" style="width:16px; height:16px; accent-color: var(--accent);">
-                <span>Send entire balance (network fee is deducted from this amount)</span>
+                <span>Send entire balance (fee still taken from your wallet)</span>
             </label>
 
             <div id="wd-fee-box" class="fee-box">
-                <div class="fee-row"><span>Estimated network fee</span><strong id="wd-fee-value">~0.005 TON</strong></div>
+                <div class="fee-row"><span>You send</span><strong id="wd-send-value">—</strong></div>
+                <div class="fee-row" style="margin-top:4px;"><span>Network fee (from your balance)</span><strong id="wd-fee-value">~0.0007 TON</strong></div>
                 <div class="fee-row" style="margin-top:4px;"><span>Recipient receives</span><strong id="wd-receive-value">—</strong></div>
+                <div class="fee-row" style="margin-top:4px;"><span>Total deducted</span><strong id="wd-total-value">—</strong></div>
+                <p style="margin-top:10px;font-size:11px;line-height:1.45;color:var(--text-muted);">
+                    Fee is paid from your remaining balance — not taken out of the amount you enter. Example: send 1 TON → recipient gets 1 TON; ~0.0007 TON fee leaves your wallet separately.
+                </p>
             </div>
+
 
             <div style="display: flex; flex-direction: column; gap: 6px;">
                 <label class="text-xs" style="color: var(--text); font-weight: 550;">Memo / Comment (optional, public)</label>
@@ -1556,6 +1562,10 @@
             <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Connection Request</h3>
             <div class="info-box" id="tc-confirm-app-info">Loading app info...</div>
             <div class="text-xs" style="line-height:1.5;">This app will only see your wallet address, never your recovery phrase or PIN.</div>
+            <label class="text-xs" style="display:flex;gap:10px;align-items:center;color:var(--text);">
+                <input type="checkbox" id="tc-trust-checkbox" style="width:16px;height:16px;accent-color:var(--accent);">
+                <span>Trust this app (mark as trusted for next requests)</span>
+            </label>
             <button id="btn-tc-confirm" onclick="confirmTcConnect()" class="btn-primary btn-blue">Approve &amp; Connect</button>
             <button onclick="cancelTcConnect()" class="btn-secondary">Cancel</button>
         </div>
@@ -1564,10 +1574,13 @@
         <div id="tc-tx-screen" class="glass-card hidden flex flex-col gap-3">
             <h3 class="text-sm font-bold" style="font-size: 16px; letter-spacing:-0.01em;">Transaction Request</h3>
             <div class="info-box" id="tc-tx-from-app">Request from a connected app</div>
+            <div id="tc-tx-trusted-badge" class="hidden" style="font-size:12px;font-weight:600;color:#6ee7b7;text-align:center;">✓ Trusted app</div>
             <div id="tc-tx-details" class="text-xs flex flex-col gap-3" style="max-height: 220px; overflow-y: auto;"></div>
             <button id="btn-tc-tx-approve" onclick="approveTcTx()" class="btn-primary btn-blue">Approve &amp; Send</button>
+            <button type="button" id="btn-tc-trust-toggle" class="btn-secondary" onclick="toggleTrustCurrentTcApp()">Trust this app</button>
             <button onclick="rejectTcTx()" class="btn-secondary">Reject</button>
         </div>
+
 
     </main>
 
@@ -3159,34 +3172,44 @@
         function updateFeePreview() {
             const feeEl = document.getElementById('wd-fee-value');
             const recvEl = document.getElementById('wd-receive-value');
+            const sendEl = document.getElementById('wd-send-value');
+            const totalEl = document.getElementById('wd-total-value');
             if (!feeEl || !recvEl) return;
             feeEl.innerText = '~' + formatTon(estimatedFeeNano) + ' TON';
-            const isMax = document.getElementById('wd-max').checked;
+            const isMax = document.getElementById('wd-max') && document.getElementById('wd-max').checked;
             if (isMax) {
                 if (currentBalanceNano > estimatedFeeNano) {
-                    recvEl.innerText = formatTon(currentBalanceNano - estimatedFeeNano) + ' TON';
+                    const recv = currentBalanceNano - estimatedFeeNano;
+                    if (sendEl) sendEl.innerText = formatTon(recv) + ' TON';
+                    recvEl.innerText = formatTon(recv) + ' TON';
+                    if (totalEl) totalEl.innerText = formatTon(currentBalanceNano) + ' TON';
                 } else {
+                    if (sendEl) sendEl.innerText = '—';
                     recvEl.innerText = '0 TON (fee too high)';
+                    if (totalEl) totalEl.innerText = '—';
                 }
                 return;
             }
             const amountStr = normalizeNumber(document.getElementById('wd-amount').value || '');
             if (!/^\d+(\.\d{1,9})?$/.test(amountStr) || !amountStr) {
+                if (sendEl) sendEl.innerText = '—';
                 recvEl.innerText = '—';
+                if (totalEl) totalEl.innerText = '—';
                 return;
             }
             try {
                 const entered = libs && libs.toNano ? libs.toNano(amountStr) : BigInt(Math.round(parseFloat(amountStr) * 1e9));
-                // Fee is deducted from the amount the user wants to send
-                if (entered > estimatedFeeNano) {
-                    recvEl.innerText = formatTon(entered - estimatedFeeNano) + ' TON';
-                } else {
-                    recvEl.innerText = '0 TON (amount ≤ fee)';
-                }
+                // Fee from wallet balance — recipient gets full entered amount
+                if (sendEl) sendEl.innerText = formatTon(entered) + ' TON';
+                recvEl.innerText = formatTon(entered) + ' TON';
+                if (totalEl) totalEl.innerText = '~' + formatTon(entered + estimatedFeeNano) + ' TON';
             } catch (e) {
+                if (sendEl) sendEl.innerText = '—';
                 recvEl.innerText = '—';
+                if (totalEl) totalEl.innerText = '—';
             }
         }
+
 
         function onWithdrawAmountChange() {
             updateFeePreview();
@@ -3240,7 +3263,7 @@
 
             if (isMax) {
                 if (currentBalanceNano <= fee) { alert('Balance is too low to cover the network fee (~' + formatTon(fee) + ' TON).'); return; }
-                // Carry-all remaining balance; network takes fee from it
+                // Carry-all remaining balance; network takes fee from remaining
                 sendMode = 128;
                 valueNano = 0n;
                 receiveNano = currentBalanceNano - fee;
@@ -3249,17 +3272,13 @@
                 let enteredNano;
                 try { enteredNano = libs.toNano(amountStr); } catch (e) { alert('The amount entered is not valid.'); return; }
                 if (enteredNano <= 0n) { alert('The amount must be greater than zero.'); return; }
-                if (enteredNano <= fee) {
-                    alert('Amount must be greater than the network fee (~' + formatTon(fee) + ' TON).');
+                // Fee paid from wallet balance separately — recipient gets full entered amount
+                if (enteredNano + fee > currentBalanceNano) {
+                    alert('Insufficient balance.\nNeed ~' + formatTon(enteredNano + fee) + ' TON (amount + network fee).\nFee is taken from your wallet, not from the send amount.');
                     return;
                 }
-                if (enteredNano > currentBalanceNano) {
-                    alert('Insufficient balance.');
-                    return;
-                }
-                // Fee is deducted from the amount the user entered → recipient gets entered − fee
-                valueNano = enteredNano - fee;
-                receiveNano = valueNano;
+                valueNano = enteredNano;
+                receiveNano = enteredNano;
                 sendMode = 3;
             }
 
@@ -3269,9 +3288,10 @@
 
             const shownAddr = recipient.address.toString({ urlSafe: true, bounceable: recipient.bounce, testOnly: false });
             const confirmMsg = isMax
-                ? ('Confirm withdrawal:\n\nSend entire balance\nFee (est.): ~' + formatTon(fee) + ' TON\nRecipient receives: ~' + formatTon(receiveNano) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?')
-                : ('Confirm withdrawal:\n\nYou entered: ' + amountStr + ' TON\nFee (est.): ~' + formatTon(fee) + ' TON\nRecipient receives: ' + formatTon(receiveNano) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
+                ? ('Confirm send:\n\nSend entire balance\nFee (from your wallet): ~' + formatTon(fee) + ' TON\nRecipient receives: ~' + formatTon(receiveNano) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?')
+                : ('Confirm send:\n\nAmount: ' + amountStr + ' TON\nRecipient receives: ' + formatTon(receiveNano) + ' TON\nFee (from your wallet, not from amount): ~' + formatTon(fee) + ' TON\nTotal deducted: ~' + formatTon(receiveNano + fee) + ' TON\nTo:\n' + shownAddr + (comment ? '\nComment: ' + comment : '') + '\n\nSend now?');
             if (!confirm(confirmMsg)) return;
+
 
             const auth = await authorizeAction('Enter your wallet PIN to confirm this transaction');
             if (!auth) return;
@@ -3468,10 +3488,56 @@
         const TC_RESOLVED_TTL_MS = 24 * 60 * 60 * 1000;
         const TC_PENDING_KEY = 'tc_pending_tx_v1';
         const TC_PENDING_TTL_MS = 2 * 60 * 1000; // keep approve requests ~2 minutes
+        const TC_TRUSTED_KEY = 'tc_trusted_dapps_v1';
         let tcNacl = null;
         let tcEventSource = null;
         let tcPendingConnect = null;
         let tcPendingTx = null;
+
+        function loadTrustedDapps() {
+            try {
+                const arr = JSON.parse(localStorage.getItem(TC_TRUSTED_KEY) || '[]');
+                return Array.isArray(arr) ? arr : [];
+            } catch (e) { return []; }
+        }
+        function saveTrustedDapps(list) {
+            localStorage.setItem(TC_TRUSTED_KEY, JSON.stringify(list || []));
+        }
+        function isTrustedDapp(dappClientIdHex) {
+            if (!dappClientIdHex) return false;
+            const id = String(dappClientIdHex).toLowerCase();
+            return loadTrustedDapps().some(function (x) { return String(x).toLowerCase() === id; });
+        }
+        function setTrustedDapp(dappClientIdHex, trusted) {
+            if (!dappClientIdHex) return;
+            const id = String(dappClientIdHex).toLowerCase();
+            let list = loadTrustedDapps().map(function (x) { return String(x).toLowerCase(); });
+            list = list.filter(function (x) { return x !== id; });
+            if (trusted) list.push(id);
+            saveTrustedDapps(list);
+        }
+        function toggleTrustCurrentTcApp() {
+            if (!tcPendingTx || !tcPendingTx.connection) return;
+            const id = tcPendingTx.connection.dappClientIdHex;
+            const next = !isTrustedDapp(id);
+            setTrustedDapp(id, next);
+            updateTcTxTrustedUi();
+            if (typeof showToast === 'function') {
+                showToast(next ? 'App marked as trusted' : 'Trust removed');
+            }
+        }
+        function updateTcTxTrustedUi() {
+            const badge = document.getElementById('tc-tx-trusted-badge');
+            const btn = document.getElementById('btn-tc-trust-toggle');
+            if (!tcPendingTx || !tcPendingTx.connection) return;
+            const trusted = isTrustedDapp(tcPendingTx.connection.dappClientIdHex);
+            if (badge) {
+                if (trusted) badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+            }
+            if (btn) btn.innerText = trusted ? 'Remove trust' : 'Trust this app';
+        }
+
 
         function loadResolvedReqs() {
             try {
@@ -3657,15 +3723,37 @@
                 const row = document.createElement('div');
                 row.className = 'list-card';
                 row.style.padding = '12px 14px';
-                row.innerHTML = '<div class="left"><span class="emoji-icon">🔗</span><div style="display:flex; flex-direction:column; text-align:left; gap:2px;"><span class="text-sm font-bold">' +
-                    escapeHtml(conn.appName || conn.appUrl || 'Unknown app') + '</span><span class="text-xs">' + escapeHtml(conn.appUrl || '') + '</span></div></div>';
+                row.style.flexWrap = 'wrap';
+                row.style.gap = '8px';
+                const trusted = isTrustedDapp(conn.dappClientIdHex);
+                row.innerHTML = '<div class="left" style="flex:1;min-width:0;"><span class="emoji-icon">' + (trusted ? '⭐' : '🔗') + '</span><div style="display:flex; flex-direction:column; text-align:left; gap:2px;"><span class="text-sm font-bold">' +
+                    escapeHtml(conn.appName || conn.appUrl || 'Unknown app') + (trusted ? ' · Trusted' : '') + '</span><span class="text-xs">' + escapeHtml(conn.appUrl || '') + '</span></div></div>';
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '6px';
+                actions.style.flexShrink = '0';
+                const trustBtn = document.createElement('button');
+                trustBtn.className = 'btn-secondary';
+                trustBtn.style.width = 'auto';
+                trustBtn.style.padding = '8px 10px';
+                trustBtn.style.fontSize = '12px';
+                trustBtn.innerText = trusted ? 'Untrust' : 'Trust';
+                trustBtn.onclick = function (e) {
+                    e.stopPropagation();
+                    setTrustedDapp(conn.dappClientIdHex, !isTrustedDapp(conn.dappClientIdHex));
+                    renderTcConnectionsList();
+                    if (typeof showToast === 'function') showToast(isTrustedDapp(conn.dappClientIdHex) ? 'Trusted' : 'Trust removed');
+                };
                 const btn = document.createElement('button');
                 btn.className = 'btn-danger';
                 btn.style.width = 'auto';
                 btn.style.padding = '8px 12px';
                 btn.innerText = 'Disconnect';
                 btn.onclick = function (e) { e.stopPropagation(); disconnectTcApp(conn.dappClientIdHex); };
-                row.appendChild(btn);
+                actions.appendChild(trustBtn);
+                actions.appendChild(btn);
+                row.appendChild(actions);
+
                 box.appendChild(row);
             });
         }
@@ -3687,8 +3775,11 @@
             else if (manifestUrl) { try { name = new URL(manifestUrl).hostname; } catch (e) {} }
             if (manifest && manifest.url) url = manifest.url;
             infoEl.innerText = '"' + name + '" (' + url + ') wants to connect to your wallet.';
+            const trustCb = document.getElementById('tc-trust-checkbox');
+            if (trustCb) trustCb.checked = isTrustedDapp(parsed.dappClientIdHex);
             showScreen('tc-confirm-screen');
         }
+
 
         function cancelTcConnect() {
             tcPendingConnect = null;
@@ -3765,12 +3856,17 @@
                     appUrl: (tcPendingConnect.manifest && tcPendingConnect.manifest.url) || tcPendingConnect.manifestUrl || ''
                 });
                 saveTcConnections(list);
+                const trustCb = document.getElementById('tc-trust-checkbox');
+                if (trustCb && trustCb.checked) {
+                    setTrustedDapp(tcPendingConnect.dappClientIdHex, true);
+                }
                 tcPendingConnect = null;
 
                 await loadWallet(words);
                 words = null;
                 setSendingResult(true, 'Connected! Go back to that app and check.');
                 showTonConnectScreen();
+
             } catch (e) {
                 console.error(e);
                 setSendingResult(false, 'Connection failed.\n' + (e && e.message ? e.message : ''));
@@ -3917,7 +4013,9 @@
         function renderTcTxScreen() {
             const connection = tcPendingTx.connection;
             const txRequest = tcPendingTx.txRequest;
-            document.getElementById('tc-tx-from-app').innerText = 'Request from: ' + (connection.appName || connection.appUrl || 'a connected app');
+            const trusted = isTrustedDapp(connection.dappClientIdHex);
+            document.getElementById('tc-tx-from-app').innerText = 'Request from: ' + (connection.appName || connection.appUrl || 'a connected app') + (trusted ? ' (Trusted)' : '');
+            updateTcTxTrustedUi();
             const box = document.getElementById('tc-tx-details');
             box.innerHTML = '';
             (txRequest.messages || []).forEach(function (m, idx) {
@@ -3932,6 +4030,7 @@
                 box.appendChild(div);
             });
         }
+
 
         async function rejectTcTx() {
             if (!tcPendingTx) { showScreen('dashboard-screen'); return; }
