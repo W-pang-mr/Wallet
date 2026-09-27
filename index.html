@@ -5,16 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>TON Non-Custodial Wallet</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Preload heavy TON libs early (faster unlock / send) -->
-    <link rel="modulepreload" href="https://esm.sh/@ton/crypto@3">
-    <link rel="modulepreload" href="https://esm.sh/@ton/ton@15">
-    <link rel="modulepreload" href="https://esm.sh/tweetnacl@1.0.3">
     <link rel="preconnect" href="https://esm.sh" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://toncenter.com">
     <link rel="dns-prefetch" href="https://tonapi.io">
     <link rel="dns-prefetch" href="https://connect.ton.org">
+    <!-- Bundled modulepreload = fewer round-trips -->
+    <link rel="modulepreload" href="https://esm.sh/@ton/crypto@3.3.0?bundle&target=es2022">
+    <link rel="modulepreload" href="https://esm.sh/@ton/ton@15.1.0?bundle&target=es2022">
+    <link rel="modulepreload" href="https://esm.sh/tweetnacl@1.0.3?bundle&target=es2022">
+    <!-- Start download immediately while CSS/HTML still parsing -->
+    <script type="module">
+      window.__tonLibWarm = Promise.allSettled([
+        import('https://esm.sh/@ton/crypto@3.3.0?bundle&target=es2022'),
+        import('https://esm.sh/@ton/ton@15.1.0?bundle&target=es2022'),
+        import('https://esm.sh/tweetnacl@1.0.3?bundle&target=es2022')
+      ]);
+    </script>
     <style>
+
 
         /* ─── Design System: Soft Glass (Blue / Purple) ─── */
         *, *::before, *::after {
@@ -1795,33 +1804,81 @@
         let libsPromise = null;
         let naclPromise = null;
 
+        const LIB_CRYPTO_URLS = [
+            'https://esm.sh/@ton/crypto@3.3.0?bundle&target=es2022',
+            'https://esm.sh/@ton/crypto@3?bundle',
+            'https://cdn.jsdelivr.net/npm/@ton/crypto@3.3.0/+esm'
+        ];
+        const LIB_TON_URLS = [
+            'https://esm.sh/@ton/ton@15.1.0?bundle&target=es2022',
+            'https://esm.sh/@ton/ton@15?bundle',
+            'https://cdn.jsdelivr.net/npm/@ton/ton@15.1.0/+esm'
+        ];
+        const LIB_NACL_URLS = [
+            'https://esm.sh/tweetnacl@1.0.3?bundle&target=es2022',
+            'https://esm.sh/tweetnacl@1.0.3',
+            'https://cdn.jsdelivr.net/npm/tweetnacl@1.0.3/+esm'
+        ];
+
+        async function importWithFallback(urls) {
+            let lastErr = null;
+            for (let i = 0; i < urls.length; i++) {
+                try {
+                    return await import(urls[i]);
+                } catch (e) {
+                    lastErr = e;
+                    console.warn('import failed', urls[i], e);
+                }
+            }
+            throw lastErr || new Error('All CDN imports failed');
+        }
+
+        function pickExport(mod, names) {
+            if (!mod) return null;
+            for (let i = 0; i < names.length; i++) {
+                if (mod[names[i]] != null) return mod[names[i]];
+            }
+            // some CDNs nest under default
+            if (mod.default) {
+                for (let i = 0; i < names.length; i++) {
+                    if (mod.default[names[i]] != null) return mod.default[names[i]];
+                }
+            }
+            return null;
+        }
+
         async function loadLibs() {
             if (libs) return libs;
             if (libsPromise) return libsPromise;
             libsPromise = (async function () {
+                // Reuse head warm-import if already finished
+                if (window.__tonLibWarm) {
+                    try { await window.__tonLibWarm; } catch (e) {}
+                }
                 const [cryptoMod, tonMod] = await Promise.all([
-                    import('https://esm.sh/@ton/crypto@3'),
-                    import('https://esm.sh/@ton/ton@15')
+                    importWithFallback(LIB_CRYPTO_URLS),
+                    importWithFallback(LIB_TON_URLS)
                 ]);
                 const next = {
-                    mnemonicNew: cryptoMod.mnemonicNew,
-                    mnemonicValidate: cryptoMod.mnemonicValidate,
-                    mnemonicToPrivateKey: cryptoMod.mnemonicToPrivateKey,
-                    WalletContractV5R1: tonMod.WalletContractV5R1,
-                    TonClient: tonMod.TonClient,
-                    Address: tonMod.Address,
-                    internal: tonMod.internal,
-                    toNano: tonMod.toNano,
-                    beginCell: tonMod.beginCell,
-                    storeStateInit: tonMod.storeStateInit,
-                    loadStateInit: tonMod.loadStateInit,
-                    Cell: tonMod.Cell
+                    mnemonicNew: pickExport(cryptoMod, ['mnemonicNew']),
+                    mnemonicValidate: pickExport(cryptoMod, ['mnemonicValidate']),
+                    mnemonicToPrivateKey: pickExport(cryptoMod, ['mnemonicToPrivateKey']),
+                    WalletContractV5R1: pickExport(tonMod, ['WalletContractV5R1']),
+                    TonClient: pickExport(tonMod, ['TonClient']),
+                    Address: pickExport(tonMod, ['Address']),
+                    internal: pickExport(tonMod, ['internal']),
+                    toNano: pickExport(tonMod, ['toNano']),
+                    beginCell: pickExport(tonMod, ['beginCell']),
+                    storeStateInit: pickExport(tonMod, ['storeStateInit']),
+                    loadStateInit: pickExport(tonMod, ['loadStateInit']),
+                    Cell: pickExport(tonMod, ['Cell'])
                 };
                 if (!next.WalletContractV5R1) throw new Error('V5R1 not available in this @ton/ton build');
                 if (!next.Address || !next.internal || !next.toNano) throw new Error('@ton/core exports missing');
                 if (!next.beginCell || !next.storeStateInit || !next.loadStateInit || !next.Cell) {
                     throw new Error('@ton/core state-init exports missing (needed for TonConnect)');
                 }
+                if (!next.mnemonicToPrivateKey) throw new Error('@ton/crypto exports missing');
                 tonClient = new next.TonClient(
                     TONCENTER_API_KEY
                         ? { endpoint: TON_ENDPOINT, apiKey: TONCENTER_API_KEY }
@@ -1844,12 +1901,12 @@
                 return false;
             }
             try {
-                if (!libs) setStatus('Loading libraries...', true);
+                if (!libs) setStatus('Loading…', true);
                 await loadLibs();
-                // warm TonConnect crypto in parallel background
                 loadTcNacl().catch(function () {});
                 setStatus('Ready', true);
                 return true;
+
             } catch (e) {
                 console.error(e);
                 setStatus('Load error', false);
@@ -3660,7 +3717,7 @@
             if (tcNacl) return tcNacl;
             if (naclPromise) return naclPromise;
             naclPromise = (async function () {
-                const mod = await import('https://esm.sh/tweetnacl@1.0.3');
+                const mod = await importWithFallback(LIB_NACL_URLS);
                 tcNacl = mod.default || mod;
                 return tcNacl;
             })();
@@ -3671,6 +3728,7 @@
                 throw e;
             }
         }
+
 
 
         function hexToBytes(hex) {
