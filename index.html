@@ -327,94 +327,95 @@
 
 
 
-        /* ─── Balance card (Nord Studio) ─── */
+        /* ─── Balance card (redesigned) ─── */
         .balance-card {
-            text-align: center;
-            padding: 28px 20px 24px;
-            background: linear-gradient(165deg, rgba(30,41,59,0.95) 0%, rgba(15,23,42,0.98) 100%);
-            border: 1px solid rgba(94, 234, 212, 0.12);
-            border-radius: 22px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+            text-align: left;
+            padding: 0;
+            background:
+                linear-gradient(145deg, rgba(36, 48, 72, 0.98) 0%, rgba(18, 26, 42, 0.99) 55%, rgba(14, 20, 34, 1) 100%);
+            border: 1px solid rgba(125, 211, 252, 0.16);
+            border-radius: 26px;
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,0.03) inset,
+                0 18px 48px rgba(0, 0, 0, 0.4);
             position: relative;
             overflow: hidden;
+        }
+        .balance-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 90% 70% at 100% 0%, rgba(56, 189, 248, 0.14), transparent 55%),
+                radial-gradient(ellipse 70% 50% at 0% 100%, rgba(45, 212, 191, 0.1), transparent 50%);
+            pointer-events: none;
         }
         .balance-card::after {
             content: '';
             position: absolute;
-            left: 50%;
-            top: -40%;
-            width: 80%;
-            height: 80%;
-            transform: translateX(-50%);
-            background: radial-gradient(circle, rgba(94,234,212,0.12) 0%, transparent 70%);
+            top: 0;
+            left: 18px;
+            right: 18px;
+            height: 2px;
+            border-radius: 0 0 4px 4px;
+            background: linear-gradient(90deg, transparent, rgba(94,234,212,0.7), rgba(56,189,248,0.6), transparent);
             pointer-events: none;
         }
-        .balance-body {
-            flex-direction: column !important;
-            align-items: center !important;
+        .balance-card-inner {
+            position: relative;
+            z-index: 1;
+            padding: 18px 18px 16px;
         }
+        .balance-body {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            position: relative;
+            z-index: 1;
+            margin-top: 4px;
+        }
+        .balance-main { flex: 1; min-width: 0; width: 100%; }
         .balance-crystal { display: none !important; }
+
         .balance-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            position: relative;
+            z-index: 1;
             width: 100%;
         }
-
-
-        .balance-body {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            gap: 12px;
-            position: relative;
-            z-index: 1;
-        }
-        .balance-main { flex: 1; min-width: 0; }
-        .balance-crystal {
-            width: 88px;
-            height: 88px;
-            flex-shrink: 0;
-            opacity: 0.85;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            filter: drop-shadow(0 8px 20px rgba(0,0,0,0.35));
-        }
-        .balance-crystal svg { width: 72px; height: 72px; }
-
-        .balance-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 1;
-        }
         .balance-label {
-            font-size: 13px;
-            color: rgba(255,255,255,0.55);
-            font-weight: 500;
+            font-size: 12px;
+            color: rgba(186, 200, 220, 0.75);
+            font-weight: 550;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 7px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
         .mainnet-badge {
             font-size: 11px;
-            font-weight: 600;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.12);
+            font-weight: 650;
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(125, 211, 252, 0.28);
             padding: 6px 12px;
             border-radius: 999px;
-            color: rgba(255,255,255,0.85);
+            color: #7dd3fc;
             display: flex;
             align-items: center;
             gap: 4px;
         }
-        .addr-pill { display: none; }
+        .addr-pill { display: none !important; }
         .balance-num {
-            font-size: 40px;
-            font-weight: 700;
-            letter-spacing: -1.8px;
-            margin-bottom: 6px;
-            color: #f8fafc;
+            font-size: 38px;
+            font-weight: 720;
+            letter-spacing: -1.7px;
+            margin-bottom: 4px;
+            color: #ffffff;
             line-height: 1.05;
             font-variant-numeric: tabular-nums;
             position: relative;
@@ -423,13 +424,44 @@
         .balance-usd {
             font-size: 14px;
             font-weight: 500;
-            color: rgba(148, 163, 184, 0.9);
+            color: rgba(148, 163, 184, 0.95);
             min-height: 18px;
             position: relative;
             z-index: 1;
         }
-
-
+        .balance-footer {
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(148, 163, 184, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .balance-addr-chip {
+            font-size: 11px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: rgba(186, 200, 220, 0.7);
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            border-radius: 999px;
+            padding: 6px 10px;
+            max-width: 70%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .balance-copy-btn {
+            font-size: 11px;
+            font-weight: 650;
+            color: #5eead4;
+            background: rgba(94, 234, 212, 0.1);
+            border: 1px solid rgba(94, 234, 212, 0.22);
+            border-radius: 999px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
         .balance-updated { display: none; }
 
         .theme-toggle, .accent-toggle {
@@ -1391,37 +1423,28 @@
         <!-- Dashboard -->
         <div id="dashboard-screen" class="hidden flex flex-col gap-3">
             <div class="balance-card">
-                <div class="balance-top-row">
-                    <div class="balance-label">
-                        <span>Total Balance</span>
-                        <span style="opacity:0.65;cursor:pointer;font-size:14px;" onclick="showReceive()" title="Receive">👁</span>
+                <div class="balance-card-inner">
+                    <div class="balance-top-row">
+                        <div class="balance-label">
+                            <span>Total Balance</span>
+                            <span style="opacity:0.7;cursor:pointer;font-size:13px;" onclick="showReceive()" title="Receive">👁</span>
+                        </div>
+                        <div class="mainnet-badge" onclick="openSwap()" style="cursor:pointer;" title="Open STON.fi">STON.fi</div>
                     </div>
-                    <div class="mainnet-badge" onclick="openSwap()" style="cursor:pointer;" title="Open STON.fi">STON.fi</div>
+                    <div class="balance-body">
+                        <div class="balance-main">
+                            <div id="wallet-balance" class="balance-num">Checking...</div>
+                            <div id="balance-usd" class="balance-usd"></div>
+                        </div>
+                    </div>
+                    <div class="balance-footer">
+                        <div id="wallet-address-display" class="balance-addr-chip" onclick="copyAddress()" title="Copy address">Loading...</div>
+                        <button type="button" class="balance-copy-btn" onclick="copyAddress()">Copy</button>
+                    </div>
+                    <div id="balance-updated" class="balance-updated"></div>
                 </div>
-                <div class="balance-body">
-                    <div class="balance-main">
-                        <div id="wallet-balance" class="balance-num">Checking...</div>
-                        <div id="balance-usd" class="balance-usd"></div>
-                    </div>
-                    <div class="balance-crystal" aria-hidden="true">
-                        <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <linearGradient id="cry" x1="20" y1="10" x2="100" y2="110" gradientUnits="userSpaceOnUse">
-                                    <stop stop-color="#ffffff" stop-opacity="0.55"/>
-                                    <stop offset="0.45" stop-color="#c8d0dc" stop-opacity="0.35"/>
-                                    <stop offset="1" stop-color="#8899aa" stop-opacity="0.2"/>
-                                </linearGradient>
-                            </defs>
-                            <path d="M60 8L98 38L80 102H40L22 38L60 8Z" fill="url(#cry)" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-                            <path d="M60 8L98 38H22L60 8Z" fill="rgba(255,255,255,0.2)"/>
-                            <path d="M22 38L60 55L98 38" stroke="rgba(255,255,255,0.25)" stroke-width="1"/>
-                            <path d="M60 55V102" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
-                        </svg>
-                    </div>
-                </div>
-                <div id="wallet-address-display" class="addr-pill" onclick="copyAddress()" style="display:none;">Loading...</div>
-                <div id="balance-updated" class="balance-updated"></div>
             </div>
+
 
             <div class="action-row">
                 <div class="action-btn" onclick="showWithdraw()">
@@ -2517,7 +2540,13 @@
                 currentAddress = wallet.address.toString({ urlSafe: true, bounceable: false, testOnly: false });
                 // Keep words in memory only while unlocked (trusted dApp auto-approve)
                 sessionWords = Array.isArray(words) ? words.slice() : words;
-                document.getElementById('wallet-address-display').innerHTML = currentAddress + ' 📋';
+                (function () {
+                    const el = document.getElementById('wallet-address-display');
+                    if (!el || !currentAddress) return;
+                    const a = currentAddress;
+                    el.textContent = a.length > 16 ? (a.slice(0, 6) + '…' + a.slice(-5)) : a;
+                    el.title = a;
+                })();
 
                 try {
                     await refreshBalance();
