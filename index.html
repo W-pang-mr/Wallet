@@ -31,43 +31,44 @@
         }
         :root, [data-theme="dark"] {
             color-scheme: dark;
-            /* Nord Studio — cool slate + soft teal */
-            --bg: #0b1220;
-            --bg-elevated: #111827;
-            --text: #e5eefb;
-            --text-dim: rgba(229, 238, 251, 0.58);
-            --text-muted: rgba(229, 238, 251, 0.34);
-            --accent: #5eead4;
-            --accent-soft: rgba(94, 234, 212, 0.14);
-            --accent-glow: rgba(94, 234, 212, 0.22);
+            /* Black Glass Luxury */
+            --bg: #050507;
+            --bg-elevated: #0c0c10;
+            --text: #f5f5f7;
+            --text-dim: rgba(245, 245, 247, 0.58);
+            --text-muted: rgba(245, 245, 247, 0.34);
+            --accent: #e8e8ed;
+            --accent-soft: rgba(255, 255, 255, 0.1);
+            --accent-glow: rgba(255, 255, 255, 0.18);
             --success: #34d399;
             --success-soft: rgba(52, 211, 153, 0.14);
             --danger: #fb7185;
             --danger-soft: rgba(251, 113, 133, 0.14);
             --warn: #fbbf24;
             --warn-soft: rgba(251, 191, 36, 0.12);
-            --card: rgba(17, 24, 39, 0.92);
-            --card-hover: rgba(30, 41, 59, 0.95);
-            --card-border: rgba(148, 163, 184, 0.14);
-            --surface: rgba(30, 41, 59, 0.65);
-            --surface-2: rgba(51, 65, 85, 0.7);
-            --input-border: rgba(148, 163, 184, 0.22);
-            --input-text: #e5eefb;
-            --btn-sec-bg: rgba(30, 41, 59, 0.8);
-            --btn-sec-border: rgba(148, 163, 184, 0.18);
-            --nav-bg: rgba(11, 18, 32, 0.92);
-            --radius-xl: 22px;
-            --radius-lg: 18px;
-            --radius-md: 14px;
+            --card: rgba(255, 255, 255, 0.055);
+            --card-hover: rgba(255, 255, 255, 0.09);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --surface: rgba(255, 255, 255, 0.07);
+            --surface-2: rgba(255, 255, 255, 0.12);
+            --input-border: rgba(255, 255, 255, 0.14);
+            --input-text: #f5f5f7;
+            --btn-sec-bg: rgba(255, 255, 255, 0.07);
+            --btn-sec-border: rgba(255, 255, 255, 0.12);
+            --nav-bg: rgba(8, 8, 10, 0.78);
+            --radius-xl: 24px;
+            --radius-lg: 20px;
+            --radius-md: 16px;
             --radius-sm: 12px;
             --radius-full: 999px;
             --ease: cubic-bezier(0.22, 1, 0.36, 1);
             --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-            --shadow-card: 0 10px 36px rgba(0, 0, 0, 0.35);
-            --shadow-nav: 0 -8px 32px rgba(0, 0, 0, 0.4);
-            --bg-glow-1: rgba(56, 189, 248, 0.08);
-            --bg-glow-2: rgba(45, 212, 191, 0.06);
+            --shadow-card: 0 12px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.1);
+            --shadow-nav: 0 -10px 36px rgba(0, 0, 0, 0.55);
+            --bg-glow-1: rgba(255, 255, 255, 0.05);
+            --bg-glow-2: rgba(180, 190, 220, 0.04);
         }
+
 
 
 
@@ -125,11 +126,13 @@
             letter-spacing: -0.011em;
             background: var(--bg);
             background-image:
-                radial-gradient(ellipse 90% 50% at 20% -10%, var(--bg-glow-1), transparent 50%),
-                radial-gradient(ellipse 70% 40% at 100% 0%, var(--bg-glow-2), transparent 45%),
-                linear-gradient(180deg, #0b1220 0%, #0a101c 100%);
+                radial-gradient(ellipse 90% 55% at 50% -15%, rgba(255,255,255,0.06), transparent 55%),
+                radial-gradient(ellipse 60% 40% at 100% 20%, rgba(200,210,255,0.04), transparent 50%),
+                radial-gradient(ellipse 50% 35% at 0% 80%, rgba(255,255,255,0.03), transparent 50%),
+                linear-gradient(180deg, #07070a 0%, #050507 100%);
             transition: background 0.3s var(--ease), color 0.25s var(--ease);
         }
+
 
 
 
@@ -140,16 +143,17 @@
         /* ─── Cards ─── */
         .glass-card {
             position: relative;
-            background: var(--card);
-            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: var(--radius-lg);
             box-shadow: var(--shadow-card);
             padding: 18px;
             overflow: hidden;
-            backdrop-filter: blur(18px) saturate(130%);
-            -webkit-backdrop-filter: blur(18px) saturate(130%);
+            backdrop-filter: blur(28px) saturate(160%);
+            -webkit-backdrop-filter: blur(28px) saturate(160%);
             transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
         }
+
 
 
         .glass-input {
@@ -178,17 +182,18 @@
             appearance: none;
             -webkit-appearance: none;
             border: none;
-            color: #042f2e;
+            color: #0a0a0c;
             font-weight: 650;
             font-size: 15px;
             letter-spacing: -0.01em;
             padding: 16px 18px;
             border-radius: var(--radius-full);
             cursor: pointer;
-            background: linear-gradient(180deg, #5eead4 0%, #2dd4bf 100%);
-            box-shadow: 0 6px 24px rgba(45, 212, 191, 0.28);
+            background: linear-gradient(180deg, #ffffff 0%, #e8e8ed 100%);
+            box-shadow: 0 8px 28px rgba(255, 255, 255, 0.12);
             transition: opacity 0.15s ease, transform 0.12s var(--ease), box-shadow 0.15s ease;
         }
+
 
 
         .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
@@ -327,17 +332,18 @@
 
 
 
-        /* ─── Balance card (redesigned) ─── */
+        /* ─── Balance card — black glass luxury ─── */
         .balance-card {
             text-align: left;
             padding: 0;
-            background:
-                linear-gradient(145deg, rgba(36, 48, 72, 0.98) 0%, rgba(18, 26, 42, 0.99) 55%, rgba(14, 20, 34, 1) 100%);
-            border: 1px solid rgba(125, 211, 252, 0.16);
-            border-radius: 26px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 28px;
             box-shadow:
-                0 0 0 1px rgba(255,255,255,0.03) inset,
-                0 18px 48px rgba(0, 0, 0, 0.4);
+                0 0 0 1px rgba(255,255,255,0.05) inset,
+                0 20px 50px rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(40px) saturate(170%);
+            -webkit-backdrop-filter: blur(40px) saturate(170%);
             position: relative;
             overflow: hidden;
         }
@@ -346,21 +352,21 @@
             position: absolute;
             inset: 0;
             background:
-                radial-gradient(ellipse 90% 70% at 100% 0%, rgba(56, 189, 248, 0.14), transparent 55%),
-                radial-gradient(ellipse 70% 50% at 0% 100%, rgba(45, 212, 191, 0.1), transparent 50%);
+                radial-gradient(ellipse 80% 60% at 90% 0%, rgba(255,255,255,0.12), transparent 55%),
+                radial-gradient(ellipse 60% 40% at 10% 100%, rgba(255,255,255,0.05), transparent 50%);
             pointer-events: none;
         }
         .balance-card::after {
             content: '';
             position: absolute;
             top: 0;
-            left: 18px;
-            right: 18px;
-            height: 2px;
-            border-radius: 0 0 4px 4px;
-            background: linear-gradient(90deg, transparent, rgba(94,234,212,0.7), rgba(56,189,248,0.6), transparent);
+            left: 20px;
+            right: 20px;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
             pointer-events: none;
         }
+
         .balance-card-inner {
             position: relative;
             z-index: 1;
@@ -400,15 +406,16 @@
         .mainnet-badge {
             font-size: 11px;
             font-weight: 650;
-            background: rgba(15, 23, 42, 0.65);
-            border: 1px solid rgba(125, 211, 252, 0.28);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
             padding: 6px 12px;
             border-radius: 999px;
-            color: #7dd3fc;
+            color: rgba(255, 255, 255, 0.88);
             display: flex;
             align-items: center;
             gap: 4px;
         }
+
         .addr-pill { display: none !important; }
         .balance-num {
             font-size: 38px;
@@ -455,13 +462,14 @@
         .balance-copy-btn {
             font-size: 11px;
             font-weight: 650;
-            color: #5eead4;
-            background: rgba(94, 234, 212, 0.1);
-            border: 1px solid rgba(94, 234, 212, 0.22);
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.18);
             border-radius: 999px;
             padding: 6px 12px;
             cursor: pointer;
         }
+
         .balance-updated { display: none; }
 
         .theme-toggle, .accent-toggle {
@@ -535,15 +543,18 @@
             width: 54px;
             height: 54px;
             border-radius: 50%;
-            background: rgba(30, 41, 59, 0.95);
-            border: 1px solid rgba(94, 234, 212, 0.22);
-            color: #5eead4;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             flex-shrink: 0;
         }
+
         .action-btn .icon-circle svg {
             display: block;
             width: 22px;
@@ -786,7 +797,7 @@
 
 
 
-        /* ─── Bottom nav (Nord Studio) ─── */
+        /* ─── Bottom nav — black glass ─── */
         .bottom-nav {
             position: fixed;
             left: 50%;
@@ -800,16 +811,14 @@
             justify-content: space-around;
             align-items: center;
             padding: 10px 8px;
-            border-radius: 20px;
-            background: rgba(15, 23, 42, 0.94);
-            border: 1px solid rgba(94, 234, 212, 0.12);
+            border-radius: 24px;
+            background: rgba(12, 12, 14, 0.72);
+            border: 1px solid rgba(255, 255, 255, 0.12);
             box-shadow: var(--shadow-nav);
-            backdrop-filter: blur(24px) saturate(140%);
-            -webkit-backdrop-filter: blur(24px) saturate(140%);
+            backdrop-filter: blur(32px) saturate(160%);
+            -webkit-backdrop-filter: blur(32px) saturate(160%);
         }
-        .nav-item.active:not(.nav-center) {
-            color: #5eead4 !important;
-        }
+
 
 
         .nav-item {
@@ -1064,7 +1073,72 @@
         .send-anim, .send-ring, .send-core, .sending-spinner, .sending-icon { display: none !important; }
 
         /* Toast */
+        /* ─── Luxury entry intro ─── */
+        #luxury-intro {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(ellipse at center, #121218 0%, #050507 70%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        #luxury-intro.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #luxury-intro.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .intro-orb {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.35), rgba(255,255,255,0.05) 45%, transparent 70%);
+            box-shadow: 0 0 60px rgba(255,255,255,0.15), 0 0 120px rgba(180,190,255,0.08);
+            animation: orbPulse 2.2s ease-in-out infinite;
+            position: relative;
+        }
+        .intro-orb::after {
+            content: '';
+            position: absolute;
+            inset: -18px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.12);
+            animation: orbRing 2.2s ease-out infinite;
+        }
+        .intro-text {
+            position: absolute;
+            bottom: 22%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(255,255,255,0.75);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            animation: introFade 1.2s ease both;
+        }
+        @keyframes orbPulse {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.08); opacity: 1; }
+        }
+        @keyframes orbRing {
+            0% { transform: scale(0.85); opacity: 0.6; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+        @keyframes introFade {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .toast-host {
+
             position: fixed;
             left: 50%;
             bottom: max(88px, calc(env(safe-area-inset-bottom, 0px) + 72px));
@@ -1255,16 +1329,21 @@
     </style>
 </head>
 <body>
+    <div id="luxury-intro" aria-hidden="true">
+        <div class="intro-orb"></div>
+        <div class="intro-text">Welcome</div>
+    </div>
 
     <div class="top-bar">
         <div class="brand">
-            <div class="brand-icon" style="background:linear-gradient(145deg,#2d9cdb,#0098ea 55%,#0077b6);border:none;">
-                <svg width="18" height="18" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="white" fill-opacity="0.95"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="#0098EA"/></svg>
+            <div class="brand-icon" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(12px);">
+                <svg width="18" height="18" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M28 8L46 18.5V37.5L28 48L10 37.5V18.5L28 8Z" fill="white" fill-opacity="0.95"/><path d="M28 20L36 24.5V33.5L28 38L20 33.5V24.5L28 20Z" fill="rgba(255,255,255,0.35)"/></svg>
             </div>
 
             <div>
                 <span class="text-sm font-bold" style="display:block; line-height:1.25; letter-spacing:-0.02em; font-weight:550;">My TON Wallet</span>
-                <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Soft Glass</span>
+                <span style="font-size:10px; color:var(--text-dim); font-weight:400;">Black Glass</span>
+
 
             </div>
         </div>
@@ -1650,7 +1729,8 @@
     </main>
 
     <footer style="text-align: center; font-size: 10px; color: var(--text-muted); padding-top: 8px; letter-spacing: 0.02em;">
-        Non-Custodial · Nord Studio
+        Non-Custodial · Black Glass Luxury
+
 
 
 
@@ -1940,6 +2020,92 @@
             void el.offsetWidth;
             el.classList.add('screen-enter');
         }
+
+        // ─── Luxury intro + soft space ambient (Web Audio, no external file) ───
+        let ambientCtx = null;
+        let ambientNodes = null;
+        let introPlayed = false;
+
+        function stopAmbient() {
+            try {
+                if (ambientNodes) {
+                    ambientNodes.forEach(function (n) {
+                        try { n.stop && n.stop(); } catch (e) {}
+                        try { n.disconnect && n.disconnect(); } catch (e) {}
+                    });
+                }
+                ambientNodes = null;
+                if (ambientCtx) {
+                    ambientCtx.close().catch(function () {});
+                    ambientCtx = null;
+                }
+            } catch (e) {}
+        }
+
+        function playSpaceAmbient() {
+            try {
+                stopAmbient();
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                ambientCtx = new AC();
+                const master = ambientCtx.createGain();
+                master.gain.value = 0.0001;
+                master.connect(ambientCtx.destination);
+                // soft fade in
+                master.gain.linearRampToValueAtTime(0.045, ambientCtx.currentTime + 1.8);
+
+                const freqs = [55, 82.5, 110, 165, 220];
+                ambientNodes = [];
+                freqs.forEach(function (f, i) {
+                    const osc = ambientCtx.createOscillator();
+                    const g = ambientCtx.createGain();
+                    const filter = ambientCtx.createBiquadFilter();
+                    osc.type = i % 2 === 0 ? 'sine' : 'triangle';
+                    osc.frequency.value = f;
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 400 + i * 80;
+                    g.gain.value = 0.12 / (i + 1);
+                    osc.connect(filter);
+                    filter.connect(g);
+                    g.connect(master);
+                    osc.start();
+                    ambientNodes.push(osc, g, filter);
+                });
+                // auto soft stop after ~12s
+                setTimeout(function () {
+                    if (!ambientCtx) return;
+                    try {
+                        master.gain.linearRampToValueAtTime(0.0001, ambientCtx.currentTime + 2.5);
+                    } catch (e) {}
+                    setTimeout(stopAmbient, 2800);
+                }, 10000);
+            } catch (e) {
+                console.warn('ambient audio unavailable', e);
+            }
+        }
+
+        function playLuxuryIntro() {
+            if (introPlayed) {
+                playSpaceAmbient();
+                return;
+            }
+            introPlayed = true;
+            const intro = document.getElementById('luxury-intro');
+            if (!intro) {
+                playSpaceAmbient();
+                return;
+            }
+            intro.classList.add('show');
+            playSpaceAmbient();
+            setTimeout(function () {
+                intro.classList.add('hide');
+                intro.classList.remove('show');
+                setTimeout(function () {
+                    intro.style.display = 'none';
+                }, 550);
+            }, 2200);
+        }
+
 
         function setStatus(text, ok) {
             const el = document.getElementById('connection-status');
@@ -2424,8 +2590,11 @@
 
         function lockWallet() {
             stopBalancePolling();
+            stopAmbient();
+            introPlayed = false;
             sessionWords = null;
             tcPendingTx = null;
+
             currentAddress = '';
             currentAddressObj = null;
             currentBalanceNano = 0n;
@@ -2527,9 +2696,11 @@
             }
             showScreen('dashboard-screen');
             setStatus('Connected', true);
+            try { playLuxuryIntro(); } catch (e) {}
 
             try {
                 const keyPair = await libs.mnemonicToPrivateKey(words);
+
 
                 const wallet = libs.WalletContractV5R1.create({
                     workchain: 0,
