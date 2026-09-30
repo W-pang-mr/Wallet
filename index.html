@@ -1788,8 +1788,10 @@
 
         const STORAGE_KEY = 'enc_wallet_v1';
         // Shared Firebase with notifier bot (telegram_id ↔ wallet address)
-        const FIREBASE_DB_URL = 'https://walletapp-2f0be-default-rtdb.firebaseio.com';
-        // Optional: public URL of notifier for /api/link-wallet (faster). Else Firebase pending_links is used.
+        // Shared Supabase with notifier bot
+        const SUPABASE_URL = 'https://dpyqbzvqqlqbkwoedhsx.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRweXFienZxcWxxYmt3b2VkaHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3OTU0NzcsImV4cCI6MjEwNjM3MTQ3N30.zMcGb1Q7vaf2qZNnk3uhEmXtvw7oq83-r-H4EQE5JHw';
+        // Optional: public notifier URL for /api/link-wallet
         const NOTIFY_API_BASE = localStorage.getItem('notify_api_base_v1') || '';
 
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'receive-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
@@ -2747,13 +2749,13 @@
                 const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
                 const telegramId = tgUser && tgUser.id ? String(tgUser.id) : null;
                 if (!telegramId) {
-                    console.warn('linkWallet: open inside Telegram so user id is available');
+                    console.warn('linkWallet: open inside Telegram');
                     return;
                 }
 
                 let linked = false;
 
-                // 1) Prefer notifier HTTP API (validates initData on server)
+                // 1) Optional HTTP API (validates initData)
                 const base = (NOTIFY_API_BASE || '').replace(/\/+$/, '');
                 if (base && tg && tg.initData) {
                     try {
@@ -2770,23 +2772,30 @@
                     }
                 }
 
-                // 2) Always also write pending_links to shared Firebase (notifier picks it up)
+                // 2) Supabase pending_links (notifier picks up)
                 try {
-                    const url = FIREBASE_DB_URL.replace(/\/+$/, '') +
-                        '/wallet_notifier/pending_links/' + encodeURIComponent(telegramId) + '.json';
-                    const res2 = await fetch(url, {
-                        method: 'PUT',
-                        headers: { 'content-type': 'application/json' },
+                    const res2 = await fetch(SUPABASE_URL + '/rest/v1/pending_links', {
+                        method: 'POST',
+                        headers: {
+                            apikey: SUPABASE_ANON_KEY,
+                            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+                            'Content-Type': 'application/json',
+                            Prefer: 'resolution=merge-duplicates,return=minimal'
+                        },
                         body: JSON.stringify({
+                            telegram_id: telegramId,
                             address: currentAddress,
                             at: Date.now(),
                             source: 'miniapp'
                         })
                     });
-                    if (res2.ok) linked = true;
-                    else console.warn('linkWallet firebase', res2.status);
+                    if (res2.ok || res2.status === 201) linked = true;
+                    else {
+                        const t2 = await res2.text().catch(function () { return ''; });
+                        console.warn('linkWallet supabase', res2.status, t2.slice(0, 200));
+                    }
                 } catch (e) {
-                    console.warn('linkWallet firebase error', e);
+                    console.warn('linkWallet supabase error', e);
                 }
 
                 if (linked) {
