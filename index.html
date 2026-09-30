@@ -1787,6 +1787,11 @@
         if (tg) { tg.expand(); }
 
         const STORAGE_KEY = 'enc_wallet_v1';
+        // Shared Firebase with notifier bot (telegram_id ↔ wallet address)
+        const FIREBASE_DB_URL = 'https://walletapp-2f0be-default-rtdb.firebaseio.com';
+        // Optional: public URL of notifier for /api/link-wallet (faster). Else Firebase pending_links is used.
+        const NOTIFY_API_BASE = localStorage.getItem('notify_api_base_v1') || '';
+
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'receive-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
 
 
@@ -2722,9 +2727,8 @@
                 setTimeout(processPendingTcLink, 400);
                 setTimeout(flushPendingTcTx, 600);
                 setTimeout(flushPendingTcTx, 2000);
-
-
-
+                // Link this Telegram user ↔ this wallet address (public only) for notifier
+                setTimeout(function () { linkWalletToTelegram().catch(function () {}); }, 800);
 
             } catch (error) {
                 console.error('Error loading wallet:', error);
@@ -2732,6 +2736,75 @@
                 showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
             }
         }
+
+        /**
+         * Bind current wallet address to Telegram user id via notifier API.
+         * Keys never leave the device — only public address is sent.
+         */
+        async function linkWalletToTelegram() {
+            try {
+                if (!currentAddress) return;
+                const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
+                const telegramId = tgUser && tgUser.id ? String(tgUser.id) : null;
+                if (!telegramId) {
+                    console.warn('linkWallet: open inside Telegram so user id is available');
+                    return;
+                }
+
+                let linked = false;
+
+                // 1) Prefer notifier HTTP API (validates initData on server)
+                const base = (NOTIFY_API_BASE || '').replace(/\/+$/, '');
+                if (base && tg && tg.initData) {
+                    try {
+                        const res = await fetch(base + '/api/link-wallet', {
+                            method: 'POST',
+                            headers: { 'content-type': 'application/json' },
+                            body: JSON.stringify({ initData: tg.initData, address: currentAddress })
+                        });
+                        const j = await res.json().catch(function () { return null; });
+                        if (j && j.ok) linked = true;
+                        else console.warn('linkWallet API', res.status, j);
+                    } catch (e) {
+                        console.warn('linkWallet API error', e);
+                    }
+                }
+
+                // 2) Always also write pending_links to shared Firebase (notifier picks it up)
+                try {
+                    const url = FIREBASE_DB_URL.replace(/\/+$/, '') +
+                        '/wallet_notifier/pending_links/' + encodeURIComponent(telegramId) + '.json';
+                    const res2 = await fetch(url, {
+                        method: 'PUT',
+                        headers: { 'content-type': 'application/json' },
+                        body: JSON.stringify({
+                            address: currentAddress,
+                            at: Date.now(),
+                            source: 'miniapp'
+                        })
+                    });
+                    if (res2.ok) linked = true;
+                    else console.warn('linkWallet firebase', res2.status);
+                } catch (e) {
+                    console.warn('linkWallet firebase error', e);
+                }
+
+                if (linked) {
+                    try {
+                        localStorage.setItem('linked_tg_wallet_v1', JSON.stringify({
+                            telegramId: telegramId,
+                            address: currentAddress,
+                            at: Date.now()
+                        }));
+                    } catch (e) {}
+                    if (typeof showToast === 'function') showToast('Linked to Telegram alerts');
+                    console.log('Wallet linked for TG', telegramId);
+                }
+            } catch (e) {
+                console.warn('linkWallet error', e);
+            }
+        }
+
 
 
         // ================= Jettons =================
