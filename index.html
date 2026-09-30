@@ -1786,8 +1786,116 @@
         const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
         if (tg) { tg.expand(); }
 
-        const STORAGE_KEY = 'enc_wallet_v1';
-        // Shared Firebase with notifier bot (telegram_id ↔ wallet address)
+        /** Telegram user id — wallets are isolated per account on same phone */
+        function getTelegramUserId() {
+            try {
+                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                    return String(tg.initDataUnsafe.user.id);
+                }
+            } catch (e) {}
+            return null;
+        }
+        function userScope(base) {
+            const uid = getTelegramUserId();
+            // _nouser: not inside Telegram — still isolated from real TG accounts
+            return uid ? (base + '_u' + uid) : (base + '_nouser');
+        }
+        function walletStorageKey() { return userScope('enc_wallet_v1'); }
+        function pinDisabledKey() { return userScope('pin_disabled_v1'); }
+        function addressBookKey() { return userScope('address_book_v1'); }
+        function tcStorageKey() { return userScope('tc_connections_v1'); }
+        function tcLastEventKey() { return userScope('tc_last_event_id_v1'); }
+        function tcResolvedKey() { return userScope('tc_resolved_reqs_v1'); }
+        function tcPendingKey() { return userScope('tc_pending_tx_v1'); }
+        function tcTrustedKey() { return userScope('tc_trusted_dapps_v1'); }
+
+        /** One-time: move legacy shared wallet to THIS telegram user only */
+        function migrateLegacyWalletIfNeeded() {
+            const uid = getTelegramUserId();
+            if (!uid) return;
+            const scoped = walletStorageKey();
+            if (localStorage.getItem(scoped)) return;
+            const legacy = localStorage.getItem('enc_wallet_v1');
+            if (!legacy) return;
+            localStorage.setItem(scoped, legacy);
+            localStorage.removeItem('enc_wallet_v1');
+            // migrate related flags if present
+            if (localStorage.getItem('pin_disabled_v1') === '1') {
+                localStorage.setItem(pinDisabledKey(), '1');
+                localStorage.removeItem('pin_disabled_v1');
+            }
+            console.log('Migrated legacy wallet to TG user', uid);
+        }
+
+        /** Save encrypted wallet blob to Supabase under this Telegram user id */
+        async function cloudSaveWallet(encrypted, address) {
+            try {
+                const uid = getTelegramUserId();
+                if (!uid || !encrypted) return false;
+                const res = await fetch(SUPABASE_URL + '/rest/v1/user_wallets', {
+                    method: 'POST',
+                    headers: {
+                        apikey: SUPABASE_ANON_KEY,
+                        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
+                        'Content-Type': 'application/json',
+                        Prefer: 'resolution=merge-duplicates,return=minimal'
+                    },
+                    body: JSON.stringify({
+                        telegram_id: uid,
+                        encrypted: encrypted,
+                        address: address || null,
+                        updated_at: new Date().toISOString()
+                    })
+                });
+                if (!res.ok && res.status !== 201) {
+                    const tx = await res.text().catch(function () { return ''; });
+                    console.warn('cloudSaveWallet', res.status, tx.slice(0, 200));
+                    return false;
+                }
+                console.log('Wallet cloud-saved for TG', uid);
+                return true;
+            } catch (e) {
+                console.warn('cloudSaveWallet error', e);
+                return false;
+            }
+        }
+
+        /** Load encrypted wallet for this Telegram user from Supabase → localStorage */
+        async function cloudLoadWallet() {
+            try {
+                const uid = getTelegramUserId();
+                if (!uid) return false;
+                const res = await fetch(
+                    SUPABASE_URL + '/rest/v1/user_wallets?telegram_id=eq.' + encodeURIComponent(uid) + '&select=encrypted,address',
+                    {
+                        headers: {
+                            apikey: SUPABASE_ANON_KEY,
+                            Authorization: 'Bearer ' + SUPABASE_ANON_KEY
+                        }
+                    }
+                );
+                if (!res.ok) {
+                    console.warn('cloudLoadWallet', res.status);
+                    return false;
+                }
+                const rows = await res.json();
+                if (!rows || !rows[0] || !rows[0].encrypted) return false;
+                localStorage.setItem(walletStorageKey(), rows[0].encrypted);
+                console.log('Wallet cloud-loaded for TG', uid, rows[0].address || '');
+                return true;
+            } catch (e) {
+                console.warn('cloudLoadWallet error', e);
+                return false;
+            }
+        }
+
+        async function persistWalletBlob(encrypted) {
+            await persistWalletBlob(encrypted);
+            // address may not be ready yet — loadWallet will re-save with address
+            await cloudSaveWallet(encrypted, currentAddress || null);
+        }
+
+
         // Shared Supabase with notifier bot
         const SUPABASE_URL = 'https://dpyqbzvqqlqbkwoedhsx.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRweXFienZxcWxxYmt3b2VkaHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3OTU0NzcsImV4cCI6MjEwNjM3MTQ3N30.zMcGb1Q7vaf2qZNnk3uhEmXtvw7oq83-r-H4EQE5JHw';
@@ -1835,9 +1943,7 @@
 
 
 
-        const ADDRESS_BOOK_KEY = 'address_book_v1';
         const ADDRESS_BOOK_MAX = 3;
-        const PIN_DISABLED_KEY = 'pin_disabled_v1';
         const NO_PIN_SECRET = 'glass_wallet_no_pin_v1';
 
         // ─── Theme ───
@@ -2347,7 +2453,7 @@
 
         async function decryptWithPin(pin) {
             try {
-                return await decryptWords(localStorage.getItem(STORAGE_KEY), pin);
+                return await decryptWords(localStorage.getItem(walletStorageKey()), pin);
             } catch (e) {
                 return null;
             }
@@ -2355,14 +2461,14 @@
 
         // ================= Address book =================
         function loadAddressBook() {
-            try { return JSON.parse(localStorage.getItem(ADDRESS_BOOK_KEY) || '[]'); }
+            try { return JSON.parse(localStorage.getItem(addressBookKey()) || '[]'); }
             catch (e) { return []; }
         }
         function saveAddressToBook(address) {
             let list = loadAddressBook().filter(a => a !== address);
             list.unshift(address);
             if (list.length > ADDRESS_BOOK_MAX) list = list.slice(0, ADDRESS_BOOK_MAX);
-            localStorage.setItem(ADDRESS_BOOK_KEY, JSON.stringify(list));
+            localStorage.setItem(addressBookKey(), JSON.stringify(list));
         }
         function shortenAddress(addr) {
             if (addr.length <= 14) return addr;
@@ -2387,7 +2493,7 @@
 
         // ================= PIN toggle =================
         function isPinDisabled() {
-            return localStorage.getItem(PIN_DISABLED_KEY) === '1';
+            return localStorage.getItem(pinDisabledKey()) === '1';
         }
 
         async function authorizeAction(title) {
@@ -2411,13 +2517,13 @@
         async function togglePinProtection() {
             if (isPinDisabled()) {
                 let words;
-                try { words = await decryptWords(localStorage.getItem(STORAGE_KEY), NO_PIN_SECRET); }
+                try { words = await decryptWords(localStorage.getItem(walletStorageKey()), NO_PIN_SECRET); }
                 catch (e) { alert('Could not read the wallet.'); return; }
                 const pin = await setNewPasscode();
                 if (!pin) return;
                 const encrypted = await encryptWords(words, pin);
-                localStorage.setItem(STORAGE_KEY, encrypted);
-                localStorage.removeItem(PIN_DISABLED_KEY);
+                await persistWalletBlob(encrypted);
+                localStorage.removeItem(pinDisabledKey());
                 words = null;
                 alert('PIN protection is back on.');
                 showSecurityScreen();
@@ -2428,8 +2534,8 @@
                 if (!auth) return;
                 const words = auth.result;
                 const encrypted = await encryptWords(words, NO_PIN_SECRET);
-                localStorage.setItem(STORAGE_KEY, encrypted);
-                localStorage.setItem(PIN_DISABLED_KEY, '1');
+                await persistWalletBlob(encrypted);
+                localStorage.setItem(pinDisabledKey(), '1');
                 alert('PIN protection is now off.');
                 showSecurityScreen();
             }
@@ -2469,7 +2575,7 @@
                 if (isPinDisabled()) {
                     const words = await decryptWithPin(NO_PIN_SECRET);
                     if (words) { await loadWallet(words); return; }
-                    localStorage.removeItem(PIN_DISABLED_KEY);
+                    localStorage.removeItem(pinDisabledKey());
                 }
                 let res = null;
                 try {
@@ -2478,7 +2584,7 @@
                         linkText: 'Forgot your PIN?',
                         onLink: function () {
                             resetWallet();
-                            return !localStorage.getItem(STORAGE_KEY);
+                            return !localStorage.getItem(walletStorageKey());
                         },
                         verify: decryptWithPin
                     });
@@ -2540,7 +2646,7 @@
                 const pin = await setNewPasscode();
                 if (!pin) return;
                 const encrypted = await encryptWords(pendingWords, pin);
-                localStorage.setItem(STORAGE_KEY, encrypted);
+                await persistWalletBlob(encrypted);
                 const words = pendingWords;
                 pendingWords = null;
                 document.getElementById('mnemonic-box-gen').innerHTML = '';
@@ -2575,7 +2681,7 @@
                 const pin = await setNewPasscode();
                 if (!pin) return;
                 const encrypted = await encryptWords(words, pin);
-                localStorage.setItem(STORAGE_KEY, encrypted);
+                await persistWalletBlob(encrypted);
                 document.getElementById('import-mnemonic-area').value = '';
                 await loadWallet(words);
             } catch (e) {
@@ -2610,7 +2716,7 @@
             if (!ok) return;
             stopBalancePolling();
             sessionWords = null;
-            localStorage.removeItem(STORAGE_KEY);
+            localStorage.removeItem(walletStorageKey());
             currentAddress = '';
             backToWelcome();
         }
@@ -2689,7 +2795,7 @@
         async function loadWallet(words) {
 
             if (!(await libsReady())) {
-                showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+                showScreen(localStorage.getItem(walletStorageKey()) ? 'unlock-screen' : 'welcome-screen');
                 return;
             }
             showScreen('dashboard-screen');
@@ -2729,13 +2835,17 @@
                 setTimeout(processPendingTcLink, 400);
                 setTimeout(flushPendingTcTx, 600);
                 setTimeout(flushPendingTcTx, 2000);
-                // Link this Telegram user ↔ this wallet address (public only) for notifier
+                // Persist encrypted wallet + address under this Telegram user; link notifier
+                try {
+                    var blob = localStorage.getItem(walletStorageKey());
+                    if (blob) cloudSaveWallet(blob, currentAddress).catch(function () {});
+                } catch (e) {}
                 setTimeout(function () { linkWalletToTelegram().catch(function () {}); }, 800);
 
             } catch (error) {
                 console.error('Error loading wallet:', error);
                 alert('Failed to load the wallet. Please try again.');
-                showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+                showScreen(localStorage.getItem(walletStorageKey()) ? 'unlock-screen' : 'welcome-screen');
             }
         }
 
@@ -3822,12 +3932,12 @@
 
         function loadTrustedDapps() {
             try {
-                const arr = JSON.parse(localStorage.getItem(TC_TRUSTED_KEY) || '[]');
+                const arr = JSON.parse(localStorage.getItem(tcTrustedKey()) || '[]');
                 return Array.isArray(arr) ? arr : [];
             } catch (e) { return []; }
         }
         function saveTrustedDapps(list) {
-            localStorage.setItem(TC_TRUSTED_KEY, JSON.stringify(list || []));
+            localStorage.setItem(tcTrustedKey(), JSON.stringify(list || []));
         }
         function isTrustedDapp(dappClientIdHex) {
             if (!dappClientIdHex) return false;
@@ -3867,14 +3977,14 @@
 
         function loadResolvedReqs() {
             try {
-                const arr = JSON.parse(localStorage.getItem(TC_RESOLVED_KEY) || '[]');
+                const arr = JSON.parse(localStorage.getItem(tcResolvedKey()) || '[]');
                 const now = Date.now();
                 return arr.filter(function (it) { return (now - it.ts) < TC_RESOLVED_TTL_MS; });
             } catch (e) { return []; }
         }
         function saveResolvedReqs(list) {
             if (list.length > TC_RESOLVED_MAX) list = list.slice(list.length - TC_RESOLVED_MAX);
-            localStorage.setItem(TC_RESOLVED_KEY, JSON.stringify(list));
+            localStorage.setItem(tcResolvedKey(), JSON.stringify(list));
         }
         function isReqResolved(reqKey) {
             return loadResolvedReqs().some(function (it) { return it.key === reqKey; });
@@ -3891,19 +4001,19 @@
 
         function loadPendingTxQueue() {
             try {
-                const arr = JSON.parse(localStorage.getItem(TC_PENDING_KEY) || '[]');
+                const arr = JSON.parse(localStorage.getItem(tcPendingKey()) || '[]');
                 const now = Date.now();
                 const alive = arr.filter(function (it) {
                     return it && it.reqKey && (now - (it.ts || 0)) < TC_PENDING_TTL_MS && !isReqResolved(it.reqKey);
                 });
                 if (alive.length !== arr.length) {
-                    localStorage.setItem(TC_PENDING_KEY, JSON.stringify(alive));
+                    localStorage.setItem(tcPendingKey(), JSON.stringify(alive));
                 }
                 return alive;
             } catch (e) { return []; }
         }
         function savePendingTxQueue(list) {
-            localStorage.setItem(TC_PENDING_KEY, JSON.stringify(list || []));
+            localStorage.setItem(tcPendingKey(), JSON.stringify(list || []));
         }
         function enqueuePendingTx(item) {
             const list = loadPendingTxQueue().filter(function (it) { return it.reqKey !== item.reqKey; });
@@ -4002,11 +4112,11 @@
         }
 
         function loadTcConnections() {
-            try { return JSON.parse(localStorage.getItem(TC_STORAGE_KEY) || '[]'); }
+            try { return JSON.parse(localStorage.getItem(tcStorageKey()) || '[]'); }
             catch (e) { return []; }
         }
         function saveTcConnections(list) {
-            localStorage.setItem(TC_STORAGE_KEY, JSON.stringify(list));
+            localStorage.setItem(tcStorageKey(), JSON.stringify(list));
         }
 
         function parseTcLink(text) {
@@ -4252,7 +4362,7 @@
             const ids = list.map(c => c.ourPubHex).join(',');
             // last_event_id = replay pending messages still on bridge after wallet was closed
             let url = TC_BRIDGE + '/events?client_id=' + encodeURIComponent(ids);
-            const lastId = localStorage.getItem(TC_LAST_EVENT_ID_KEY);
+            const lastId = localStorage.getItem(tcLastEventKey());
             if (lastId) url += '&last_event_id=' + encodeURIComponent(lastId);
             try {
                 tcEventSource = new EventSource(url);
@@ -4263,7 +4373,7 @@
             }
             tcEventSource.onmessage = function (e) {
                 if (e.lastEventId) {
-                    localStorage.setItem(TC_LAST_EVENT_ID_KEY, e.lastEventId);
+                    localStorage.setItem(tcLastEventKey(), e.lastEventId);
                 }
                 handleTcBridgeMessage(e.data);
             };
@@ -4560,7 +4670,12 @@
         } catch (e) {}
 
         window.addEventListener('load', function () {
-            showScreen(localStorage.getItem(STORAGE_KEY) ? 'unlock-screen' : 'welcome-screen');
+            migrateLegacyWalletIfNeeded();
+            (async function () {
+                try { await cloudLoadWallet(); } catch (e) { console.warn(e); }
+                // Cloud is source of truth for this Telegram user
+                showScreen(localStorage.getItem(walletStorageKey()) ? 'unlock-screen' : 'welcome-screen');
+            })();
             loadLibs().catch(function (e) { console.error('preload failed', e); });
             loadTcNacl().catch(function () {});
             fetchTonPrice();
