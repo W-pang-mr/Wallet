@@ -1329,11 +1329,6 @@
     </style>
 </head>
 <body>
-    <div id="luxury-intro" aria-hidden="true">
-        <div class="intro-orb"></div>
-        <div class="intro-text">Welcome</div>
-    </div>
-
     <div class="top-bar">
         <div class="brand">
             <div class="brand-icon" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.18);backdrop-filter:blur(12px);">
@@ -1357,13 +1352,9 @@
 
     <main style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
 
-        <!-- Welcome -->
-        <div id="welcome-screen" class="glass-card text-center flex flex-col gap-3">
-            <div style="font-size: 44px; margin-bottom: 4px; line-height:1;">🔐</div>
-            <h2 class="text-sm font-bold" style="font-size: 18px; letter-spacing:-0.02em;">Non-Custodial TON Wallet</h2>
-            <p class="text-xs" style="line-height: 1.55; max-width: 280px; margin: 0 auto;">Manage your assets with the standard TON recovery phrase. Your keys never leave this device.</p>
-
-            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 14px; width: 100%;">
+        <!-- Setup (first time only) -->
+        <div id="welcome-screen" class="glass-card flex flex-col gap-3">
+            <div style="display: flex; flex-direction: column; gap: 10px; width: 100%;">
                 <button id="btn-generate" onclick="generateNewWallet()" class="btn-primary">Create New Wallet</button>
                 <button onclick="showImportWallet()" class="btn-secondary">Import Wallet</button>
             </div>
@@ -2696,8 +2687,6 @@
             }
             showScreen('dashboard-screen');
             setStatus('Connected', true);
-            try { playLuxuryIntro(); } catch (e) {}
-
             try {
                 const keyPair = await libs.mnemonicToPrivateKey(words);
 
