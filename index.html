@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TON Non-Custodial Wallet</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>My TON Wallet</title>
+        <meta name="theme-color" content="#050507">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TON Wallet">
+    <meta name="description" content="Non-custodial TON wallet — keys stay on your device.">
+    <link rel="manifest" href="./manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-512.png">
     <link rel="modulepreload" href="https://esm.sh/@ton/crypto@3">
     <link rel="modulepreload" href="https://esm.sh/@ton/ton@15">
     <link rel="modulepreload" href="https://esm.sh/tweetnacl@1.0.3">
@@ -1487,6 +1495,8 @@
             <div class="info-box" id="sec-status">PIN protection is ON.</div>
             <div class="warn-box">Turning the PIN off means the wallet opens automatically and sends funds without asking for any confirmation. Only do this on a device only you can access.</div>
             <button id="btn-toggle-pin" onclick="togglePinProtection()" class="btn-danger">Disable PIN</button>
+            <div class="info-box" id="notif-status">Phone notifications: ON</div>
+            <button id="btn-toggle-notif" onclick="togglePhoneNotifications()" class="btn-secondary">Toggle notifications</button>
             <button onclick="showScreen('dashboard-screen')" class="btn-secondary">Back</button>
         </div>
 
@@ -1783,124 +1793,71 @@
 
 
     <script>
-        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
-        if (tg) { tg.expand(); }
+        // Local-only mobile wallet (no Telegram / no remote DB)
+        const tg = null;
 
-        /** Telegram user id — wallets are isolated per account on same phone */
-        function getTelegramUserId() {
-            try {
-                if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-                    return String(tg.initDataUnsafe.user.id);
-                }
-            } catch (e) {}
-            return null;
-        }
-        function userScope(base) {
-            const uid = getTelegramUserId();
-            // _nouser: not inside Telegram — still isolated from real TG accounts
-            return uid ? (base + '_u' + uid) : (base + '_nouser');
-        }
-        function walletStorageKey() { return userScope('enc_wallet_v1'); }
-        function pinDisabledKey() { return userScope('pin_disabled_v1'); }
-        function addressBookKey() { return userScope('address_book_v1'); }
-        function tcStorageKey() { return userScope('tc_connections_v1'); }
-        function tcLastEventKey() { return userScope('tc_last_event_id_v1'); }
-        function tcResolvedKey() { return userScope('tc_resolved_reqs_v1'); }
-        function tcPendingKey() { return userScope('tc_pending_tx_v1'); }
-        function tcTrustedKey() { return userScope('tc_trusted_dapps_v1'); }
+        function walletStorageKey() { return 'enc_wallet_v1'; }
+        function pinDisabledKey() { return 'pin_disabled_v1'; }
+        function addressBookKey() { return 'address_book_v1'; }
+        function tcStorageKey() { return 'tc_connections_v1'; }
+        function tcLastEventKey() { return 'tc_last_event_id_v1'; }
+        function tcResolvedKey() { return 'tc_resolved_reqs_v1'; }
+        function tcPendingKey() { return 'tc_pending_tx_v1'; }
+        function tcTrustedKey() { return 'tc_trusted_dapps_v1'; }
+        function notifPrefKey() { return 'wallet_notif_enabled_v1'; }
+        function lastTxLtKey() { return 'wallet_last_tx_lt_v1'; }
 
-        /** One-time: move legacy shared wallet to THIS telegram user only */
         function migrateLegacyWalletIfNeeded() {
-            const uid = getTelegramUserId();
-            if (!uid) return;
-            const scoped = walletStorageKey();
-            if (localStorage.getItem(scoped)) return;
-            const legacy = localStorage.getItem('enc_wallet_v1');
-            if (!legacy) return;
-            localStorage.setItem(scoped, legacy);
-            localStorage.removeItem('enc_wallet_v1');
-            // migrate related flags if present
-            if (localStorage.getItem('pin_disabled_v1') === '1') {
-                localStorage.setItem(pinDisabledKey(), '1');
-                localStorage.removeItem('pin_disabled_v1');
-            }
-            console.log('Migrated legacy wallet to TG user', uid);
-        }
-
-        /** Save encrypted wallet blob to Supabase under this Telegram user id */
-        async function cloudSaveWallet(encrypted, address) {
-            try {
-                const uid = getTelegramUserId();
-                if (!uid || !encrypted) return false;
-                const res = await fetch(SUPABASE_URL + '/rest/v1/user_wallets', {
-                    method: 'POST',
-                    headers: {
-                        apikey: SUPABASE_ANON_KEY,
-                        Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
-                        'Content-Type': 'application/json',
-                        Prefer: 'resolution=merge-duplicates,return=minimal'
-                    },
-                    body: JSON.stringify({
-                        telegram_id: uid,
-                        encrypted: encrypted,
-                        address: address || null,
-                        updated_at: new Date().toISOString()
-                    })
-                });
-                if (!res.ok && res.status !== 201) {
-                    const tx = await res.text().catch(function () { return ''; });
-                    console.warn('cloudSaveWallet', res.status, tx.slice(0, 200));
-                    return false;
-                }
-                console.log('Wallet cloud-saved for TG', uid);
-                return true;
-            } catch (e) {
-                console.warn('cloudSaveWallet error', e);
-                return false;
-            }
-        }
-
-        /** Load encrypted wallet for this Telegram user from Supabase → localStorage */
-        async function cloudLoadWallet() {
-            try {
-                const uid = getTelegramUserId();
-                if (!uid) return false;
-                const res = await fetch(
-                    SUPABASE_URL + '/rest/v1/user_wallets?telegram_id=eq.' + encodeURIComponent(uid) + '&select=encrypted,address',
-                    {
-                        headers: {
-                            apikey: SUPABASE_ANON_KEY,
-                            Authorization: 'Bearer ' + SUPABASE_ANON_KEY
-                        }
-                    }
-                );
-                if (!res.ok) {
-                    console.warn('cloudLoadWallet', res.status);
-                    return false;
-                }
-                const rows = await res.json();
-                if (!rows || !rows[0] || !rows[0].encrypted) return false;
-                localStorage.setItem(walletStorageKey(), rows[0].encrypted);
-                console.log('Wallet cloud-loaded for TG', uid, rows[0].address || '');
-                return true;
-            } catch (e) {
-                console.warn('cloudLoadWallet error', e);
-                return false;
-            }
+            // no-op (local single-device)
         }
 
         async function persistWalletBlob(encrypted) {
-            await persistWalletBlob(encrypted);
-            // address may not be ready yet — loadWallet will re-save with address
-            await cloudSaveWallet(encrypted, currentAddress || null);
+            localStorage.setItem(walletStorageKey(), encrypted);
         }
 
+        async function ensureNotificationPermission() {
+            try {
+                if (!('Notification' in window)) return false;
+                if (Notification.permission === 'granted') return true;
+                if (Notification.permission === 'denied') return false;
+                const r = await Notification.requestPermission();
+                return r === 'granted';
+            } catch (e) { return false; }
+        }
 
-        // Shared Supabase with notifier bot
-        const SUPABASE_URL = 'https://dpyqbzvqqlqbkwoedhsx.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRweXFienZxcWxxYmt3b2VkaHN4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA3OTU0NzcsImV4cCI6MjEwNjM3MTQ3N30.zMcGb1Q7vaf2qZNnk3uhEmXtvw7oq83-r-H4EQE5JHw';
-        // Optional: public notifier URL for /api/link-wallet
-        const NOTIFY_API_BASE = localStorage.getItem('notify_api_base_v1') || '';
+        function isNotifEnabled() {
+            try { return localStorage.getItem(notifPrefKey()) !== '0'; } catch (e) { return true; }
+        }
+
+        function setNotifEnabled(on) {
+            try { localStorage.setItem(notifPrefKey(), on ? '1' : '0'); } catch (e) {}
+        }
+
+        async function showPhoneNotification(title, body, tag) {
+            if (!isNotifEnabled()) return;
+            try {
+                if (!('Notification' in window) || Notification.permission !== 'granted') return;
+                const opts = {
+                    body: body || '',
+                    icon: './icon-192.png',
+                    badge: './icon-192.png',
+                    tag: tag || 'ton-wallet',
+                    renotify: true,
+                    silent: false
+                };
+                if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+                    const reg = await navigator.serviceWorker.ready;
+                    if (reg.showNotification) {
+                        await reg.showNotification(title, opts);
+                        return;
+                    }
+                }
+                new Notification(title, opts);
+            } catch (e) {
+                console.warn('notify failed', e);
+            }
+        }
+
 
         const SCREENS = ['welcome-screen', 'create-wallet-screen', 'import-wallet-screen', 'dashboard-screen', 'withdraw-screen', 'receive-screen', 'send-jetton-screen', 'tx-detail-screen', 'security-screen', 'nfts-screen', 'send-nft-screen', 'tonconnect-screen', 'tc-confirm-screen', 'tc-tx-screen'];
 
@@ -1913,7 +1870,7 @@
         const TON_ENDPOINT = 'https://toncenter.com/api/v2/jsonRPC';
         const TONAPI_RATES = 'https://tonapi.io/v2/rates?tokens=ton&currencies=usd';
         const PIN_LENGTH = 4;
-        const BALANCE_POLL_MS = 2000;
+        const BALANCE_POLL_MS = 4000; // mobile-friendly (was 2s)
         const THEME_KEY = 'glass_theme_v1';
         const ACCENT_KEY = 'glass_accent_v1';
 
@@ -2511,7 +2468,7 @@
                 : 'PIN protection is ON.';
             document.getElementById('btn-toggle-pin').innerText = isPinDisabled() ? 'Enable PIN' : 'Disable PIN';
             document.getElementById('btn-toggle-pin').className = isPinDisabled() ? 'btn-primary btn-blue' : 'btn-danger';
-            showScreen('security-screen');
+            showScreen('security-screen'); try { refreshNotifStatus(); } catch (e) {}
         }
 
         async function togglePinProtection() {
@@ -2692,6 +2649,32 @@
             }
         }
 
+
+        function refreshNotifStatus() {
+            const el = document.getElementById('notif-status');
+            if (!el) return;
+            const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+            const on = isNotifEnabled();
+            el.textContent = 'Phone notifications: ' + (on ? 'ON' : 'OFF') + (perm === 'denied' ? ' (blocked by system)' : '');
+        }
+
+        async function togglePhoneNotifications() {
+            if (!isNotifEnabled()) {
+                const ok = await ensureNotificationPermission();
+                setNotifEnabled(true);
+                if (ok) {
+                    await showPhoneNotification('TON Wallet', 'Notifications enabled');
+                    if (typeof showToast === 'function') showToast('Notifications on');
+                } else if (typeof showToast === 'function') {
+                    showToast('Allow notifications in system settings', 'err');
+                }
+            } else {
+                setNotifEnabled(false);
+                if (typeof showToast === 'function') showToast('Notifications off');
+            }
+            refreshNotifStatus();
+        }
+
         function lockWallet() {
             stopBalancePolling();
             stopAmbient();
@@ -2785,8 +2768,7 @@
         function openSwap() {
             const url = 'https://app.ston.fi/';
             try {
-                if (tg && tg.openLink) tg.openLink(url);
-                else window.open(url, '_blank', 'noopener');
+                window.open(url, '_blank', 'noopener');
             } catch (e) {
                 window.open(url, '_blank', 'noopener');
             }
@@ -2835,12 +2817,8 @@
                 setTimeout(processPendingTcLink, 400);
                 setTimeout(flushPendingTcTx, 600);
                 setTimeout(flushPendingTcTx, 2000);
-                // Persist encrypted wallet + address under this Telegram user; link notifier
-                try {
-                    var blob = localStorage.getItem(walletStorageKey());
-                    if (blob) cloudSaveWallet(blob, currentAddress).catch(function () {});
-                } catch (e) {}
-                setTimeout(function () { linkWalletToTelegram().catch(function () {}); }, 800);
+                // Ask for phone notification permission once unlocked
+                setTimeout(function () { ensureNotificationPermission().catch(function () {}); }, 600);
 
             } catch (error) {
                 console.error('Error loading wallet:', error);
@@ -2853,79 +2831,6 @@
          * Bind current wallet address to Telegram user id via notifier API.
          * Keys never leave the device — only public address is sent.
          */
-        async function linkWalletToTelegram() {
-            try {
-                if (!currentAddress) return;
-                const tgUser = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : null;
-                const telegramId = tgUser && tgUser.id ? String(tgUser.id) : null;
-                if (!telegramId) {
-                    console.warn('linkWallet: open inside Telegram');
-                    return;
-                }
-
-                let linked = false;
-
-                // 1) Optional HTTP API (validates initData)
-                const base = (NOTIFY_API_BASE || '').replace(/\/+$/, '');
-                if (base && tg && tg.initData) {
-                    try {
-                        const res = await fetch(base + '/api/link-wallet', {
-                            method: 'POST',
-                            headers: { 'content-type': 'application/json' },
-                            body: JSON.stringify({ initData: tg.initData, address: currentAddress })
-                        });
-                        const j = await res.json().catch(function () { return null; });
-                        if (j && j.ok) linked = true;
-                        else console.warn('linkWallet API', res.status, j);
-                    } catch (e) {
-                        console.warn('linkWallet API error', e);
-                    }
-                }
-
-                // 2) Supabase pending_links (notifier picks up)
-                try {
-                    const res2 = await fetch(SUPABASE_URL + '/rest/v1/pending_links', {
-                        method: 'POST',
-                        headers: {
-                            apikey: SUPABASE_ANON_KEY,
-                            Authorization: 'Bearer ' + SUPABASE_ANON_KEY,
-                            'Content-Type': 'application/json',
-                            Prefer: 'resolution=merge-duplicates,return=minimal'
-                        },
-                        body: JSON.stringify({
-                            telegram_id: telegramId,
-                            address: currentAddress,
-                            at: Date.now(),
-                            source: 'miniapp'
-                        })
-                    });
-                    if (res2.ok || res2.status === 201) linked = true;
-                    else {
-                        const t2 = await res2.text().catch(function () { return ''; });
-                        console.warn('linkWallet supabase', res2.status, t2.slice(0, 200));
-                    }
-                } catch (e) {
-                    console.warn('linkWallet supabase error', e);
-                }
-
-                if (linked) {
-                    try {
-                        localStorage.setItem('linked_tg_wallet_v1', JSON.stringify({
-                            telegramId: telegramId,
-                            address: currentAddress,
-                            at: Date.now()
-                        }));
-                    } catch (e) {}
-                    if (typeof showToast === 'function') showToast('Linked to Telegram alerts');
-                    console.log('Wallet linked for TG', telegramId);
-                }
-            } catch (e) {
-                console.warn('linkWallet error', e);
-            }
-        }
-
-
-
         // ================= Jettons =================
         function formatJetton(raw, decimals) {
             try {
@@ -3523,31 +3428,94 @@
 
         let jettonPollTimer = null;
         const JETTON_POLL_MS = 45000;
+        let lastNotifiedLt = localStorage.getItem(lastTxLtKey()) || '';
 
         function startBalancePolling() {
             stopBalancePolling();
-            // Balance only — every 2s (lightweight)
-            balancePollTimer = setInterval(function () {
+            const tick = async function () {
                 if (document.visibilityState === 'hidden') return;
-                refreshBalance();
-            }, BALANCE_POLL_MS);
-            // Jettons + NFTs less often to avoid TonAPI rate limits
-            jettonPollTimer = setInterval(function () {
-                if (document.visibilityState === 'hidden') return;
-                refreshJettons();
-                refreshNfts();
-            }, JETTON_POLL_MS);
+                try { await refreshBalance(); } catch (e) {}
+                try { await refreshHistoryForNotify(); } catch (e) {}
+            };
+            tick();
+            balancePollTimer = setInterval(tick, BALANCE_POLL_MS);
+            document.addEventListener('visibilitychange', onVisChangePoll);
         }
+
+        function onVisChangePoll() {
+            if (document.visibilityState === 'visible' && currentAddress) {
+                refreshBalance().catch(function () {});
+                refreshHistoryForNotify().catch(function () {});
+            }
+        }
+
         function stopBalancePolling() {
             if (balancePollTimer) {
                 clearInterval(balancePollTimer);
                 balancePollTimer = null;
             }
-            if (jettonPollTimer) {
-                clearInterval(jettonPollTimer);
-                jettonPollTimer = null;
+            try { document.removeEventListener('visibilitychange', onVisChangePoll); } catch (e) {}
+        }
+
+        /** Lightweight history check for local phone notifications */
+        async function refreshHistoryForNotify() {
+            if (!currentAddressObj || !isNotifEnabled()) return;
+            try {
+                if (!(await libsReady())) return;
+                const addr = currentAddressObj.toString();
+                const url = 'https://tonapi.io/v2/accounts/' + encodeURIComponent(addr) + '/events?limit=5';
+                const res = await fetch(url);
+                if (!res.ok) return;
+                const data = await res.json();
+                const events = data.events || [];
+                if (!events.length) return;
+                const newest = events[0];
+                const lt = String(newest.event_id || newest.lt || newest.timestamp || '');
+                if (!lt) return;
+                if (!lastNotifiedLt) {
+                    lastNotifiedLt = lt;
+                    try { localStorage.setItem(lastTxLtKey(), lt); } catch (e) {}
+                    return; // baseline — don't spam on first load
+                }
+                if (lt === lastNotifiedLt) return;
+                // collect new events until we hit lastNotifiedLt
+                const fresh = [];
+                for (const ev of events) {
+                    const id = String(ev.event_id || ev.lt || ev.timestamp || '');
+                    if (id === lastNotifiedLt) break;
+                    fresh.push(ev);
+                }
+                lastNotifiedLt = lt;
+                try { localStorage.setItem(lastTxLtKey(), lt); } catch (e) {}
+                for (const ev of fresh.reverse()) {
+                    let title = 'TON Wallet';
+                    let body = 'New activity';
+                    try {
+                        const actions = ev.actions || [];
+                        const a0 = actions[0];
+                        if (a0 && a0.TonTransfer) {
+                            const ton = a0.TonTransfer;
+                            const nano = BigInt(ton.amount || 0);
+                            const whole = Number(nano) / 1e9;
+                            const amt = whole.toFixed(4);
+                            if (ton.recipient && currentAddress && String(ton.recipient.address || '').includes(currentAddress.slice(2, 10))) {
+                                title = 'Received TON';
+                                body = '+' + amt + ' TON';
+                            } else {
+                                title = 'Sent TON';
+                                body = '−' + amt + ' TON';
+                            }
+                        } else if (a0 && a0.type) {
+                            body = String(a0.type);
+                        }
+                    } catch (e) {}
+                    await showPhoneNotification(title, body, 'tx-' + (ev.event_id || Date.now()));
+                }
+            } catch (e) {
+                console.warn('refreshHistoryForNotify', e);
             }
         }
+
         document.addEventListener('visibilitychange', function () {
             if (document.visibilityState === 'visible' && currentAddressObj) {
                 refreshBalance();
@@ -4671,11 +4639,7 @@
 
         window.addEventListener('load', function () {
             migrateLegacyWalletIfNeeded();
-            (async function () {
-                try { await cloudLoadWallet(); } catch (e) { console.warn(e); }
-                // Cloud is source of truth for this Telegram user
-                showScreen(localStorage.getItem(walletStorageKey()) ? 'unlock-screen' : 'welcome-screen');
-            })();
+            showScreen(localStorage.getItem(walletStorageKey()) ? 'unlock-screen' : 'welcome-screen');
             loadLibs().catch(function (e) { console.error('preload failed', e); });
             loadTcNacl().catch(function () {});
             fetchTonPrice();
@@ -4701,6 +4665,16 @@
 
 
 
+
+    
+        // PWA service worker (for APK / install)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('./sw.js').catch(function (e) {
+                    console.warn('SW register failed', e);
+                });
+            });
+        }
 
     </script>
 </body>
